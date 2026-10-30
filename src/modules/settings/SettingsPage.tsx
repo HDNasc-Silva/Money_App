@@ -12,6 +12,7 @@ import { DomainError, useFinanceActions, useFinanceData } from '@/store/FinanceP
 import { THEME_LABELS, type ThemeName } from '@/theme/theme';
 import { useTheme } from '@/theme/ThemeProvider';
 import { todayIso } from '@/utils/dates';
+import { CategoriesSettings } from './CategoriesSettings';
 import styles from './Settings.module.css';
 
 const THEME_OPTIONS = (Object.keys(THEME_LABELS) as ThemeName[]).map((value) => ({ value, label: THEME_LABELS[value] }));
@@ -117,6 +118,8 @@ export function SettingsPage() {
           />
         </label>
       </Card>
+
+      <CategoriesSettings />
 
       <Card>
         <CardHeader

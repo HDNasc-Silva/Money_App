@@ -7,6 +7,29 @@ Categorias: **Adicionado** · **Modificado** · **Corrigido** · **Removido** ·
 
 ---
 
+## [1.2.0] - 30/10/2026 — Categorias em Ajustes e catálogo de ícones com busca
+
+### Adicionado
+- **Ajustes → Categorias** (`src/modules/settings/CategoriesSettings.tsx`): lista compacta de todas as categorias, agrupadas em Despesas e Receitas (ícone, nome, grupo e teto das despesas); "Nova categoria" e toque na categoria para editar/excluir reutilizando o `CategoryFormSheet` (mesmas regras de validação, exclusão e mudança de tipo); "Restaurar categorias padrão" via `ensureDefaultCategories()` com toast de quantas foram restauradas ou de que nada faltava. As categorias existentes são mantidas.
+- **Catálogo de ícones** (`src/design-system/icons.ts`): 139 ícones do Material Symbols Outlined com rótulo em português e palavras-chave (alimentação, casa e contas, transporte, viagens, saúde, esportes e beleza, lazer, educação e trabalho, tecnologia, compras e presentes, família/crianças/pets, dinheiro e investimentos, outros). Funções puras `searchIcons(query, catalog?)` e `iconLabel(name)`.
+- **`IconPicker`** reescrito em componente próprio (`src/components/forms/IconPicker.tsx` + `IconPicker.module.css`): busca sem acento e sem diferenciar maiúsculas por rótulo, palavras-chave e nome; grade rolável com altura máxima (cabe no bottom sheet); indicação "Selecionado: <rótulo>" sempre visível, mesmo fora do resultado da busca; estado vazio; `aria-label` em português; Enter na busca não envia o formulário.
+- Testes: 10 unitários (`tests/icons.test.ts`: tamanho e unicidade do catálogo, cobertura dos ícones em uso, busca com acentos, palavras-chave, múltiplos termos, vazio, subconjunto, rótulo) e 2 de integração (`tests/categoriesSettings.test.tsx`: criar categoria com ícone escolhido pela busca e usá-la no lançamento; restaurar categoria padrão excluída sem duplicar). Total: 104 testes.
+
+### Modificado
+- Categorias e metas passam a usar o mesmo catálogo de ícones (antes: listas fixas de 30 e 12 ícones nos formulários).
+
+### Refatorado
+- `IconPicker` saiu de `Fields.tsx`; listas `CATEGORY_ICONS` e `GOAL_ICONS` removidas.
+- Estilo inline da mensagem de erro do formulário de categoria movido para `Categories.module.css` (`.formError`).
+
+### Técnico
+- Versão do pacote: 1.1.0 → 1.2.0 (MINOR).
+
+### Documentação
+- `ESCOPO_PROJETO.md`: módulo Ajustes, seção 10.3, regras de negócio 25–26 e acompanhamento v1.2.0. `README.md`: tabela de módulos.
+
+---
+
 ## [1.1.0] - 30/10/2026 — Máscara automática nos campos de valor
 
 ### Adicionado

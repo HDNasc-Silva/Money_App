@@ -60,6 +60,102 @@
   gap: var(--space-sm);
 }
 
+/* ---------- Categorias ---------- */
+.categorySection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.categorySectionTitle {
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.categorySectionTitle span {
+  font-weight: 500;
+}
+
+.categoryList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.categoryList li + li {
+  border-top: 1px solid var(--color-divider);
+}
+
+.categoryRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  width: 100%;
+  min-height: 3.25rem;
+  padding: var(--space-sm) var(--space-md);
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  text-align: left;
+}
+
+.categoryRow:hover {
+  background: var(--color-surface-container);
+}
+
+.categoryIcon,
+.categoryIconIncome {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-container);
+}
+
+.categoryIconIncome {
+  background: var(--color-income-bg);
+  color: var(--color-income);
+}
+
+.categoryText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.categoryText strong {
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.categoryText small {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.categoryChevron {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+.categoryEmpty {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
 @media (min-width: 640px) {
   .buttons {
     grid-template-columns: 1fr 1fr;

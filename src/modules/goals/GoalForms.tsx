@@ -3,7 +3,8 @@ import { Button } from '@/components/common/Button';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { Sheet } from '@/components/common/Sheet';
 import { useToast } from '@/components/common/Toast';
-import { FormRow, FormStack, IconPicker, MoneyField, TextField } from '@/components/forms/Fields';
+import { FormRow, FormStack, MoneyField, TextField } from '@/components/forms/Fields';
+import { IconPicker } from '@/components/forms/IconPicker';
 import { goalProgress } from '@/domain/goals';
 import type { Goal } from '@/models';
 import { useFinanceActions } from '@/store/FinanceProvider';
@@ -16,11 +17,6 @@ import {
   type FieldErrors,
   type GoalFormValues,
 } from '@/validations';
-
-const GOAL_ICONS = [
-  'shield', 'flight_takeoff', 'laptop_mac', 'format_paint', 'directions_car', 'home',
-  'school', 'favorite', 'beach_access', 'celebration', 'child_care', 'savings',
-] as const;
 
 const toValues = (goal: Goal | null): GoalFormValues => ({
   name: goal?.name ?? '',
@@ -89,7 +85,7 @@ export function GoalFormSheet({ goal, onClose }: GoalFormSheetProps) {
               <MoneyField label="Aporte mensal" value={values.monthlyContribution} onChange={(v) => update('monthlyContribution', v)} error={errors.monthlyContribution} />
               <TextField label="Prazo (opcional)" type="date" value={values.deadline} onChange={(v) => update('deadline', v)} error={errors.deadline} />
             </FormRow>
-            <IconPicker label="Ícone" icons={GOAL_ICONS} value={values.icon} onChange={(v) => update('icon', v)} error={errors.icon} />
+            <IconPicker label="Ícone" value={values.icon} onChange={(v) => update('icon', v)} error={errors.icon} />
             <Button type="submit" icon="check" fullWidth>
               {goal ? 'Salvar alterações' : 'Criar meta'}
             </Button>

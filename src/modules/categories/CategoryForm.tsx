@@ -4,19 +4,13 @@ import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { SegmentedControl } from '@/components/common/SegmentedControl';
 import { Sheet } from '@/components/common/Sheet';
 import { useToast } from '@/components/common/Toast';
-import { FormRow, FormStack, IconPicker, MoneyField, SelectField, TextField } from '@/components/forms/Fields';
+import { FormRow, FormStack, MoneyField, SelectField, TextField } from '@/components/forms/Fields';
+import { IconPicker } from '@/components/forms/IconPicker';
 import type { Category, CategoryGroup, TransactionType } from '@/models';
 import { DomainError, useFinanceActions, useFinanceData } from '@/store/FinanceProvider';
 import { centsToInput } from '@/utils/money';
 import { validateCategory, type CategoryFormValues, type FieldErrors } from '@/validations';
-
-export const CATEGORY_ICONS = [
-  'restaurant', 'shopping_cart', 'home', 'directions_car', 'commute', 'local_gas_station',
-  'health_and_safety', 'medical_services', 'sports_esports', 'theater_comedy', 'school', 'pets',
-  'fitness_center', 'subscriptions', 'local_cafe', 'flight', 'checkroom', 'child_care',
-  'bolt', 'wifi', 'phone_iphone', 'card_giftcard', 'category', 'help_outline',
-  'account_balance_wallet', 'payments', 'savings', 'work', 'storefront', 'trending_up',
-] as const;
+import styles from './Categories.module.css';
 
 export const GROUP_LABELS: Record<CategoryGroup, string> = {
   essential: 'Essencial',
@@ -124,9 +118,9 @@ export function CategoryFormSheet({ category, onClose }: CategoryFormSheetProps)
               )}
               <SelectField label="Grupo" value={values.group} onChange={(v) => update('group', v as CategoryGroup)} options={GROUP_OPTIONS} />
             </FormRow>
-            <IconPicker label="Ícone de identificação" icons={CATEGORY_ICONS} value={values.icon} onChange={(v) => update('icon', v)} error={errors.icon} />
+            <IconPicker label="Ícone de identificação" value={values.icon} onChange={(v) => update('icon', v)} error={errors.icon} />
             {formError && (
-              <p role="alert" style={{ color: 'var(--color-expense)', fontSize: '0.8125rem' }}>
+              <p role="alert" className={styles.formError}>
                 {formError}
               </p>
             )}

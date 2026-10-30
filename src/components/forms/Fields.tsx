@@ -139,43 +139,6 @@ export function SelectField({ label, value, onChange, options, error, hint, plac
   );
 }
 
-interface IconPickerProps {
-  label: string;
-  icons: readonly string[];
-  value: string;
-  onChange(icon: string): void;
-  error?: string;
-}
-
-export function IconPicker({ label, icons, value, onChange, error }: IconPickerProps) {
-  const id = useId();
-  return (
-    <fieldset className={styles.fieldset} aria-describedby={error ? `${id}-error` : undefined}>
-      <legend className={styles.label}>{label}</legend>
-      <div className={styles.iconGrid} role="radiogroup" aria-label={label}>
-        {icons.map((icon) => (
-          <button
-            key={icon}
-            type="button"
-            role="radio"
-            aria-checked={icon === value}
-            aria-label={icon.replace(/_/g, ' ')}
-            className={[styles.iconOption, icon === value && styles.iconSelected].filter(Boolean).join(' ')}
-            onClick={() => onChange(icon)}
-          >
-            <Icon name={icon} size={20} />
-          </button>
-        ))}
-      </div>
-      {error && (
-        <p id={`${id}-error`} className={styles.error} role="alert">
-          {error}
-        </p>
-      )}
-    </fieldset>
-  );
-}
-
 export function FormRow({ children }: { children: ReactNode }) {
   return <div className={styles.row}>{children}</div>;
 }

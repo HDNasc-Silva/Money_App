@@ -15,7 +15,7 @@ Registrar receitas e despesas, controlar limites de orçamento por categoria, ac
 | Categorias | Categorias, limites mensais, consumo e alertas |
 | Metas | Metas, aportes, progresso e simulador de economia |
 | Relatórios | Tendências, distribuição de gastos, comparação de períodos, exportação CSV/PDF |
-| Ajustes | Nome, tema, backup, dados de demonstração |
+| Ajustes | Nome, tema, gerenciamento de categorias (com catálogo de ícones pesquisável), backup, dados de demonstração |
 
 ## Tecnologias
 
