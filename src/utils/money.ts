@@ -68,9 +68,24 @@ export function parseMoney(input: string): Cents | null {
   return Math.round(value * 100);
 }
 
-/** Formata centavos para preencher um campo de edição ("1234,56"). */
+/** Formata centavos no formato da máscara dos campos de valor ("1.234,56"); reconvertível por `parseMoney`. */
 export function centsToInput(cents: Cents): string {
-  return numberFormatter.format(cents / 100).replace(/\./g, '');
+  return normalizeSpaces(numberFormatter.format(cents / 100));
+}
+
+/** Quantidade máxima de dígitos aceita pela máscara (dígitos de `MAX_AMOUNT`). */
+const MAX_INPUT_DIGITS = String(MAX_AMOUNT).length;
+
+/**
+ * Máscara de entrada monetária "pelos centavos" (estilo app de banco): apenas os dígitos do texto
+ * contam e os dois últimos são os centavos. "15000" → "150,00"; "R$ 1234,56" → "1.234,56".
+ * Sem dígitos significativos o campo fica vazio (preserva a validação de campo obrigatório).
+ * Dígitos além do limite de `MAX_AMOUNT` são descartados (mantém os primeiros).
+ */
+export function formatMoneyInput(raw: string): string {
+  const digits = raw.replace(/\D/g, '').replace(/^0+/, '').slice(0, MAX_INPUT_DIGITS);
+  if (!digits) return '';
+  return centsToInput(Math.min(Number(digits), MAX_AMOUNT));
 }
 
 export const fromReais = (reais: number): Cents => Math.round(reais * 100);

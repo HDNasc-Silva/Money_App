@@ -1,6 +1,7 @@
-import type { Category, FinanceData, Goal, IsoDate, Transaction, TransactionType } from '@/models';
+import type { FinanceData, Goal, IsoDate, Transaction, TransactionType } from '@/models';
 import { addMonths, daysInMonth, monthKeyOf } from '@/utils/dates';
 import { fromReais } from '@/utils/money';
+import { buildDefaultCategories } from './defaultCategories';
 
 /**
  * DADOS DE DEMONSTRAÇÃO.
@@ -11,37 +12,8 @@ import { fromReais } from '@/utils/money';
 
 const CREATED_AT = '2020-01-01T00:00:00.000Z';
 
-const category = (
-  id: string,
-  name: string,
-  description: string,
-  icon: string,
-  kind: TransactionType,
-  group: Category['group'],
-  limit: number | null,
-): Category => ({
-  id,
-  name,
-  description,
-  icon,
-  kind,
-  group,
-  monthlyLimit: limit === null ? null : fromReais(limit),
-  createdAt: CREATED_AT,
-});
-
-export const DEMO_CATEGORIES: Category[] = [
-  category('cat-food', 'Alimentação', 'Mercado, feira e refeições diárias', 'restaurant', 'expense', 'essential', 1200),
-  category('cat-home', 'Moradia', 'Aluguel, contas fixas e condomínio', 'home', 'expense', 'essential', 1300),
-  category('cat-transport', 'Transporte', 'Combustível, passagens e manutenção', 'directions_car', 'expense', 'essential', 600),
-  category('cat-leisure', 'Lazer', 'Passeios, cinema e entretenimento', 'sports_esports', 'expense', 'lifestyle', 400),
-  category('cat-health', 'Saúde', 'Medicamentos, consultas e cuidados', 'health_and_safety', 'expense', 'essential', 300),
-  category('cat-education', 'Educação', 'Livros, cursos e workshops', 'school', 'expense', 'lifestyle', 200),
-  category('cat-other', 'Outros', 'Reservas pontuais e pequenas demandas', 'category', 'expense', 'lifestyle', 300),
-  category('cat-salary', 'Salário', 'Receita principal', 'account_balance_wallet', 'income', 'essential', null),
-  category('cat-freelance', 'Freelance', 'Trabalhos extras', 'payments', 'income', 'lifestyle', null),
-  category('cat-yield', 'Rendimentos', 'Juros e investimentos', 'savings', 'income', 'lifestyle', null),
-];
+/** Os lançamentos de demonstração usam os ids estáveis das categorias padrão (`cat-food`, `cat-salary`…). */
+const DEMO_CATEGORIES = buildDefaultCategories(CREATED_AT);
 
 /** Gerador pseudoaleatório determinístico (mulberry32). */
 function seededRandom(seed: number): () => number {

@@ -7,6 +7,53 @@ Categorias: **Adicionado** · **Modificado** · **Corrigido** · **Removido** ·
 
 ---
 
+## [1.1.0] - 30/10/2026 — Máscara automática nos campos de valor
+
+### Adicionado
+- Máscara monetária automática "pelos centavos" (estilo app de banco) em todos os campos de valor (`MoneyField`: lançamento, teto de categoria, metas e aporte). Digitar 1, 5, 0, 0, 0 mostra "0,01" → "0,15" → "1,50" → "15,00" → "150,00"; acima de mil aparecem os separadores de milhar ("1.500,00", "12.345,67").
+- Função pura `formatMoneyInput(raw)` em `src/utils/money.ts`: considera só dígitos (letras, vírgulas e pontos são ignorados), remove zeros à esquerda, limita aos dígitos de `MAX_AMOUNT` (descarta os excedentes) e devolve vazio quando não há dígitos significativos.
+- Testes: 19 unitários (sequência de digitação, backspace até vazio, colar "1.234,56"/"R$ 1234,56", ignorar letras, limite, vazio e round-trip `centsToInput` → `parseMoney`) e 1 de integração que digita no campo Valor e confere o texto exibido. Total: 92 testes.
+
+### Modificado
+- `centsToInput` passa a gerar o formato da máscara, com milhar ("1.234,56" em vez de "1234,56"); valores pré-preenchidos (edição de lançamento, teto, metas, aporte) já aparecem formatados. `parseMoney` continua convertendo de volta (coberto por teste).
+- `MoneyField` usa `inputMode="numeric"` (teclado numérico no celular) e mantém o cursor no fim do campo após cada digitação.
+- Testes de integração existentes passam a digitar na nova semântica (ex.: "150000" para R$ 1.500,00).
+
+### Técnico
+- Versão do pacote: 1.0.1 → 1.1.0 (MINOR: melhoria de usabilidade compatível).
+
+### Documentação
+- `ESCOPO_PROJETO.md`: regra de negócio 24 (formato de entrada de valores) e acompanhamento v1.1.0.
+
+---
+
+## [1.0.1] - 30/10/2026 — Lançamentos sem categoria após apagar os dados
+
+### Corrigido
+- Depois de "Apagar todos os dados" (ou "Começar do zero"), não era possível adicionar movimentações: as categorias também eram apagadas e o formulário falhava com "Selecione uma categoria." sem oferecer saída. Agora `clearAllData` apaga lançamentos e metas, mantém o nome do usuário e **recria as categorias padrão**.
+
+### Adicionado
+- Conjunto único de categorias padrão (`src/store/defaultCategories.ts`: 7 de despesa com limites + 3 de receita), reutilizado pela demonstração e pelo "começar do zero".
+- Ação `ensureDefaultCategories()` no `FinanceProvider` (e ação `categories/added` no reducer): adiciona apenas as categorias padrão que faltam, sem duplicar nomes do mesmo tipo (comparação sem acento e sem diferenciar maiúsculas) e sem reutilizar ids já ocupados; persiste via repositório.
+- Formulário de lançamento: quando não há categoria do tipo selecionado, mostra aviso com o botão **"Criar categorias padrão"** e o link **"Criar categoria personalizada"** (fecha o formulário e abre Categorias) — recupera quem já tinha dados salvos com `categories: []`.
+- 5 testes (`tests/defaultCategories.test.tsx`): regra de categorias faltantes, não duplicação em `ensureDefaultCategories`, apagar dados mantendo categorias padrão, fluxo de recuperação no formulário e link para Categorias. Total: 72 testes.
+
+### Modificado
+- Texto da confirmação de "Apagar todos os dados" e do aviso de conclusão informam que as categorias padrão serão recriadas.
+
+### Refatorado
+- `demoData.ts` deixa de definir as categorias próprias e passa a usar `buildDefaultCategories` (mesmos ids, nomes e limites de antes).
+
+### Técnico
+- Versão do pacote: 1.0.0 → 1.0.1 (`package.json` e `package-lock.json`).
+- `tsc --noEmit`, `eslint .`, `vitest run` (72 testes) e `npm run build` sem erros.
+
+### Documentação
+- `ESCOPO_PROJETO.md`: regras de negócio 21–23 (categorias padrão, apagar dados, recuperação), fluxo do formulário sem categorias e acompanhamento v1.0.1.
+- `README.md`: nota sobre categorias padrão mantidas ao apagar os dados.
+
+---
+
 ## [1.0.0] - 30/10/2026 — Primeira versão funcional
 
 ### Adicionado

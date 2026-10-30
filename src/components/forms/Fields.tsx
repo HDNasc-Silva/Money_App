@@ -1,5 +1,6 @@
-import { useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react';
+import { useId, useLayoutEffect, useRef, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react';
 import { Icon } from '@/components/common/Icon';
+import { formatMoneyInput } from '@/utils/money';
 import styles from './Fields.module.css';
 
 interface FieldShellProps {
@@ -60,9 +61,19 @@ export function TextField({ label, value, onChange, error, hint, ...rest }: Text
   );
 }
 
-/** Campo monetário com prefixo "R$" fixo e teclado decimal no mobile. */
+/**
+ * Campo monetário com prefixo "R$" fixo, máscara automática pelos centavos (`formatMoneyInput`)
+ * e teclado numérico no mobile. O cursor é mantido no fim após cada digitação.
+ */
 export function MoneyField({ label, value, onChange, error, hint, ...rest }: TextFieldProps) {
   const id = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useLayoutEffect(() => {
+    const input = inputRef.current;
+    if (input && document.activeElement === input) input.setSelectionRange(value.length, value.length);
+  }, [value]);
+
   return (
     <FieldShell id={id} label={label} error={error} hint={hint}>
       <div className={styles.moneyWrap}>
@@ -70,13 +81,14 @@ export function MoneyField({ label, value, onChange, error, hint, ...rest }: Tex
           R$
         </span>
         <input
+          ref={inputRef}
           id={id}
           className={[styles.input, styles.moneyInput, 'money'].join(' ')}
-          inputMode="decimal"
+          inputMode="numeric"
           autoComplete="off"
           placeholder="0,00"
           value={value}
-          onChange={(event) => onChange(event.target.value.replace(/[^\d.,]/g, ''))}
+          onChange={(event) => onChange(formatMoneyInput(event.target.value))}
           aria-invalid={Boolean(error)}
           aria-describedby={describedBy(id, error, hint)}
           {...rest}

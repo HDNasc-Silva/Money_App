@@ -69,7 +69,7 @@ export function SettingsPage() {
       showToast({ message: 'Dados de demonstração restaurados.' });
     } else if (pending === 'clear') {
       await actions.clearAllData();
-      showToast({ message: 'Todos os dados foram apagados.' });
+      showToast({ message: 'Dados apagados. As categorias padrão foram recriadas.' });
     }
     setPending(null);
   };
@@ -149,7 +149,7 @@ export function SettingsPage() {
         title={pending === 'clear' ? 'Apagar todos os dados?' : 'Restaurar dados de demonstração?'}
         message={
           pending === 'clear'
-            ? 'Lançamentos, categorias e metas serão removidos deste dispositivo. Exporte um backup antes, se quiser guardá-los.'
+            ? 'Lançamentos, metas e categorias personalizadas serão removidos deste dispositivo; as categorias padrão serão recriadas para você começar do zero. Exporte um backup antes, se quiser guardá-los.'
             : 'Os dados atuais serão substituídos pelos dados de demonstração.'
         }
         confirmLabel={pending === 'clear' ? 'Apagar tudo' : 'Restaurar'}

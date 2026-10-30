@@ -9,6 +9,7 @@ import { useFinanceActions, useFinanceData } from '@/store/FinanceProvider';
 import { todayIso } from '@/utils/dates';
 import { centsToInput } from '@/utils/money';
 import { validateTransaction, type FieldErrors, type TransactionFormValues } from '@/validations';
+import { MissingCategoriesNotice } from './MissingCategoriesNotice';
 
 const TYPE_OPTIONS = [
   { value: 'expense', label: 'Despesa' },
@@ -51,11 +52,12 @@ function initialValues(transaction: Transaction | null, preset: TransactionPrese
 /** Formulário de criação/edição; montado com `key` para reiniciar o estado a cada abertura. */
 export function TransactionFormSheet({ open, transaction, preset, onClose }: TransactionFormSheetProps) {
   const { categories } = useFinanceData();
-  const { saveTransaction } = useFinanceActions();
+  const { saveTransaction, ensureDefaultCategories } = useFinanceActions();
   const { showToast } = useToast();
   const [values, setValues] = useState(() => initialValues(transaction, preset));
   const [errors, setErrors] = useState<FieldErrors<keyof TransactionFormValues>>({});
   const [saving, setSaving] = useState(false);
+  const [creatingCategories, setCreatingCategories] = useState(false);
 
   const categoryOptions = useMemo(
     () => categories.filter((c) => c.kind === values.type).map((c) => ({ value: c.id, label: c.name })),
@@ -71,6 +73,16 @@ export function TransactionFormSheet({ open, transaction, preset, onClose }: Tra
     setValues((current) => {
       const category = categories.find((c) => c.id === current.categoryId);
       return { ...current, type, categoryId: category?.kind === type ? current.categoryId : '' };
+    });
+  };
+
+  const createDefaultCategories = async () => {
+    setCreatingCategories(true);
+    const added = await ensureDefaultCategories();
+    setCreatingCategories(false);
+    setErrors((current) => ({ ...current, categoryId: undefined }));
+    showToast({
+      message: added.length ? `${added.length} categoria(s) padrão criada(s). Selecione uma para continuar.` : 'As categorias padrão já existem.',
     });
   };
 
@@ -120,6 +132,14 @@ export function TransactionFormSheet({ open, transaction, preset, onClose }: Tra
               error={errors.categoryId}
             />
           </FormRow>
+          {categoryOptions.length === 0 && (
+            <MissingCategoriesNotice
+              type={values.type}
+              busy={creatingCategories}
+              onCreateDefaults={createDefaultCategories}
+              onCustomize={onClose}
+            />
+          )}
           <TextField
             label="Observação (opcional)"
             value={values.note}

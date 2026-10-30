@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { addMonths, daysInMonth, formatDayMonth, formatMonthLabel, isValidIso, monthsBetween } from '@/utils/dates';
 import { formatPercent, formatSignedPercent, initials, normalizeText } from '@/utils/format';
-import { centsToInput, formatCurrency, parseMoney } from '@/utils/money';
+import { centsToInput, formatCurrency, formatMoneyInput, MAX_AMOUNT, parseMoney } from '@/utils/money';
 
 describe('money', () => {
   it.each([
@@ -33,9 +33,70 @@ describe('money', () => {
     expect(formatCurrency(485000, { bare: true })).toBe('4.850,00');
   });
 
-  it('centsToInput gera texto reconvertível', () => {
-    expect(centsToInput(123456)).toBe('1234,56');
-    expect(parseMoney(centsToInput(123456))).toBe(123456);
+  it('centsToInput gera o formato da máscara, com milhar', () => {
+    expect(centsToInput(123456)).toBe('1.234,56');
+    expect(centsToInput(1)).toBe('0,01');
+    expect(centsToInput(MAX_AMOUNT)).toBe('999.999.999,99');
+  });
+
+  it.each([0, 1, 10, 99, 100, 150000, 123456, 100000000, 1234567890, MAX_AMOUNT])(
+    'round-trip centsToInput → parseMoney (%i)',
+    (cents) => {
+      expect(parseMoney(centsToInput(cents))).toBe(cents);
+    },
+  );
+});
+
+describe('formatMoneyInput (máscara pelos centavos)', () => {
+  /** Simula a digitação: cada tecla é acrescentada ao texto já formatado. */
+  const typeKeys = (keys: string, start = '') => {
+    const steps: string[] = [];
+    let value = start;
+    for (const key of keys) {
+      value = formatMoneyInput(value + key);
+      steps.push(value);
+    }
+    return steps;
+  };
+
+  /** Simula o backspace: remove o último caractere do texto formatado. */
+  const backspace = (value: string) => formatMoneyInput(value.slice(0, -1));
+
+  it('formata a cada dígito digitado', () => {
+    expect(typeKeys('15000')).toEqual(['0,01', '0,15', '1,50', '15,00', '150,00']);
+    expect(typeKeys('0', '150,00')).toEqual(['1.500,00']);
+    expect(typeKeys('1234567')).toEqual(['0,01', '0,12', '1,23', '12,34', '123,45', '1.234,56', '12.345,67']);
+  });
+
+  it('backspace remove o último dígito até esvaziar', () => {
+    const steps: string[] = [];
+    let value = '150,00';
+    while (value) {
+      value = backspace(value);
+      steps.push(value);
+    }
+    expect(steps).toEqual(['15,00', '1,50', '0,15', '0,01', '']);
+  });
+
+  it('campo vazio ou só com zeros continua vazio', () => {
+    expect(formatMoneyInput('')).toBe('');
+    expect(formatMoneyInput('0')).toBe('');
+    expect(formatMoneyInput('0,00')).toBe('');
+  });
+
+  it('ignora letras, vírgulas e pontos digitados', () => {
+    expect(typeKeys('1a,2.b3')).toEqual(['0,01', '0,01', '0,01', '0,12', '0,12', '0,12', '1,23']);
+  });
+
+  it.each(['1.234,56', 'R$ 1234,56', 'R$1.234,56', ' 123456 '])('colar "%s" resulta em 1.234,56', (pasted) => {
+    expect(formatMoneyInput(pasted)).toBe('1.234,56');
+  });
+
+  it('não aceita mais dígitos que o limite de MAX_AMOUNT', () => {
+    const atLimit = formatMoneyInput(String(MAX_AMOUNT));
+    expect(atLimit).toBe('999.999.999,99');
+    expect(formatMoneyInput(`${atLimit}5`)).toBe(atLimit);
+    expect(parseMoney(formatMoneyInput('123456789012345'))).toBeLessThanOrEqual(MAX_AMOUNT);
   });
 });
 

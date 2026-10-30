@@ -17,6 +17,7 @@ export type FinanceAction =
   | { type: 'transaction/removed'; id: string }
   | { type: 'category/saved'; category: Category }
   | { type: 'category/removed'; id: string }
+  | { type: 'categories/added'; categories: Category[] }
   | { type: 'goal/saved'; goal: Goal }
   | { type: 'goal/removed'; id: string }
   | { type: 'settings/saved'; settings: Settings }
@@ -43,6 +44,8 @@ export function financeReducer(state: FinanceState, action: FinanceAction): Fina
       return { ...state, data: { ...data, categories: upsert(data.categories, action.category) } };
     case 'category/removed':
       return { ...state, data: { ...data, categories: withoutId(data.categories, action.id) } };
+    case 'categories/added':
+      return { ...state, data: { ...data, categories: action.categories.reduce<Category[]>((items, category) => upsert(items, category), data.categories) } };
     case 'goal/saved':
       return { ...state, data: { ...data, goals: upsert(data.goals, action.goal) } };
     case 'goal/removed':

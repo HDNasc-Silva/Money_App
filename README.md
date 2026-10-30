@@ -92,7 +92,7 @@ App_Financas_Layout/  layouts de referência (não alterar)
 - Valores monetários são inteiros em **centavos** (`utils/money.ts` converte e formata).
 - Regras de negócio ficam em `src/domain/` como funções puras; componentes não calculam nem acessam o storage.
 - Componentes usam apenas tokens de `src/design-system/` — nunca cores fixas — para funcionar nos dois temas.
-- Os dados ficam no `localStorage` do navegador (chave `money-app:data:v1`). Na primeira execução são carregados **dados de demonstração**, identificados na interface e removíveis em Ajustes.
+- Os dados ficam no `localStorage` do navegador (chave `money-app:data:v1`). Na primeira execução são carregados **dados de demonstração**, identificados na interface e removíveis em Ajustes ("Apagar todos os dados" mantém as categorias padrão definidas em `src/store/defaultCategories.ts`).
 - Antes de qualquer alteração, consulte `ESCOPO_PROJETO.md` e `CHANGELOG.md`; depois, atualize-os.
 - No Windows, os comandos acima funcionam no PowerShell. Se o Node acabou de ser instalado, abra um terminal novo para que `npm` seja encontrado.
 - Os testes (`tests/`) cobrem utilitários, regras de negócio, validações, persistência, exportação CSV, tema e a integração entre os módulos.

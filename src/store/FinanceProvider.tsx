@@ -7,6 +7,7 @@ import { createDefaultAdapter } from '@/services/storage/StorageAdapter';
 import { todayIso } from '@/utils/dates';
 import { createId } from '@/utils/id';
 import type { CategoryDraft, GoalDraft, TransactionDraft } from '@/validations';
+import { buildDefaultCategories, missingDefaultCategories } from './defaultCategories';
 import { buildDemoData } from './demoData';
 import { financeReducer, initialFinanceState, type FinanceState } from './financeReducer';
 
@@ -24,6 +25,8 @@ export interface FinanceActions {
   deleteTransaction(id: string): Promise<void>;
   saveCategory(draft: CategoryDraft, id?: string): Promise<Category>;
   deleteCategory(id: string): Promise<void>;
+  /** Adiciona as categorias padrão que faltam (sem duplicar nomes); retorna as que foram criadas. */
+  ensureDefaultCategories(): Promise<Category[]>;
   saveGoal(draft: GoalDraft, id?: string): Promise<Goal>;
   deleteGoal(id: string): Promise<void>;
   addContribution(goalId: string, amount: number, date: IsoDate): Promise<Goal>;
@@ -169,6 +172,16 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
         await persist(() => repos.categories.remove(id));
       },
 
+      async ensureDefaultCategories() {
+        const added = missingDefaultCategories(data().categories, now(), createId);
+        if (added.length === 0) return [];
+        dispatch({ type: 'categories/added', categories: added });
+        await persist(async () => {
+          for (const category of added) await repos.categories.upsert(category);
+        });
+        return added;
+      },
+
       async saveGoal(draft, id) {
         const existing = id ? data().goals.find((g) => g.id === id) : undefined;
         const goal: Goal = {
@@ -206,9 +219,14 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
         await replaceData(buildDemoData(todayIso()));
       },
 
+      /** Apaga lançamentos e metas; recria as categorias padrão para que seja possível lançar em seguida. */
       async clearAllData() {
         const { userName } = data().settings;
-        await replaceData({ ...EMPTY_DATA, settings: { ...DEFAULT_SETTINGS, userName } });
+        await replaceData({
+          ...EMPTY_DATA,
+          categories: buildDefaultCategories(now()),
+          settings: { ...DEFAULT_SETTINGS, userName },
+        });
       },
 
       async importBackup(json) {

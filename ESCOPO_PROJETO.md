@@ -2,7 +2,7 @@
 
 > Documento oficial de referência. Representa o **estado atual real** do aplicativo e deve ser atualizado a cada alteração do sistema (ver `CHANGELOG.md` e `DECISOES_TECNICAS.md`).
 
-**Versão atual:** 1.0.0 (primeira versão funcional)
+**Versão atual:** 1.1.0 (máscara automática nos campos de valor)
 **Última atualização:** 30/10/2026
 
 ---
@@ -136,7 +136,7 @@ Money_APP/
 | **Categorias** (`modules/categories`) | CRUD de categorias, limite mensal, gasto atual, % consumido, alertas de limite, teto global, filtro por grupo |
 | **Metas** (`modules/goals`) | CRUD de metas, valor alvo/acumulado, prazo, progresso, aportes, simulador de aporte mensal e cenários |
 | **Relatórios** (`modules/reports`) | Receitas × despesas, evolução do saldo, tendência de 6 meses/ano, distribuição por categoria, comparação com período anterior, indicadores, exportação CSV/PDF |
-| **Ajustes** (`modules/settings`) | Nome do usuário, tema, restaurar dados de demonstração, apagar dados, exportar/importar backup JSON |
+| **Ajustes** (`modules/settings`) | Nome do usuário, tema, restaurar dados de demonstração, apagar dados (recriando as categorias padrão), exportar/importar backup JSON |
 | Design System (`design-system`, `theme`) | Tokens dos dois temas, alternância e persistência |
 | Persistência (`services`) | Leitura/gravação segura e versionada dos dados |
 
@@ -156,6 +156,7 @@ Money_APP/
 - Campos: tipo, descrição, valor, data, categoria, observação opcional.
 - Histórico agrupado por dia com total diário; resumo de entradas/saídas do período.
 - Busca por descrição/categoria; filtros de período (este mês, 7 dias, mês anterior, todos), tipo e categoria; estado vazio com "limpar filtros".
+- Sem categoria do tipo selecionado, o formulário mostra um aviso com "Criar categorias padrão" (adiciona só as que faltam) e "Criar categoria personalizada" (fecha o formulário e abre Categorias).
 
 ### 10.3 Categorias
 - Criar, editar e excluir categorias (despesa ou receita), com ícone, descrição e grupo (Essencial / Estilo de Vida).
@@ -202,6 +203,10 @@ Money_APP/
 18. Alertas do mês corrente comparam com o **mesmo intervalo de dias** do mês anterior (ex.: 1–10 vs 1–10); aumento de gastos gera alerta a partir de 10%.
 19. Uma categoria com lançamentos não pode mudar de tipo (despesa ↔ receita).
 20. O seletor de mês não avança para meses futuros.
+21. **Categorias padrão** (`store/defaultCategories.ts`): Alimentação, Moradia, Transporte, Lazer, Saúde, Educação e Outros (despesa, com limites mensais) e Salário, Freelance e Rendimentos (receita, sem limite). São as mesmas usadas na demonstração.
+22. "Apagar todos os dados" (Ajustes, também acessado por "Começar do zero") remove lançamentos, metas e categorias personalizadas, mantém o nome do usuário, volta as demais preferências ao padrão e **recria as categorias padrão**, para que seja sempre possível lançar em seguida.
+23. "Criar categorias padrão" adiciona apenas as categorias padrão ausentes: uma categoria é considerada existente quando há outra do mesmo tipo com o mesmo nome (sem acento e sem diferenciar maiúsculas, como na regra 16); ids padrão já ocupados recebem um id novo, nunca sobrescrevendo dados do usuário.
+24. **Entrada de valores monetários** (máscara pelos centavos, `formatMoneyInput`): só dígitos são considerados e os dois últimos são os centavos ("15000" → "150,00"; "1234567" → "12.345,67"); letras, vírgulas e pontos digitados são ignorados; colar "1.234,56" ou "R$ 1234,56" resulta em "1.234,56"; backspace remove o último dígito; sem dígitos significativos o campo fica vazio (a validação de obrigatório continua valendo); no máximo os dígitos de `MAX_AMOUNT` (R$ 999.999.999,99). Valores pré-preenchidos aparecem no mesmo formato ("1.234,56").
 
 ## 12. Fluxos de navegação
 
@@ -320,7 +325,16 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 - ✅ Alternância global de tema (seção 14) com persistência e respeito ao tema do sistema.
 - ✅ Persistência local via repositórios, com tratamento de dados corrompidos e storage indisponível.
 - ✅ Navegação inferior (mobile) e lateral (≥ 1024 px).
-- ✅ 67 testes automatizados (Vitest): utilitários, regras de negócio, validações, persistência, CSV, tema e integração entre módulos.
+- ✅ 72 testes automatizados (Vitest): utilitários, regras de negócio, validações, persistência, CSV, tema, integração entre módulos e categorias padrão.
+
+### Concluído (v1.0.1 — correção, testada automaticamente)
+- ✅ "Apagar todos os dados" mantém as categorias padrão (antes deixava o app sem categorias e impedia novos lançamentos).
+- ✅ Recuperação no formulário de lançamento para quem já estava sem categorias ("Criar categorias padrão" / "Criar categoria personalizada").
+- ✅ Categorias padrão centralizadas e reutilizadas pela demonstração.
+
+### Concluído (v1.1.0 — testado automaticamente)
+- ✅ Máscara automática com pontuação pt-BR em todos os campos de valor (lançamento, teto, metas, aporte), teclado numérico no celular e cursor no fim (regra 24).
+- ✅ 92 testes automatizados (inclui 19 unitários da máscara/round-trip e 1 de integração da digitação).
 
 ### Em desenvolvimento
 - Nenhum.
@@ -337,6 +351,8 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 - Sem testes E2E em navegador real automatizados; a verificação visual foi manual (375 px e 1366 px, temas claro e escuro).
 - O projeto não está sob controle de versão (Git não instalado no ambiente).
 - Dados ficam apenas no navegador atual (sem sincronização entre dispositivos).
+- O aviso de categorias ausentes no formulário (v1.0.1) foi validado por testes automatizados (jsdom); falta verificação visual manual no navegador nos dois temas.
+- A máscara de valores (v1.1.0) foi validada em jsdom; falta testar manualmente em teclados de celulares reais (Android/iOS) e com edição no meio do texto (o cursor sempre volta ao fim, por decisão de design).
 
 ### Próximas etapas (sugestões)
 1. Inicializar repositório Git.

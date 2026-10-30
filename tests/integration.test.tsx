@@ -41,7 +41,7 @@ describe('integração entre módulos', () => {
 
     await user.click(within(screen.getByRole('main')).getByRole('button', { name: /Novo Lançamento/ }));
     const dialog = await screen.findByRole('dialog', { name: 'Novo lançamento' });
-    await user.type(within(dialog).getByLabelText('Valor'), '1500');
+    await user.type(within(dialog).getByLabelText('Valor'), '150000');
     await user.type(within(dialog).getByLabelText('Descrição'), 'Mercado do mês');
     await user.selectOptions(within(dialog).getByLabelText('Categoria'), 'food');
     await user.click(within(dialog).getByRole('button', { name: /Adicionar lançamento/ }));
@@ -74,6 +74,40 @@ describe('integração entre módulos', () => {
     expect(stored.transactions).toHaveLength(1);
   });
 
+  it('aplica a máscara de valor enquanto o usuário digita', async () => {
+    const { adapter, user } = setup('/lancamentos');
+    await user.click(await screen.findByRole('button', { name: /Nova Movimentação/ }));
+    const dialog = await screen.findByRole('dialog', { name: 'Novo lançamento' });
+    const amount = within(dialog).getByLabelText('Valor');
+    expect(amount).toHaveAttribute('inputmode', 'numeric');
+
+    const shown: string[] = [];
+    for (const key of '15000') {
+      await user.type(amount, key);
+      shown.push((amount as HTMLInputElement).value);
+    }
+    expect(shown).toEqual(['0,01', '0,15', '1,50', '15,00', '150,00']);
+
+    await user.type(amount, 'abc,.');
+    expect(amount).toHaveValue('150,00');
+    await user.type(amount, '0');
+    expect(amount).toHaveValue('1.500,00');
+    expect((amount as HTMLInputElement).selectionStart).toBe('1.500,00'.length);
+    await user.type(amount, '{Backspace}');
+    expect(amount).toHaveValue('150,00');
+
+    await user.clear(amount);
+    await user.paste('R$ 1234,56');
+    expect(amount).toHaveValue('1.234,56');
+
+    await user.type(within(dialog).getByLabelText('Descrição'), 'Lazer');
+    await user.selectOptions(within(dialog).getByLabelText('Categoria'), 'fun');
+    await user.click(within(dialog).getByRole('button', { name: /Adicionar lançamento/ }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    const stored = JSON.parse(adapter.read(DATA_KEY) ?? '{}') as FinanceData;
+    expect(stored.transactions.find((t) => t.description === 'Lazer')?.amount).toBe(123456);
+  });
+
   it('busca, edita e exclui lançamentos', async () => {
     const { adapter, user } = setup('/lancamentos');
     await screen.findByRole('heading', { name: 'Lançamentos' });
@@ -86,8 +120,10 @@ describe('integração entre módulos', () => {
     await user.click(await screen.findByRole('button', { name: /Editar informações/ }));
     const form = await screen.findByRole('dialog', { name: 'Editar lançamento' });
     const amount = within(form).getByLabelText('Valor');
+    expect(amount).toHaveValue('5.000,00');
     await user.clear(amount);
-    await user.type(amount, '6000');
+    await user.type(amount, '600000');
+    expect(amount).toHaveValue('6.000,00');
     await user.click(within(form).getByRole('button', { name: /Salvar alterações/ }));
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     expect(screen.getAllByText(/6\.000,00/).length).toBeGreaterThan(0);
