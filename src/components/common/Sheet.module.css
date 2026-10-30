@@ -1,0 +1,124 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: var(--color-overlay);
+  backdrop-filter: blur(4px);
+  animation: fadeIn var(--duration-theme) ease;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 32rem;
+  max-height: 92dvh;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  border: 1px solid var(--color-border);
+  border-bottom: 0;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-overlay);
+  animation: slideUp 220ms var(--ease-standard);
+}
+
+[data-theme='dark'] .panel {
+  background: #1a2130;
+}
+
+.handle {
+  align-self: center;
+  width: 2.5rem;
+  height: 4px;
+  margin-top: var(--space-sm);
+  border-radius: var(--radius-full);
+  background: var(--color-border-strong);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg) 0;
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: var(--space-sm);
+}
+
+.title {
+  font-size: 1.125rem;
+  line-height: 1.5rem;
+}
+
+.subtitle {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.body {
+  overflow-y: auto;
+  padding: var(--space-lg);
+}
+
+.footer {
+  display: flex;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg) var(--space-lg);
+  border-top: 1px solid var(--color-divider);
+}
+
+.footer > * {
+  flex: 1;
+}
+
+@media (min-width: 768px) {
+  .backdrop {
+    align-items: center;
+    padding: var(--space-xl);
+  }
+
+  .panel {
+    border-bottom: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    animation-name: popIn;
+  }
+
+  .handle {
+    display: none;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.97);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .panel {
+    animation: none;
+  }
+}

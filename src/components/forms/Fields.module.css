@@ -1,0 +1,143 @@
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.label {
+  padding: 0;
+  margin-bottom: 6px;
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--color-text-muted);
+}
+
+.field .label {
+  margin-bottom: 0;
+}
+
+.input {
+  width: 100%;
+  min-height: 3.25rem;
+  padding: 0 var(--space-md);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-low);
+  color: var(--color-text);
+  font-size: 1rem;
+  transition:
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease;
+}
+
+.input::placeholder {
+  color: var(--color-text-subtle);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-focus);
+  box-shadow: 0 0 0 1px var(--color-focus);
+}
+
+[data-theme='dark'] .input:focus {
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+}
+
+.input[aria-invalid='true'] {
+  border-color: var(--color-expense);
+}
+
+.moneyWrap {
+  position: relative;
+}
+
+.prefix {
+  position: absolute;
+  top: 50%;
+  left: var(--space-md);
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  font-family: var(--font-heading);
+  font-weight: 500;
+}
+
+.moneyInput {
+  padding-left: 2.75rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.selectWrap {
+  position: relative;
+}
+
+.select {
+  appearance: none;
+  padding-right: 2.5rem;
+}
+
+.chevron {
+  position: absolute;
+  top: 50%;
+  right: var(--space-md);
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.error {
+  color: var(--color-expense);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.hint {
+  color: var(--color-text-subtle);
+  font-size: 0.75rem;
+}
+
+.iconGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(2.75rem, 1fr));
+  gap: var(--space-sm);
+}
+
+.iconOption {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.75rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-low);
+  color: var(--color-text-muted);
+}
+
+.iconSelected {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}

@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><title>FinOrg</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary-fixed": "#6ffbbe",
+          "primary": "#4edea3",
+          "on-primary-container": "#00422b",
+          "surface": "#0f131c",
+          "surface-container-high": "#262a33",
+          "surface-container-highest": "#31353e",
+          "outline-variant": "#3c4a42",
+          "on-primary": "#003824",
+          "surface-dim": "#0f131c",
+          "on-tertiary": "#67001b",
+          "on-primary-fixed-variant": "#005236",
+          "surface-tint": "#4edea3",
+          "on-secondary-container": "#00374d",
+          "surface-bright": "#353942",
+          "error-container": "#93000a",
+          "on-error-container": "#ffdad6",
+          "inverse-on-surface": "#2c3039",
+          "tertiary-fixed-dim": "#ffb2b7",
+          "surface-variant": "#31353e",
+          "error": "#ffb4ab",
+          "secondary-container": "#00a6e0",
+          "secondary-fixed-dim": "#7bd0ff",
+          "tertiary": "#ffb2b7",
+          "on-secondary": "#00354a",
+          "outline": "#86948a",
+          "on-surface": "#dfe2ee",
+          "on-error": "#690005",
+          "tertiary-fixed": "#ffdadb",
+          "on-primary-fixed": "#002113",
+          "primary-container": "#10b981",
+          "on-tertiary-fixed-variant": "#92002a",
+          "surface-container": "#1c2028",
+          "on-surface-variant": "#bbcabf",
+          "surface-container-low": "#181c24",
+          "primary-fixed-dim": "#4edea3",
+          "secondary": "#7bd0ff",
+          "surface-container-lowest": "#0a0e16",
+          "on-secondary-fixed": "#001e2c",
+          "background": "#0f131c",
+          "inverse-primary": "#006c49",
+          "on-tertiary-fixed": "#40000d",
+          "on-tertiary-container": "#780021",
+          "on-secondary-fixed-variant": "#004c69",
+          "tertiary-container": "#ff7886",
+          "secondary-fixed": "#c4e7ff",
+          "inverse-surface": "#dfe2ee",
+          "on-background": "#dfe2ee"
+        },
+        borderRadius: {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        spacing: {
+          "gutter": "1.5rem",
+          "space-lg": "1.5rem",
+          "space-sm": "0.5rem",
+          "margin-sm": "1rem",
+          "space-xl": "2.5rem",
+          "gutter-lg": "2rem",
+          "margin": "1rem",
+          "gutter-sm": "1rem",
+          "margin-lg": "3rem",
+          "space-md": "0.75rem",
+          "space-xs": "0.25rem"
+        },
+        fontFamily: {
+          "label-ui": ["Inter"],
+          "headline-md": ["Geist"],
+          "display-lg-mobile": ["Geist"],
+          "display-lg": ["Geist"],
+          "label-numeric-lg": ["JetBrains Mono"],
+          "label-numeric-sm": ["JetBrains Mono"],
+          "body-md": ["Inter"],
+          "body-lg": ["Inter"],
+          "headline-lg": ["Geist"],
+          "headline-sm": ["Geist"],
+          "body-sm": ["Inter"],
+          "label-numeric-md": ["JetBrains Mono"]
+        },
+        fontSize: {
+          "label-ui": ["0.75rem", { "lineHeight": "1rem", "letterSpacing": "0.05em", "fontWeight": "600" }],
+          "headline-md": ["1.25rem", { "lineHeight": "1.75rem", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+          "display-lg-mobile": ["2.25rem", { "lineHeight": "2.75rem", "letterSpacing": "-0.025em", "fontWeight": "600" }],
+          "display-lg": ["3.5rem", { "lineHeight": "4rem", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+          "label-numeric-lg": ["1.5rem", { "lineHeight": "2rem", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+          "label-numeric-sm": ["0.75rem", { "lineHeight": "1rem", "letterSpacing": "0.02em", "fontWeight": "500" }],
+          "body-md": ["0.875rem", { "lineHeight": "1.25rem", "fontWeight": "400" }],
+          "body-lg": ["1rem", { "lineHeight": "1.5rem", "fontWeight": "400" }],
+          "headline-lg": ["1.5rem", { "lineHeight": "2rem", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+          "headline-sm": ["1.125rem", { "lineHeight": "1.5rem", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+          "body-sm": ["0.75rem", { "lineHeight": "1rem", "fontWeight": "400" }],
+          "label-numeric-md": ["0.875rem", { "lineHeight": "1.25rem", "letterSpacing": "0em", "fontWeight": "500" }]
+        }
+      }
+    }
+  };
+</script><style>@layer base { html, body { width: 100vw; margin: 0; padding: 0; min-height: 100%; } body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; } .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); } .pt-safe { padding-top: env(safe-area-inset-top, 0px); } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head><body class="bg-surface text-on-surface antialiased flex flex-col min-h-screen selection:bg-primary/20 selection:text-primary"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/85 backdrop-blur-xl border-b border-surface-container-highest/50 shadow-sm"><div class="h-16 px-margin flex items-center justify-between"><div class="flex items-center gap-space-sm"><div class="w-8 h-8 rounded-lg bg-surface-container-high border border-outline-variant/30 flex items-center justify-center p-1 text-primary"><span class="material-symbols-outlined text-[20px] text-primary">account_balance_wallet</span></div><div class="flex flex-col"><span class="font-headline-md text-[16px] text-white font-semibold tracking-tight">FinOrg</span><span class="font-body-sm text-[11px] text-slate-400 font-medium">Lançamentos</span></div></div><div class="flex items-center gap-space-xs"><button aria-label="Notificações" class="relative w-10 h-10 flex items-center justify-center rounded-full text-slate-300 hover:text-white hover:bg-surface-container-high active:scale-95 transition-all"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-primary ring-2 ring-surface"></span></button><a class="flex items-center justify-center p-0.5 rounded-full hover:ring-2 hover:ring-primary/40 transition-all border border-slate-700/60" data-path="perfil" href="#"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtFsUpGNrsQJ83vhnibL3OYLlBS3g9xfzLFrPG44KTZSABFqBWLcYw0RMGaK69ECHz2qehHYKc9XGCSFIgBp3Ew_pwzLuTezeku3j9vbXpPI_64BqnOMb6dfhBykNEKop6wszW2QMWWE9hQ2B66fj-qMeMEwcL-Kk_YLhTOVC33CD2uhG9NBPui9sEnxpJ3sGjylLMpWIARr0IdFTOv808aN-7_XcNP-S9CTFNbwtN"/></a></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-24 bg-surface"><div class="flex flex-col w-full max-w-lg mx-auto px-margin pb-20 space-y-space-md">
+<!-- Summary Banner Card (Obsidian Capital) -->
+<section class="bg-surface-container-low border border-surface-container-highest/60 rounded-xl p-space-md shadow-sm space-y-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-slate-400">calendar_month</span>
+<span class="font-body-md text-slate-300 font-medium">Outubro 2024</span>
+</div>
+<div class="flex items-center gap-1.5 bg-emerald-950/60 border border-emerald-800/40 px-2.5 py-0.5 rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+<span class="font-label-ui text-[11px] text-primary font-semibold">Balanço Positivo</span>
+</div>
+</div>
+<!-- Mini Balanço Split Grid -->
+<div class="grid grid-cols-2 gap-space-xs pt-1">
+<div class="bg-surface-container/70 border border-surface-container-highest/40 p-2.5 rounded-lg flex flex-col justify-between">
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[16px]">arrow_downward_alt</span>
+<span class="font-label-ui text-[11px] font-semibold uppercase tracking-wider">Entradas</span>
+</div>
+<div class="mt-1">
+<span class="font-headline-md text-primary font-semibold tracking-tight font-label-numeric-lg text-[18px]">R$ 8.200,00</span>
+</div>
+</div>
+<div class="bg-surface-container/70 border border-surface-container-highest/40 p-2.5 rounded-lg flex flex-col justify-between">
+<div class="flex items-center gap-1 text-rose-400">
+<span class="material-symbols-outlined text-[16px]">arrow_upward_alt</span>
+<span class="font-label-ui text-[11px] font-semibold uppercase tracking-wider">Saídas</span>
+</div>
+<div class="mt-1">
+<span class="font-headline-md text-white font-semibold tracking-tight font-label-numeric-lg text-[18px]">R$ 3.350,00</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Search & Filter Controls -->
+<section class="space-y-space-xs">
+<!-- Fast Search Bar -->
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-slate-400 text-[20px] pointer-events-none">search</span>
+<input class="w-full h-11 pl-10 pr-10 bg-surface-container-low border border-surface-container-highest/60 text-white placeholder:text-slate-400 font-body-md rounded-xl shadow-sm focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/40 active:bg-surface-container transition-all" id="search-input" placeholder="Buscar por descrição ou categoria..." type="search"/>
+<button aria-label="Limpar busca" class="hidden absolute right-3 w-6 h-6 flex items-center justify-center rounded-full bg-surface-container-highest text-slate-300 active:scale-95" id="clear-search-btn">
+<span class="material-symbols-outlined text-[14px]">close</span>
+</button>
+</div>
+<!-- Period Pills Scrollable -->
+<div class="flex items-center gap-1.5 overflow-x-auto py-1 no-scrollbar">
+<button class="filter-period-btn px-3 py-1.5 rounded-full font-body-md text-xs whitespace-nowrap bg-primary text-surface-container-lowest font-semibold transition-all active:scale-95 shadow-sm">
+        Este mês
+      </button>
+<button class="filter-period-btn px-3 py-1.5 rounded-full font-body-md text-xs whitespace-nowrap bg-surface-container-low border border-surface-container-highest/60 text-slate-300 hover:text-white hover:bg-surface-container transition-all active:scale-95 shadow-sm">
+        Últimos 7 dias
+      </button>
+<button class="filter-period-btn px-3 py-1.5 rounded-full font-body-md text-xs whitespace-nowrap bg-surface-container-low border border-surface-container-highest/60 text-slate-300 hover:text-white hover:bg-surface-container transition-all active:scale-95 shadow-sm">
+        Mês anterior
+      </button>
+<button class="filter-period-btn px-3 py-1.5 rounded-full font-body-md text-xs whitespace-nowrap bg-surface-container-low border border-surface-container-highest/60 text-slate-300 hover:text-white hover:bg-surface-container transition-all active:scale-95 shadow-sm">
+        Todos
+      </button>
+</div>
+<!-- Type Switcher Pill Group -->
+<div class="grid grid-cols-3 p-1 bg-surface-container-low border border-surface-container-highest/60 rounded-xl gap-1">
+<button class="filter-type-btn py-1.5 rounded-lg font-body-md text-xs text-center bg-surface-container-highest text-white font-semibold shadow-sm transition-all" data-type="all">
+        Todos
+      </button>
+<button class="filter-type-btn py-1.5 rounded-lg font-body-md text-xs text-center text-slate-400 hover:text-white font-medium transition-all" data-type="income">
+        Receitas
+      </button>
+<button class="filter-type-btn py-1.5 rounded-lg font-body-md text-xs text-center text-slate-400 hover:text-white font-medium transition-all" data-type="expense">
+        Despesas
+      </button>
+</div>
+</section>
+<!-- Grouped Transactions List -->
+<section class="space-y-space-md" id="transactions-container">
+<!-- Group: Hoje -->
+<div class="date-group space-y-space-xs">
+<div class="flex items-center justify-between px-1">
+<h2 class="font-body-md text-xs font-semibold text-slate-300">Hoje • 24 de Outubro</h2>
+<span class="font-body-sm text-xs text-slate-400 font-medium font-label-numeric-sm">- R$ 245,50</span>
+</div>
+<div class="bg-surface-container-low border border-surface-container-highest/60 rounded-xl shadow-sm overflow-hidden">
+<!-- Item: Supermercado Pão de Açúcar -->
+<article class="transaction-item flex items-center justify-between p-3.5 hover:bg-surface-container/60 transition-colors" data-search="supermercado pão de açúcar alimentação essencial mercado" data-type="expense">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-10 h-10 rounded-xl bg-rose-950/60 border border-rose-800/40 flex items-center justify-center text-rose-400 flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">shopping_cart</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-lg text-sm font-medium text-white truncate">Supermercado Pão de Açúcar</span>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="font-body-sm text-slate-400">Alimentação</span>
+<span class="w-1 h-1 rounded-full bg-slate-600"></span>
+<span class="bg-surface-container px-1.5 py-0.2 rounded font-body-sm text-[11px] text-slate-300 border border-surface-container-highest/40">Essencial</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 flex-shrink-0">
+<span class="font-body-lg text-sm font-semibold text-white font-label-numeric-md">- R$ 245,50</span>
+<button aria-label="Ações do lançamento" class="action-menu-btn w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-surface-container active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</article>
+</div>
+</div>
+<!-- Group: Ontem -->
+<div class="date-group space-y-space-xs">
+<div class="flex items-center justify-between px-1">
+<h2 class="font-body-md text-xs font-semibold text-slate-300">Ontem • 23 de Outubro</h2>
+<span class="font-body-sm text-xs text-primary font-medium font-label-numeric-sm">+ R$ 7.320,00</span>
+</div>
+<div class="bg-surface-container-low border border-surface-container-highest/60 rounded-xl shadow-sm divide-y divide-surface-container-highest/40 overflow-hidden">
+<!-- Item: Salário Mensal Consultoria -->
+<article class="transaction-item flex items-center justify-between p-3.5 hover:bg-surface-container/60 transition-colors" data-search="salário mensal consultoria receita principal faturamento" data-type="income">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-10 h-10 rounded-xl bg-emerald-950/70 border border-emerald-800/40 flex items-center justify-center text-primary flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-lg text-sm font-medium text-white truncate">Salário Mensal Consultoria</span>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="font-body-sm text-slate-400">Receita</span>
+<span class="w-1 h-1 rounded-full bg-slate-600"></span>
+<span class="bg-emerald-950/50 border border-emerald-800/30 px-1.5 py-0.2 rounded font-body-sm text-[11px] text-primary font-medium">Contrato PJ</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 flex-shrink-0">
+<span class="font-body-lg text-sm font-semibold text-primary font-label-numeric-md">+ R$ 7.500,00</span>
+<button aria-label="Ações do lançamento" class="action-menu-btn w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-surface-container active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</article>
+<!-- Item: Posto Ipiranga Combustível -->
+<article class="transaction-item flex items-center justify-between p-3.5 hover:bg-surface-container/60 transition-colors" data-search="posto ipiranga combustível transporte carro gasolina" data-type="expense">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-10 h-10 rounded-xl bg-surface-container-high border border-surface-container-highest/60 flex items-center justify-center text-slate-300 flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">local_gas_station</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-lg text-sm font-medium text-white truncate">Posto Ipiranga Combustível</span>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="font-body-sm text-slate-400">Transporte</span>
+<span class="w-1 h-1 rounded-full bg-slate-600"></span>
+<span class="bg-surface-container px-1.5 py-0.2 rounded font-body-sm text-[11px] text-slate-300 border border-surface-container-highest/40">Veículo</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 flex-shrink-0">
+<span class="font-body-lg text-sm font-semibold text-white font-label-numeric-md">- R$ 180,00</span>
+<button aria-label="Ações do lançamento" class="action-menu-btn w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-surface-container active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</article>
+</div>
+</div>
+<!-- Group: 20 de Outubro -->
+<div class="date-group space-y-space-xs">
+<div class="flex items-center justify-between px-1">
+<h2 class="font-body-md text-xs font-semibold text-slate-300">20 de Outubro</h2>
+<span class="font-body-sm text-xs text-slate-400 font-medium font-label-numeric-sm">- R$ 600,00</span>
+</div>
+<div class="bg-surface-container-low border border-surface-container-highest/60 rounded-xl shadow-sm divide-y divide-surface-container-highest/40 overflow-hidden">
+<!-- Item: Aluguel & Condomínio -->
+<article class="transaction-item flex items-center justify-between p-3.5 hover:bg-surface-container/60 transition-colors" data-search="aluguel &amp; condomínio moradia fixo casa apartamento" data-type="expense">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-10 h-10 rounded-xl bg-surface-container-high border border-surface-container-highest/60 flex items-center justify-center text-slate-300 flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">home</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-lg text-sm font-medium text-white truncate">Aluguel &amp; Condomínio</span>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="font-body-sm text-slate-400">Moradia</span>
+<span class="w-1 h-1 rounded-full bg-slate-600"></span>
+<span class="bg-surface-container px-1.5 py-0.2 rounded font-body-sm text-[11px] text-slate-300 border border-surface-container-highest/40">Custo Fixo</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 flex-shrink-0">
+<span class="font-body-lg text-sm font-semibold text-white font-label-numeric-md">- R$ 1.100,00</span>
+<button aria-label="Ações do lançamento" class="action-menu-btn w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-surface-container active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</article>
+<!-- Item: Rendimento Trabalho Freelance -->
+<article class="transaction-item flex items-center justify-between p-3.5 hover:bg-surface-container/60 transition-colors" data-search="rendimento trabalho freelance receita extra design ui" data-type="income">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-10 h-10 rounded-xl bg-emerald-950/70 border border-emerald-800/40 flex items-center justify-center text-primary flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">payments</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-lg text-sm font-medium text-white truncate">Rendimento Trabalho Freelance</span>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="font-body-sm text-slate-400">Receita</span>
+<span class="w-1 h-1 rounded-full bg-slate-600"></span>
+<span class="bg-emerald-950/50 border border-emerald-800/30 px-1.5 py-0.2 rounded font-body-sm text-[11px] text-primary font-medium">Extra</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 flex-shrink-0">
+<span class="font-body-lg text-sm font-semibold text-primary font-label-numeric-md">+ R$ 700,00</span>
+<button aria-label="Ações do lançamento" class="action-menu-btn w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-surface-container active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</article>
+<!-- Item: Farmácia Droga Raia -->
+<article class="transaction-item flex items-center justify-between p-3.5 hover:bg-surface-container/60 transition-colors" data-search="farmácia droga raia saúde remédio medicamentos" data-type="expense">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-10 h-10 rounded-xl bg-surface-container-high border border-surface-container-highest/60 flex items-center justify-center text-slate-300 flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">medical_services</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-lg text-sm font-medium text-white truncate">Farmácia Droga Raia</span>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="font-body-sm text-slate-400">Saúde</span>
+<span class="w-1 h-1 rounded-full bg-slate-600"></span>
+<span class="bg-surface-container px-1.5 py-0.2 rounded font-body-sm text-[11px] text-slate-300 border border-surface-container-highest/40">Bem-estar</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 flex-shrink-0">
+<span class="font-body-lg text-sm font-semibold text-white font-label-numeric-md">- R$ 85,00</span>
+<button aria-label="Ações do lançamento" class="action-menu-btn w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-surface-container active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</article>
+<!-- Item: Cinema e Restaurante -->
+<article class="transaction-item flex items-center justify-between p-3.5 hover:bg-surface-container/60 transition-colors" data-search="cinema e restaurante lazer entretenimento fds comida" data-type="expense">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-10 h-10 rounded-xl bg-surface-container-high border border-surface-container-highest/60 flex items-center justify-center text-slate-300 flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">local_activity</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-lg text-sm font-medium text-white truncate">Cinema e Restaurante</span>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="font-body-sm text-slate-400">Lazer</span>
+<span class="w-1 h-1 rounded-full bg-slate-600"></span>
+<span class="bg-surface-container px-1.5 py-0.2 rounded font-body-sm text-[11px] text-slate-300 border border-surface-container-highest/40">Fim de Semana</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 flex-shrink-0">
+<span class="font-body-lg text-sm font-semibold text-white font-label-numeric-md">- R$ 115,00</span>
+<button aria-label="Ações do lançamento" class="action-menu-btn w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-surface-container active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</article>
+</div>
+</div>
+</section>
+<!-- Empty State (hidden by default) -->
+<div class="hidden flex-col items-center justify-center py-12 px-4 text-center space-y-3" id="empty-state">
+<div class="w-14 h-14 rounded-full bg-surface-container-low border border-surface-container-highest/60 flex items-center justify-center text-slate-400">
+<span class="material-symbols-outlined text-[28px]">search_off</span>
+</div>
+<div class="space-y-1">
+<p class="font-headline-md text-sm font-semibold text-white">Nenhum lançamento localizado</p>
+<p class="font-body-sm text-slate-400 max-w-xs">Tente buscar por outro termo ou ajuste os filtros de receita e despesa.</p>
+</div>
+<button class="px-4 py-2 bg-surface-container border border-surface-container-highest/60 text-white rounded-xl font-body-md text-xs active:scale-95 transition-all hover:bg-surface-container-high" id="reset-filters-btn">
+      Limpar filtros
+    </button>
+</div>
+<!-- Subtle Footer Statistics -->
+<footer class="pt-2 pb-6 flex items-center justify-center gap-2 text-slate-400">
+<span class="material-symbols-outlined text-[16px] text-primary">done_all</span>
+<span class="font-body-sm text-[11px]">Mostrando 7 de 28 lançamentos no período</span>
+</footer>
+<!-- Floating Action Button (+ Nova Movimentação) -->
+<div class="fixed bottom-20 right-4 z-40">
+<button class="flex items-center gap-2 h-12 pl-4 pr-5 rounded-full bg-primary text-surface-container-lowest font-semibold shadow-xl hover:bg-primary-fixed active:scale-95 transition-all group" id="open-new-tx-btn">
+<span class="material-symbols-outlined text-[22px] transition-transform group-hover:rotate-90">add</span>
+<span class="font-body-lg text-sm font-semibold tracking-tight">Nova Movimentação</span>
+</button>
+</div>
+<!-- Bottom Sheet / Modal: Ações do Item (Editar / Excluir) -->
+<div class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 opacity-0 pointer-events-none transition-opacity duration-200" id="action-sheet-backdrop">
+<div class="fixed bottom-0 left-0 right-0 max-w-lg mx-auto bg-surface-container-low border-t border-surface-container-highest/70 rounded-t-2xl p-space-md shadow-2xl transform translate-y-full transition-transform duration-200 ease-out space-y-space-md" id="action-sheet">
+<div class="w-10 h-1 bg-surface-container-highest rounded-full mx-auto"></div>
+<div class="flex items-center justify-between pb-1">
+<div class="flex flex-col">
+<span class="font-body-sm text-xs text-slate-400 font-medium">Opções do Lançamento</span>
+<span class="font-headline-md text-white font-semibold truncate" id="sheet-item-title">Supermercado</span>
+</div>
+<button class="w-8 h-8 rounded-full flex items-center justify-center bg-surface-container text-slate-300 hover:text-white active:scale-95" id="close-sheet-btn">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<div class="space-y-2">
+<button class="w-full flex items-center gap-3 p-3.5 rounded-xl bg-surface-container border border-surface-container-highest/40 text-white font-body-lg text-sm hover:bg-surface-container-high active:scale-[0.99] transition-all" id="sheet-edit-btn">
+<span class="material-symbols-outlined text-primary text-[22px]">edit</span>
+<div class="flex flex-col text-left">
+<span class="font-medium">Editar informações</span>
+<span class="font-body-sm text-slate-400">Alterar valor, categoria ou data</span>
+</div>
+</button>
+<button class="w-full flex items-center gap-3 p-3.5 rounded-xl bg-surface-container border border-surface-container-highest/40 text-white font-body-lg text-sm hover:bg-surface-container-high active:scale-[0.99] transition-all" id="sheet-duplicate-btn">
+<span class="material-symbols-outlined text-slate-400 text-[22px]">content_copy</span>
+<div class="flex flex-col text-left">
+<span class="font-medium">Duplicar lançamento</span>
+<span class="font-body-sm text-slate-400">Criar uma cópia para este mês</span>
+</div>
+</button>
+<button class="w-full flex items-center gap-3 p-3.5 rounded-xl bg-rose-950/40 border border-rose-800/40 text-rose-300 font-body-lg text-sm hover:bg-rose-950/60 active:scale-[0.99] transition-all" id="sheet-delete-btn">
+<span class="material-symbols-outlined text-rose-400 text-[22px]">delete</span>
+<div class="flex flex-col text-left">
+<span class="font-medium text-rose-300">Excluir lançamento</span>
+<span class="font-body-sm text-slate-400">Remover permanentemente do extrato</span>
+</div>
+</button>
+</div>
+</div>
+</div>
+<!-- Toast de Notificação Discreta -->
+<div class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-surface-container-high border border-surface-container-highest text-white px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 opacity-0 pointer-events-none -translate-y-2 transition-all duration-200" id="toast-feedback">
+<span class="material-symbols-outlined text-primary text-[18px]" id="toast-icon">check_circle</span>
+<span class="font-body-md text-xs" id="toast-message">Ação realizada com sucesso</span>
+</div>
+</div>
+<script>
+  (() => {
+    // State
+    let currentTypeFilter = 'all';
+    let searchQuery = '';
+    let selectedItemElement = null;
+
+    // Elements
+    const searchInput = document.getElementById('search-input');
+    const clearSearchBtn = document.getElementById('clear-search-btn');
+    const typeButtons = document.querySelectorAll('.filter-type-btn');
+    const periodButtons = document.querySelectorAll('.filter-period-btn');
+    const transactionsContainer = document.getElementById('transactions-container');
+    const emptyState = document.getElementById('empty-state');
+    const resetFiltersBtn = document.getElementById('reset-filters-btn');
+    
+    // Bottom Sheet
+    const backdrop = document.getElementById('action-sheet-backdrop');
+    const sheet = document.getElementById('action-sheet');
+    const closeSheetBtn = document.getElementById('close-sheet-btn');
+    const sheetItemTitle = document.getElementById('sheet-item-title');
+    const sheetEditBtn = document.getElementById('sheet-edit-btn');
+    const sheetDuplicateBtn = document.getElementById('sheet-duplicate-btn');
+    const sheetDeleteBtn = document.getElementById('sheet-delete-btn');
+    const newTxBtn = document.getElementById('open-new-tx-btn');
+
+    // Toast
+    const toast = document.getElementById('toast-feedback');
+    const toastMsg = document.getElementById('toast-message');
+
+    function showToast(message, icon = 'check_circle') {
+      toastMsg.textContent = message;
+      document.getElementById('toast-icon').textContent = icon;
+      toast.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-2');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none', '-translate-y-2');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 2500);
+    }
+
+    function filterTransactions() {
+      const items = document.querySelectorAll('.transaction-item');
+      let visibleCount = 0;
+
+      items.forEach(item => {
+        const itemType = item.getAttribute('data-type');
+        const itemText = (item.getAttribute('data-search') || '').toLowerCase();
+        
+        const matchesType = (currentTypeFilter === 'all') || (itemType === currentTypeFilter);
+        const matchesQuery = !searchQuery || itemText.includes(searchQuery);
+
+        if (matchesType && matchesQuery) {
+          item.style.display = 'flex';
+          visibleCount++;
+        } else {
+          item.style.display = 'none';
+        }
+      });
+
+      // Show/Hide Date Group headers based on visible children
+      const groups = document.querySelectorAll('.date-group');
+      groups.forEach(group => {
+        const visibleItems = group.querySelectorAll('.transaction-item[style="display: flex;"]');
+        if (visibleItems.length === 0 && (searchQuery || currentTypeFilter !== 'all')) {
+          group.style.display = 'none';
+        } else {
+          group.style.display = 'block';
+        }
+      });
+
+      if (visibleCount === 0) {
+        emptyState.classList.remove('hidden');
+        emptyState.classList.add('flex');
+        transactionsContainer.classList.add('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+        emptyState.classList.remove('flex');
+        transactionsContainer.classList.remove('hidden');
+      }
+    }
+
+    // Search Input listeners
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value.trim().toLowerCase();
+      if (searchQuery.length > 0) {
+        clearSearchBtn.classList.remove('hidden');
+      } else {
+        clearSearchBtn.classList.add('hidden');
+      }
+      filterTransactions();
+    });
+
+    clearSearchBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      searchQuery = '';
+      clearSearchBtn.classList.add('hidden');
+      filterTransactions();
+      searchInput.focus();
+    });
+
+    // Type Switcher
+    typeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        typeButtons.forEach(b => {
+          b.className = 'filter-type-btn py-1.5 rounded-lg font-body-md text-xs text-center text-slate-400 hover:text-white font-medium transition-all';
+        });
+        btn.className = 'filter-type-btn py-1.5 rounded-lg font-body-md text-xs text-center bg-surface-container-highest text-white font-semibold shadow-sm transition-all';
+        currentTypeFilter = btn.getAttribute('data-type');
+        filterTransactions();
+      });
+    });
+
+    // Period Switcher pills
+    periodButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        periodButtons.forEach(b => {
+          b.className = 'filter-period-btn px-3 py-1.5 rounded-full font-body-md text-xs whitespace-nowrap bg-surface-container-low border border-surface-container-highest/60 text-slate-300 hover:text-white hover:bg-surface-container transition-all active:scale-95 shadow-sm';
+        });
+        btn.className = 'filter-period-btn px-3 py-1.5 rounded-full font-body-md text-xs whitespace-nowrap bg-primary text-surface-container-lowest font-semibold transition-all active:scale-95 shadow-sm';
+        showToast(`Filtrado por: ${btn.textContent.trim()}`, 'tune');
+      });
+    });
+
+    // Reset filters
+    resetFiltersBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      searchQuery = '';
+      clearSearchBtn.classList.add('hidden');
+      currentTypeFilter = 'all';
+      typeButtons.forEach((b, idx) => {
+        if (idx === 0) {
+          b.className = 'filter-type-btn py-1.5 rounded-lg font-body-md text-xs text-center bg-surface-container-highest text-white font-semibold shadow-sm transition-all';
+        } else {
+          b.className = 'filter-type-btn py-1.5 rounded-lg font-body-md text-xs text-center text-slate-400 hover:text-white font-medium transition-all';
+        }
+      });
+      filterTransactions();
+    });
+
+    // Open Bottom Sheet on more-vert click
+    document.querySelectorAll('.action-menu-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectedItemElement = btn.closest('.transaction-item');
+        const title = selectedItemElement.querySelector('.font-medium').textContent.trim();
+        sheetItemTitle.textContent = title;
+
+        backdrop.classList.remove('opacity-0', 'pointer-events-none');
+        backdrop.classList.add('opacity-100', 'pointer-events-auto');
+        sheet.classList.remove('translate-y-full');
+        sheet.classList.add('translate-y-0');
+      });
+    });
+
+    function closeSheet() {
+      backdrop.classList.remove('opacity-100', 'pointer-events-auto');
+      backdrop.classList.add('opacity-0', 'pointer-events-none');
+      sheet.classList.remove('translate-y-0');
+      sheet.classList.add('translate-y-full');
+    }
+
+    closeSheetBtn.addEventListener('click', closeSheet);
+    backdrop.addEventListener('click', (e) => {
+      if (e.target === backdrop) closeSheet();
+    });
+
+    // Sheet actions
+    sheetEditBtn.addEventListener('click', () => {
+      closeSheet();
+      showToast('Abrindo edição do lançamento...', 'edit');
+    });
+
+    sheetDuplicateBtn.addEventListener('click', () => {
+      closeSheet();
+      showToast('Lançamento duplicado com sucesso!', 'content_copy');
+    });
+
+    sheetDeleteBtn.addEventListener('click', () => {
+      if (selectedItemElement) {
+        selectedItemElement.style.opacity = '0';
+        selectedItemElement.style.transform = 'translateX(20px)';
+        setTimeout(() => {
+          selectedItemElement.remove();
+          filterTransactions();
+        }, 200);
+      }
+      closeSheet();
+      showToast('Lançamento excluído com sucesso.', 'delete');
+    });
+
+    // New Transaction button
+    newTxBtn.addEventListener('click', () => {
+      showToast('Formulário de nova movimentação...', 'add_circle');
+    });
+  })();
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/90 backdrop-blur-xl border-t border-surface-container-highest/60 shadow-[0_-1px_12px_rgba(0,0,0,0.5)]"><div class="flex items-center justify-around h-16 px-space-xs max-w-lg mx-auto"><a class="flex flex-col items-center justify-center min-w-[52px] h-full gap-0.5 text-slate-400 hover:text-slate-200 transition-all active:scale-95" data-path="inicio" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="font-body-sm text-[11px] tracking-tight">Início</span><div class="tab-indicator w-1 h-1 rounded-full bg-transparent mt-0.5 transition-colors"></div></a><a class="flex flex-col items-center justify-center min-w-[52px] h-full gap-0.5 text-primary font-semibold transition-all active:scale-95" data-path="lancamentos" href="#"><span class="material-symbols-outlined text-[20px] font-variation-settings-'FILL'-1">receipt_long</span><span class="font-body-sm text-[11px] tracking-tight">Extrato</span><div class="tab-indicator w-1 h-1 rounded-full bg-primary mt-0.5 transition-colors"></div></a><a class="flex flex-col items-center justify-center min-w-[52px] h-full gap-0.5 text-slate-400 hover:text-slate-200 transition-all active:scale-95" data-path="categorias" href="#"><span class="material-symbols-outlined text-[20px]">category</span><span class="font-body-sm text-[11px] tracking-tight">Gastos</span><div class="tab-indicator w-1 h-1 rounded-full bg-transparent mt-0.5 transition-colors"></div></a><a class="flex flex-col items-center justify-center min-w-[52px] h-full gap-0.5 text-slate-400 hover:text-slate-200 transition-all active:scale-95" data-path="metas" href="#"><span class="material-symbols-outlined text-[20px]">flag</span><span class="font-body-sm text-[11px] tracking-tight">Metas</span><div class="tab-indicator w-1 h-1 rounded-full bg-transparent mt-0.5 transition-colors"></div></a><a class="flex flex-col items-center justify-center min-w-[52px] h-full gap-0.5 text-slate-400 hover:text-slate-200 transition-all active:scale-95" data-path="relatorios" href="#"><span class="material-symbols-outlined text-[20px]">analytics</span><span class="font-body-sm text-[11px] tracking-tight">Gráficos</span><div class="tab-indicator w-1 h-1 rounded-full bg-transparent mt-0.5 transition-colors"></div></a><a class="flex flex-col items-center justify-center min-w-[52px] h-full gap-0.5 text-slate-400 hover:text-slate-200 transition-all active:scale-95" data-path="perfil" href="#"><span class="material-symbols-outlined text-[20px]">tune</span><span class="font-body-sm text-[11px] tracking-tight">Ajustes</span><div class="tab-indicator w-1 h-1 rounded-full bg-transparent mt-0.5 transition-colors"></div></a></div></nav></body></html>

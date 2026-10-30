@@ -1,0 +1,65 @@
+/* Obsidian Capital — tema escuro (App_Financas_Layout/obsidian_capital/DESIGN.md) */
+[data-theme='dark'] {
+  --color-bg: #0f131c;
+  --color-surface: #161b25;
+  --color-surface-low: #111827;
+  --color-surface-container: #1c2028;
+  --color-surface-high: #262a33;
+  --color-surface-highest: #31353e;
+  --color-header-bg: rgba(11, 15, 23, 0.8);
+
+  --color-text: #f8fafc;
+  --color-text-muted: #94a3b8;
+  --color-text-subtle: #64748b;
+  --color-border: rgba(51, 65, 85, 0.55);
+  --color-border-strong: #334155;
+  --color-divider: #1e293b;
+
+  --color-primary: #4edea3;
+  --color-on-primary: #0b0f17;
+  --color-primary-hover: #6ffbbe;
+  --color-secondary-bg: #1e293b;
+  --color-secondary-text: #f8fafc;
+  --color-focus: #38bdf8;
+
+  --color-hero-bg: linear-gradient(145deg, #1e2533 0%, #141a24 100%);
+  --color-hero-text: #f8fafc;
+  --color-hero-muted: #94a3b8;
+  --color-hero-chip: rgba(148, 163, 184, 0.15);
+
+  --color-income: #34d399;
+  --color-income-strong: #4edea3;
+  --color-income-bg: rgba(16, 185, 129, 0.12);
+  --color-income-alert-bg: rgba(16, 185, 129, 0.08);
+
+  --color-expense: #fb7185;
+  --color-expense-text: #fb7185;
+  --color-expense-strong: #f43f5e;
+  --color-expense-bg: rgba(244, 63, 94, 0.12);
+  --color-expense-alert-bg: rgba(244, 63, 94, 0.08);
+
+  --color-warning: #fbbf24;
+  --color-warning-bg: rgba(251, 191, 36, 0.08);
+  --color-info: #818cf8;
+  --color-info-bg: rgba(99, 102, 241, 0.1);
+  --color-accent: #38bdf8;
+
+  --color-progress: #4edea3;
+  --color-progress-good: #4edea3;
+  --color-track: #262a33;
+
+  --color-overlay: rgba(0, 0, 0, 0.6);
+  --shadow-card: none;
+  --shadow-raised: 0 8px 24px -4px rgba(0, 0, 0, 0.45);
+  --shadow-overlay: 0 16px 36px -8px rgba(0, 0, 0, 0.65);
+
+  --font-money: var(--font-mono);
+
+  --chart-1: #4edea3;
+  --chart-2: #38bdf8;
+  --chart-3: #ffb2b7;
+  --chart-4: #a78bfa;
+  --chart-5: #fbbf24;
+  --chart-6: #f472b6;
+  --chart-7: #94a3b8;
+}

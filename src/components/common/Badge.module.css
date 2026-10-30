@@ -1,0 +1,46 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  font-family: var(--font-heading);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.neutral {
+  background: var(--color-surface-container);
+  color: var(--color-text-muted);
+}
+
+.income {
+  background: var(--color-income-bg);
+  color: var(--color-income);
+}
+
+.expense {
+  background: var(--color-expense-bg);
+  color: var(--color-expense-text);
+}
+
+.warning {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.info {
+  background: var(--color-info-bg);
+  color: var(--color-info);
+}
+
+[data-theme='dark'] .income,
+[data-theme='dark'] .expense,
+[data-theme='dark'] .warning,
+[data-theme='dark'] .info {
+  border-color: color-mix(in srgb, currentColor 25%, transparent);
+}

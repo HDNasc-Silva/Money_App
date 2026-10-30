@@ -1,0 +1,48 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  min-width: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.md {
+  padding: var(--space-md);
+}
+
+.lg {
+  padding: var(--space-lg);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.title {
+  font-size: 1.125rem;
+  line-height: 1.5rem;
+  letter-spacing: -0.015em;
+}
+
+.subtitle {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--color-text-muted);
+}
+
+.action {
+  flex-shrink: 0;
+}

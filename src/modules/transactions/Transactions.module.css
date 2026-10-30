@@ -1,0 +1,328 @@
+/* ---------- Resumo ---------- */
+.summaryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.summaryPeriod {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+}
+
+.summaryBox {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-low);
+}
+
+.summaryLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-heading);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.labelIncome {
+  color: var(--color-income);
+}
+
+.labelExpense {
+  color: var(--color-expense);
+}
+
+.summaryValue {
+  font-size: 1.125rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Filtros ---------- */
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-height: 3rem;
+  padding: 0 var(--space-md);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+}
+
+.search:focus-within {
+  border-color: var(--color-focus);
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  height: 2.75rem;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 0.9375rem;
+}
+
+.search input:focus {
+  outline: none;
+}
+
+.search input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.search button {
+  display: inline-flex;
+  padding: 4px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.filterRow {
+  display: grid;
+  gap: var(--space-md);
+}
+
+/* ---------- Lista ---------- */
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.groupHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.groupHeader h2 {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-xs) var(--space-md) var(--space-md);
+}
+
+.item + .item {
+  border-top: 1px solid var(--color-divider);
+}
+
+.itemIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-md);
+}
+
+.iconIncome {
+  background: var(--color-income-bg);
+  color: var(--color-income);
+}
+
+.iconExpense {
+  background: var(--color-surface-container);
+  color: var(--color-text);
+}
+
+.itemText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.itemTitle {
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemMeta {
+  overflow: hidden;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemNote {
+  color: var(--color-text-subtle);
+}
+
+.itemAmount {
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.amountIncome {
+  color: var(--color-income);
+}
+
+.itemMenu {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.itemMenu:hover {
+  background: var(--color-surface-container);
+  color: var(--color-text);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.footer > :first-child {
+  color: var(--color-income);
+}
+
+/* ---------- FAB ---------- */
+.fab {
+  position: fixed;
+  right: var(--page-margin);
+  bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + var(--space-md));
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-height: 3.25rem;
+  padding: 0 1.25rem;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  box-shadow: var(--shadow-raised);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  transition: transform var(--duration-fast) ease;
+}
+
+.fab:active {
+  transform: scale(0.97);
+}
+
+/* ---------- Sheet de ações ---------- */
+.actionList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  width: 100%;
+  padding: var(--space-md);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  text-align: left;
+}
+
+.actionButton:hover {
+  background: var(--color-surface-container);
+}
+
+.actionButton span:last-child {
+  display: flex;
+  flex-direction: column;
+}
+
+.actionButton small {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+}
+
+.actionDanger {
+  color: var(--color-expense);
+}
+
+@media (min-width: 768px) {
+  .filterRow {
+    grid-template-columns: 1fr 1fr;
+    align-items: end;
+  }
+}
+
+@media (min-width: 1024px) {
+  .fab {
+    bottom: var(--space-xl);
+    right: max(var(--space-xl), calc((100vw - var(--side-nav-width) - var(--content-max)) / 2));
+  }
+}

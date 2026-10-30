@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><title>Relatórios - FinOrg</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "primary-fixed": "#6ffbbe",
+          "primary": "#4edea3",
+          "on-primary-container": "#00422b",
+          "surface": "#0f131c",
+          "surface-container-high": "#262a33",
+          "surface-container-highest": "#31353e",
+          "outline-variant": "#3c4a42",
+          "on-primary": "#003824",
+          "surface-dim": "#0f131c",
+          "on-tertiary": "#67001b",
+          "on-primary-fixed-variant": "#005236",
+          "surface-tint": "#4edea3",
+          "on-secondary-container": "#00374d",
+          "surface-bright": "#353942",
+          "error-container": "#93000a",
+          "on-error-container": "#ffdad6",
+          "inverse-on-surface": "#2c3039",
+          "tertiary-fixed-dim": "#ffb2b7",
+          "surface-variant": "#31353e",
+          "error": "#ffb4ab",
+          "secondary-container": "#00a6e0",
+          "secondary-fixed-dim": "#7bd0ff",
+          "tertiary": "#ffb2b7",
+          "on-secondary": "#00354a",
+          "outline": "#86948a",
+          "on-surface": "#dfe2ee",
+          "on-error": "#690005",
+          "tertiary-fixed": "#ffdadb",
+          "on-primary-fixed": "#002113",
+          "primary-container": "#10b981",
+          "on-tertiary-fixed-variant": "#92002a",
+          "surface-container": "#1c2028",
+          "on-surface-variant": "#bbcabf",
+          "surface-container-low": "#181c24",
+          "primary-fixed-dim": "#4edea3",
+          "secondary": "#7bd0ff",
+          "surface-container-lowest": "#0a0e16",
+          "on-secondary-fixed": "#001e2c",
+          "background": "#0f131c",
+          "inverse-primary": "#006c49",
+          "on-tertiary-fixed": "#40000d",
+          "on-tertiary-container": "#780021",
+          "on-secondary-fixed-variant": "#004c69",
+          "tertiary-container": "#ff7886",
+          "secondary-fixed": "#c4e7ff",
+          "inverse-surface": "#dfe2ee",
+          "on-background": "#dfe2ee"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "gutter": "1.5rem",
+          "space-lg": "1.5rem",
+          "space-sm": "0.5rem",
+          "margin-sm": "1rem",
+          "space-xl": "2.5rem",
+          "gutter-lg": "2rem",
+          "margin": "1rem",
+          "gutter-sm": "1rem",
+          "margin-lg": "3rem",
+          "space-md": "1rem",
+          "space-xs": "0.25rem"
+        },
+        "fontFamily": {
+          "label-ui": ["Inter"],
+          "headline-md": ["Geist"],
+          "display-lg-mobile": ["Geist"],
+          "display-lg": ["Geist"],
+          "label-numeric-lg": ["JetBrains Mono"],
+          "label-numeric-sm": ["JetBrains Mono"],
+          "body-md": ["Inter"],
+          "body-lg": ["Inter"],
+          "headline-lg": ["Geist"],
+          "headline-sm": ["Geist"],
+          "body-sm": ["Inter"],
+          "label-numeric-md": ["JetBrains Mono"]
+        },
+        "fontSize": {
+          "label-ui": ["0.75rem", { "lineHeight": "1rem", "letterSpacing": "0.05em", "fontWeight": "600" }],
+          "headline-md": ["1.5rem", { "lineHeight": "2rem", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+          "display-lg-mobile": ["2.25rem", { "lineHeight": "2.75rem", "letterSpacing": "-0.025em", "fontWeight": "600" }],
+          "display-lg": ["3.5rem", { "lineHeight": "4rem", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+          "label-numeric-lg": ["1.5rem", { "lineHeight": "2rem", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+          "label-numeric-sm": ["0.75rem", { "lineHeight": "1rem", "letterSpacing": "0.02em", "fontWeight": "500" }],
+          "body-md": ["1rem", { "lineHeight": "1.5rem", "fontWeight": "400" }],
+          "body-lg": ["1.125rem", { "lineHeight": "1.75rem", "fontWeight": "400" }],
+          "headline-lg": ["2rem", { "lineHeight": "2.5rem", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+          "headline-sm": ["1.25rem", { "lineHeight": "1.75rem", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+          "body-sm": ["0.875rem", { "lineHeight": "1.25rem", "fontWeight": "400" }],
+          "label-numeric-md": ["1rem", { "lineHeight": "1.5rem", "letterSpacing": "0em", "fontWeight": "500" }]
+        }
+      }
+    }
+  };
+</script><style>@layer base { html, body { width: 100vw; margin: 0; padding: 0; min-height: 100%; } body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; } .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); } .pt-safe { padding-top: env(safe-area-inset-top, 0px); } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style></head><body class="bg-surface text-on-surface antialiased flex flex-col min-h-screen selection:bg-primary/20 selection:text-primary"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/85 backdrop-blur-xl border-b border-surface-container-highest/50 shadow-sm"><div class="h-16 px-margin flex items-center justify-between"><div class="flex items-center gap-space-sm"><div class="w-8 h-8 rounded-lg bg-surface-container-high border border-outline-variant/30 flex items-center justify-center p-1 text-primary"><span class="material-symbols-outlined text-[20px] text-primary">account_balance_wallet</span></div><div class="flex flex-col"><span class="font-headline-md text-[16px] text-white font-semibold tracking-tight leading-tight">FinOrg</span><span class="font-label-sm text-[11px] text-slate-400 font-medium">Relatórios</span></div></div><div class="flex items-center gap-space-xs"><button aria-label="Notificações" class="relative w-10 h-10 flex items-center justify-center rounded-full text-slate-300 hover:text-white hover:bg-surface-container-high active:scale-95 transition-all"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-primary ring-2 ring-surface"></span></button><a class="flex items-center justify-center p-0.5 rounded-full hover:ring-2 hover:ring-primary/40 transition-all border border-slate-700/60" data-path="ajustes" href="#"><img alt="Foto de Perfil" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtFsUpGNrsQJ83vhnibL3OYLlBS3g9xfzLFrPG44KTZSABFqBWLcYw0RMGaK69ECHz2qehHYKc9XGCSFIgBp3Ew_pwzLuTezeku3j9vbXpPI_64BqnOMb6dfhBykNEKop6wszW2QMWWE9hQ2B66fj-qMeMEwcL-Kk_YLhTOVC33CD2uhG9NBPui9sEnxpJ3sGjylLMpWIARr0IdFTOv808aN-7_XcNP-S9CTFNbwtN"/></a></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-24 bg-surface"><div class="flex flex-col w-full px-margin pb-space-xl gap-space-lg">
+<!-- Top Selector & Screen Header -->
+<div class="flex flex-col gap-space-sm pt-space-xs">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<h2 class="font-headline-lg text-[22px] text-white tracking-tight font-semibold">Tendências &amp; Relatórios</h2>
+<span class="font-body-sm text-slate-400">Análise de ritmo e balanço consolidado</span>
+</div>
+<button class="flex items-center gap-1.5 bg-surface-container border border-surface-container-highest/60 hover:bg-surface-container-high text-slate-200 px-3 py-1.5 rounded-full transition-all active:scale-95 shadow-sm" id="filterBtn">
+<span class="material-symbols-outlined text-[16px] text-primary">calendar_today</span>
+<span class="font-label-md text-slate-200 font-medium text-xs">Out 2024</span>
+<span class="material-symbols-outlined text-[16px] text-slate-400">expand_more</span>
+</button>
+</div>
+<!-- Quick Interval Switcher (Dark mode pill bar) -->
+<div class="flex items-center p-1 bg-surface-container-low border border-surface-container-highest/50 rounded-xl gap-1">
+<button class="flex-1 py-1.5 text-center font-label-md text-xs rounded-lg bg-surface-container-high text-white shadow-sm font-semibold transition-all border border-surface-container-highest/40">
+        Este Mês
+      </button>
+<button class="flex-1 py-1.5 text-center font-label-md text-xs rounded-lg text-slate-400 hover:text-slate-200 transition-all">
+        6 Meses
+      </button>
+<button class="flex-1 py-1.5 text-center font-label-md text-xs rounded-lg text-slate-400 hover:text-slate-200 transition-all">
+        Ano 2024
+      </button>
+</div>
+</div>
+<!-- Hero Highlight Card: Savings Diagnostic (Obsidian Gradient + Emerald Glow) -->
+<div class="relative overflow-hidden bg-gradient-to-br from-surface-container-low via-surface-container to-surface-container-high border border-surface-container-highest/80 text-white rounded-xl p-space-lg shadow-lg flex flex-col gap-space-md">
+<div class="absolute -right-6 -bottom-6 w-36 h-36 rounded-full bg-primary/10 pointer-events-none blur-3xl"></div>
+<div class="relative z-10 flex items-start justify-between">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-lg bg-emerald-950/80 border border-emerald-800/40 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+</div>
+<span class="font-label-md text-[11px] text-slate-300 uppercase tracking-wider font-semibold">Diagnóstico de Outubro</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-800/40 text-primary font-label-sm text-[11px] font-semibold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[13px]">trending_up</span> +7,4% vs Set
+      </span>
+</div>
+<div class="relative z-10 flex flex-col gap-1">
+<div class="flex items-baseline gap-2">
+<span class="font-headline-xl-mobile text-3xl font-semibold tracking-tight text-white font-label-numeric-lg">59,1%</span>
+<span class="font-body-md text-slate-400 text-sm">taxa de poupança</span>
+</div>
+<p class="font-body-sm text-slate-300 text-sm leading-snug">
+        Você reteve <strong class="text-primary font-semibold">R$ 4.850,00</strong> da renda líquida total de R$ 8.200,00 recebida neste período.
+      </p>
+</div>
+<!-- Progress Meter -->
+<div class="relative z-10 w-full flex flex-col gap-1.5 mt-1">
+<div class="h-2 w-full bg-surface-container-highest/60 rounded-full overflow-hidden flex">
+<div class="h-full bg-primary rounded-full transition-all duration-700 shadow-sm" style="width: 59.1%;"></div>
+</div>
+<div class="flex justify-between font-label-sm text-[11px] text-slate-400">
+<span>Meta estipulada: 50%</span>
+<span class="text-primary font-medium">+9,1% acima do plano</span>
+</div>
+</div>
+</div>
+<!-- Monthly Rhythm & Trend Evolution Chart (6-month series) -->
+<div class="bg-surface-container-low border border-surface-container-highest/60 rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-lg font-semibold text-white">Evolução Líquida (6 Meses)</span>
+<span class="font-body-sm text-slate-400">Reserva retida vs despesas correntes</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1.5 font-label-sm text-xs text-slate-300">
+<span class="w-2.5 h-2.5 rounded-full bg-primary"></span> Guardado
+        </span>
+<span class="flex items-center gap-1.5 font-label-sm text-xs text-slate-400">
+<span class="w-2.5 h-2.5 rounded-full bg-surface-container-highest"></span> Gastos
+        </span>
+</div>
+</div>
+<!-- Minimalist Dark SVG Chart Bars -->
+<div class="w-full flex flex-col gap-2 pt-2">
+<div class="h-44 w-full flex items-end justify-between gap-2.5 pb-2">
+<!-- Mai -->
+<div class="flex-1 flex flex-col items-center h-full justify-end gap-1.5 group cursor-pointer">
+<div class="w-full flex flex-col items-center gap-1 h-full justify-end">
+<div class="w-full max-w-[28px] bg-primary/75 rounded-t-md transition-all group-hover:bg-primary" style="height: 42%;"></div>
+<div class="w-full max-w-[28px] bg-surface-container-highest/80 rounded-b-md" style="height: 52%;"></div>
+</div>
+<span class="font-label-sm text-xs text-slate-400 group-hover:text-slate-200">Mai</span>
+</div>
+<!-- Jun -->
+<div class="flex-1 flex flex-col items-center h-full justify-end gap-1.5 group cursor-pointer">
+<div class="w-full flex flex-col items-center gap-1 h-full justify-end">
+<div class="w-full max-w-[28px] bg-primary/75 rounded-t-md transition-all group-hover:bg-primary" style="height: 48%;"></div>
+<div class="w-full max-w-[28px] bg-surface-container-highest/80 rounded-b-md" style="height: 48%;"></div>
+</div>
+<span class="font-label-sm text-xs text-slate-400 group-hover:text-slate-200">Jun</span>
+</div>
+<!-- Jul -->
+<div class="flex-1 flex flex-col items-center h-full justify-end gap-1.5 group cursor-pointer">
+<div class="w-full flex flex-col items-center gap-1 h-full justify-end">
+<div class="w-full max-w-[28px] bg-primary/75 rounded-t-md transition-all group-hover:bg-primary" style="height: 51%;"></div>
+<div class="w-full max-w-[28px] bg-surface-container-highest/80 rounded-b-md" style="height: 46%;"></div>
+</div>
+<span class="font-label-sm text-xs text-slate-400 group-hover:text-slate-200">Jul</span>
+</div>
+<!-- Ago -->
+<div class="flex-1 flex flex-col items-center h-full justify-end gap-1.5 group cursor-pointer">
+<div class="w-full flex flex-col items-center gap-1 h-full justify-end">
+<div class="w-full max-w-[28px] bg-primary/75 rounded-t-md transition-all group-hover:bg-primary" style="height: 46%;"></div>
+<div class="w-full max-w-[28px] bg-surface-container-highest/80 rounded-b-md" style="height: 50%;"></div>
+</div>
+<span class="font-label-sm text-xs text-slate-400 group-hover:text-slate-200">Ago</span>
+</div>
+<!-- Set -->
+<div class="flex-1 flex flex-col items-center h-full justify-end gap-1.5 group cursor-pointer">
+<div class="w-full flex flex-col items-center gap-1 h-full justify-end">
+<div class="w-full max-w-[28px] bg-primary/75 rounded-t-md transition-all group-hover:bg-primary" style="height: 53%;"></div>
+<div class="w-full max-w-[28px] bg-surface-container-highest/80 rounded-b-md" style="height: 44%;"></div>
+</div>
+<span class="font-label-sm text-xs text-slate-400 group-hover:text-slate-200">Set</span>
+</div>
+<!-- Out (Active Current) -->
+<div class="flex-1 flex flex-col items-center h-full justify-end gap-1.5 group cursor-pointer">
+<div class="w-full flex flex-col items-center gap-1 h-full justify-end relative">
+<span class="absolute -top-6 text-[10px] font-semibold text-primary bg-surface-container-high border border-primary/30 px-1.5 py-0.5 rounded-full shadow-sm">+59%</span>
+<div class="w-full max-w-[28px] bg-primary rounded-t-md shadow-sm" style="height: 68%;"></div>
+<div class="w-full max-w-[28px] bg-surface-container-highest rounded-b-md" style="height: 38%;"></div>
+</div>
+<span class="font-label-sm text-xs font-semibold text-white">Out</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-slate-400 font-label-sm text-xs pt-2 bg-surface-container/60 border border-surface-container-highest/40 px-3 py-2 rounded-lg">
+<span class="flex items-center gap-1 text-slate-300">
+<span class="material-symbols-outlined text-[15px] text-primary">trending_up</span>
+          Tendência sustentável de 6 meses
+        </span>
+<span class="font-semibold text-white">Média: 51,5%</span>
+</div>
+</div>
+</div>
+<!-- Expense Breakdown by Category (Donut + Clean Stacked Bars) -->
+<div class="bg-surface-container-low border border-surface-container-highest/60 rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-lg font-semibold text-white">Distribuição de Despesas</span>
+<span class="font-body-sm text-slate-400">R$ 3.350,00 consumidos</span>
+</div>
+<span class="font-label-sm text-xs font-semibold text-slate-300 bg-surface-container border border-surface-container-highest/50 px-2 py-1 rounded-md">6 categorias</span>
+</div>
+<!-- Donut Visual & Overview Row -->
+<div class="flex items-center gap-space-lg py-1">
+<div class="relative w-28 h-28 flex-shrink-0 flex items-center justify-center">
+<!-- SVG Donut Chart with calibrated dark colors -->
+<svg class="w-full h-full -rotate-90" viewbox="0 0 42 42">
+<circle cx="21" cy="21" fill="transparent" r="15.91549430918954" stroke="#1c2028" stroke-width="4.8"></circle>
+<!-- Alimentacao 37.3% (Rose/Coral) -->
+<circle cx="21" cy="21" fill="transparent" r="15.91549430918954" stroke="#fb7185" stroke-dasharray="37.3 62.7" stroke-dashoffset="0" stroke-width="4.8"></circle>
+<!-- Moradia 32.8% (Emerald/Primary) -->
+<circle cx="21" cy="21" fill="transparent" r="15.91549430918954" stroke="#4edea3" stroke-dasharray="32.8 67.2" stroke-dashoffset="-37.3" stroke-width="4.8"></circle>
+<!-- Transporte 11.3% (Sky/Secondary) -->
+<circle cx="21" cy="21" fill="transparent" r="15.91549430918954" stroke="#7bd0ff" stroke-dasharray="11.3 88.7" stroke-dashoffset="-70.1" stroke-width="4.8"></circle>
+<!-- Lazer 9.5% (Violet/Surface-Tint) -->
+<circle cx="21" cy="21" fill="transparent" r="15.91549430918954" stroke="#a78bfa" stroke-dasharray="9.5 90.5" stroke-dashoffset="-81.4" stroke-width="4.8"></circle>
+<!-- Outros + Saude 9.1% (Slate) -->
+<circle cx="21" cy="21" fill="transparent" r="15.91549430918954" stroke="#475569" stroke-dasharray="9.1 90.9" stroke-dashoffset="-90.9" stroke-width="4.8"></circle>
+</svg>
+<div class="absolute flex flex-col items-center justify-center text-center">
+<span class="font-headline-md text-lg font-semibold text-white leading-none">100%</span>
+<span class="font-label-sm text-[10px] text-slate-400">Alocado</span>
+</div>
+</div>
+<div class="flex-1 flex flex-col gap-1.5 justify-center">
+<div class="flex items-center justify-between text-slate-200 font-body-sm text-xs">
+<span class="flex items-center gap-1.5 text-slate-200">
+<span class="w-2 h-2 rounded-full bg-rose-400"></span>
+            Alimentação
+          </span>
+<span class="font-semibold text-white font-label-numeric-sm">37,3%</span>
+</div>
+<div class="flex items-center justify-between text-slate-200 font-body-sm text-xs">
+<span class="flex items-center gap-1.5 text-slate-200">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+            Moradia
+          </span>
+<span class="font-semibold text-white font-label-numeric-sm">32,8%</span>
+</div>
+<div class="flex items-center justify-between text-slate-200 font-body-sm text-xs">
+<span class="flex items-center gap-1.5 text-slate-200">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+            Transporte
+          </span>
+<span class="font-semibold text-white font-label-numeric-sm">11,3%</span>
+</div>
+<div class="flex items-center justify-between text-slate-400 font-body-sm text-xs">
+<span class="flex items-center gap-1.5 text-slate-400">
+<span class="w-2 h-2 rounded-full bg-slate-500"></span>
+            Outras Áreas
+          </span>
+<span class="font-medium text-slate-300 font-label-numeric-sm">18,6%</span>
+</div>
+</div>
+</div>
+<!-- Granular Itemized Breakdown -->
+<div class="flex flex-col gap-space-sm pt-2">
+<!-- Alimentação -->
+<div class="flex flex-col gap-1 p-2 rounded-lg hover:bg-surface-container/50 transition-colors">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-rose-400">restaurant</span>
+<span class="font-body-md text-sm font-medium text-slate-200">Alimentação &amp; Mercado</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-body-md text-sm font-semibold text-white font-label-numeric-sm">R$ 1.249,55</span>
+<span class="font-label-sm text-xs text-slate-400 w-11 text-right">37,3%</span>
+</div>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-rose-400 rounded-full" style="width: 37.3%;"></div>
+</div>
+</div>
+<!-- Moradia -->
+<div class="flex flex-col gap-1 p-2 rounded-lg hover:bg-surface-container/50 transition-colors">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary">home</span>
+<span class="font-body-md text-sm font-medium text-slate-200">Moradia &amp; Fixos</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-body-md text-sm font-semibold text-white font-label-numeric-sm">R$ 1.100,00</span>
+<span class="font-label-sm text-xs text-slate-400 w-11 text-right">32,8%</span>
+</div>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 32.8%;"></div>
+</div>
+</div>
+<!-- Transporte -->
+<div class="flex flex-col gap-1 p-2 rounded-lg hover:bg-surface-container/50 transition-colors">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-secondary">directions_subway</span>
+<span class="font-body-md text-sm font-medium text-slate-200">Transporte &amp; Mobilidade</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-body-md text-sm font-semibold text-white font-label-numeric-sm">R$ 378,55</span>
+<span class="font-label-sm text-xs text-slate-400 w-11 text-right">11,3%</span>
+</div>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 11.3%;"></div>
+</div>
+</div>
+<!-- Lazer -->
+<div class="flex flex-col gap-1 p-2 rounded-lg hover:bg-surface-container/50 transition-colors">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-purple-400">sports_esports</span>
+<span class="font-body-md text-sm font-medium text-slate-200">Lazer &amp; Convivência</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-body-md text-sm font-semibold text-white font-label-numeric-sm">R$ 318,25</span>
+<span class="font-label-sm text-xs text-slate-400 w-11 text-right">9,5%</span>
+</div>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-purple-400 rounded-full" style="width: 9.5%;"></div>
+</div>
+</div>
+<!-- Saúde -->
+<div class="flex flex-col gap-1 p-2 rounded-lg hover:bg-surface-container/50 transition-colors">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-teal-400">health_and_safety</span>
+<span class="font-body-md text-sm font-medium text-slate-200">Saúde &amp; Cuidados</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-body-md text-sm font-semibold text-white font-label-numeric-sm">R$ 180,90</span>
+<span class="font-label-sm text-xs text-slate-400 w-11 text-right">5,4%</span>
+</div>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-teal-400 rounded-full" style="width: 5.4%;"></div>
+</div>
+</div>
+<!-- Outros -->
+<div class="flex flex-col gap-1 p-2 rounded-lg hover:bg-surface-container/50 transition-colors">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-slate-400">more_horiz</span>
+<span class="font-body-md text-sm font-medium text-slate-200">Diversos e Assinaturas</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-body-md text-sm font-semibold text-white font-label-numeric-sm">R$ 122,75</span>
+<span class="font-label-sm text-xs text-slate-400 w-11 text-right">3,7%</span>
+</div>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-slate-500 rounded-full" style="width: 3.7%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Insights & Habits Bento Section -->
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between px-1">
+<span class="font-label-lg font-semibold text-white">Insights &amp; Hábitos Financeiros</span>
+<span class="font-label-sm text-xs text-primary font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">auto_awesome</span> Detectados por IA
+</span>
+</div>
+<div class="grid grid-cols-1 gap-space-sm">
+<!-- Insight 1: No-Spend Days -->
+<div class="bg-surface-container-low border border-surface-container-highest/60 p-space-md rounded-xl shadow-sm flex items-center gap-space-md">
+<div class="w-11 h-11 rounded-xl bg-emerald-950/70 border border-emerald-800/40 flex items-center justify-center text-primary flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]">energy_savings_leaf</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-label-lg font-semibold text-white truncate">Dias sem gastos supérfluos</span>
+<span class="font-headline-md text-lg font-bold text-primary font-label-numeric-md">18 d</span>
+</div>
+<span class="font-body-sm text-xs text-slate-400 line-clamp-2">
+            58% dos dias de Outubro sem nenhuma saída avulsa ou delivery.
+          </span>
+</div>
+</div>
+<!-- Insight 2: Largest Single Expense -->
+<div class="bg-surface-container-low border border-surface-container-highest/60 p-space-md rounded-xl shadow-sm flex items-center gap-space-md">
+<div class="w-11 h-11 rounded-xl bg-surface-container-high border border-surface-container-highest/80 flex items-center justify-center text-slate-200 flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]">receipt</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-label-lg font-semibold text-white truncate">Maior despesa única</span>
+<span class="font-body-md text-sm font-semibold text-white font-label-numeric-sm">R$ 1.100,00</span>
+</div>
+<span class="font-body-sm text-xs text-slate-400">
+            Aluguel Residencial liquidado pontualmente no dia 20.
+          </span>
+</div>
+</div>
+<!-- Insight 3: Detected Improvement -->
+<div class="bg-surface-container-low border border-surface-container-highest/60 p-space-md rounded-xl shadow-sm flex items-center gap-space-md">
+<div class="w-11 h-11 rounded-xl bg-emerald-950/70 border border-emerald-800/40 flex items-center justify-center text-primary flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]">savings</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-label-lg font-semibold text-white truncate">Otimização do Ritmo</span>
+<span class="font-label-md text-xs font-semibold text-primary font-label-numeric-sm">+R$ 620,00</span>
+</div>
+<span class="font-body-sm text-xs text-slate-400">
+            Economia realizada em comparação à média diária do último trimestre.
+          </span>
+</div>
+</div>
+</div>
+</div>
+<!-- Export & Utilities Bar -->
+<div class="bg-surface-container-low border border-surface-container-highest/60 rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-lg font-semibold text-white">Exportação de Dados</span>
+<span class="font-body-sm text-slate-400 text-xs">Compatível com Excel, Notion e Google Sheets</span>
+</div>
+<span class="material-symbols-outlined text-slate-400 text-[20px]">ios_share</span>
+</div>
+<div class="grid grid-cols-2 gap-space-sm pt-1">
+<button class="flex items-center justify-center gap-2 py-3 px-space-md rounded-xl bg-primary text-surface-container-lowest font-label-lg font-semibold transition-all active:scale-[0.98] shadow-sm hover:bg-primary-fixed" id="btnPdf">
+<span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+<span>Relatório PDF</span>
+</button>
+<button class="flex items-center justify-center gap-2 py-3 px-space-md rounded-xl bg-surface-container border border-surface-container-highest/70 text-slate-200 hover:text-white hover:bg-surface-container-high font-label-lg font-medium transition-all active:scale-[0.98]" id="btnCsv">
+<span class="material-symbols-outlined text-[18px] text-slate-400">table_view</span>
+<span>Planilha CSV</span>
+</button>
+</div>
+</div>
+<!-- Toast Feedback Simulation Container -->
+<div class="fixed bottom-20 left-4 right-4 max-w-sm mx-auto bg-surface-container-high border border-surface-container-highest text-white px-4 py-3 rounded-xl shadow-xl flex items-center justify-between gap-3 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none z-50" id="toastNotification">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+<span class="font-body-sm text-sm font-medium" id="toastMessage">Arquivo exportado com sucesso!</span>
+</div>
+<span class="material-symbols-outlined text-[16px] text-slate-400 cursor-pointer">close</span>
+</div>
+</div>
+<script>
+  (function () {
+    const toast = document.getElementById('toastNotification');
+    const toastMsg = document.getElementById('toastMessage');
+    const btnPdf = document.getElementById('btnPdf');
+    const btnCsv = document.getElementById('btnCsv');
+
+    function showToast(message) {
+      if (!toast || !toastMsg) return;
+      toastMsg.textContent = message;
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      
+      setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 2800);
+    }
+
+    if (btnPdf) {
+      btnPdf.addEventListener('click', () => {
+        showToast('Relatório Analítico PDF gerado com sucesso!');
+      });
+    }
+
+    if (btnCsv) {
+      btnCsv.addEventListener('click', () => {
+        showToast('Planilha CSV de Outubro baixada para o dispositivo.');
+      });
+    }
+  })();
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/90 backdrop-blur-xl border-t border-surface-container-highest/60 shadow-[0_-1px_12px_rgba(0,0,0,0.5)]"><div class="flex items-center justify-around h-16 px-space-xs max-w-lg mx-auto"><a class="flex flex-col items-center justify-center min-w-[52px] h-full gap-0.5 text-slate-400 hover:text-slate-200 transition-all active:scale-95" data-path="inicio" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="font-label-sm text-[11px] tracking-tight">Início</span><div class="tab-indicator w-1 h-1 rounded-full bg-transparent mt-0.5 transition-colors"></div></a><a class="flex flex-col items-center justify-center min-w-[52px] h-full gap-0.5 text-slate-400 hover:text-slate-200 transition-all active:scale-95" data-path="lancamentos" href="#"><span class="material-symbols-outlined text-[20px]">receipt_long</span><span class="font-label-sm text-[11px] tracking-tight">Extrato</span><div class="tab-indicator w-1 h-1 rounded-full bg-transparent mt-0.5 transition-colors"></div></a><a class="flex flex-col items-center justify-center min-w-[52px] h-full gap-0.5 text-slate-400 hover:text-slate-200 transition-all active:scale-95" data-path="categorias" href="#"><span class="material-symbols-outlined text-[20px]">category</span><span class="font-label-sm text-[11px] tracking-tight">Gastos</span><div class="tab-indicator w-1 h-1 rounded-full bg-transparent mt-0.5 transition-colors"></div></a><a class="flex flex-col items-center justify-center min-w-[52px] h-full gap-0.5 text-slate-400 hover:text-slate-200 transition-all active:scale-95" data-path="metas" href="#"><span class="material-symbols-outlined text-[20px]">flag</span><span class="font-label-sm text-[11px] tracking-tight">Metas</span><div class="tab-indicator w-1 h-1 rounded-full bg-transparent mt-0.5 transition-colors"></div></a><a class="flex flex-col items-center justify-center min-w-[52px] h-full gap-0.5 text-primary font-semibold transition-all active:scale-95" data-path="relatorios" href="#"><span class="material-symbols-outlined text-[20px] font-variation-settings-'FILL'-1">analytics</span><span class="font-label-sm text-[11px] tracking-tight">Gráficos</span><div class="tab-indicator w-1 h-1 rounded-full bg-primary mt-0.5 transition-colors"></div></a><a class="flex flex-col items-center justify-center min-w-[52px] h-full gap-0.5 text-slate-400 hover:text-slate-200 transition-all active:scale-95" data-path="ajustes" href="#"><span class="material-symbols-outlined text-[20px]">tune</span><span class="font-label-sm text-[11px] tracking-tight">Ajustes</span><div class="tab-indicator w-1 h-1 rounded-full bg-transparent mt-0.5 transition-colors"></div></a></div></nav></body></html>

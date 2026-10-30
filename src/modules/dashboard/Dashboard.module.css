@@ -1,0 +1,354 @@
+/* ---------- Cartão de saldo ---------- */
+.hero {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-hero-bg);
+  color: var(--color-hero-text);
+  box-shadow: var(--shadow-raised);
+}
+
+.heroGlow {
+  position: absolute;
+  top: -2rem;
+  right: -2rem;
+  width: 10rem;
+  height: 10rem;
+  border-radius: var(--radius-full);
+  background: rgba(78, 222, 163, 0.18);
+  filter: blur(32px);
+  pointer-events: none;
+}
+
+.heroTop {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.heroLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-family: var(--font-heading);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-hero-muted);
+}
+
+.heroDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: var(--radius-full);
+  background: #4edea3;
+}
+
+.heroToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-hero-chip);
+  color: var(--color-hero-text);
+}
+
+.heroValue {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+}
+
+.heroCurrency {
+  font-weight: 500;
+  color: var(--color-hero-muted);
+}
+
+.heroAmount {
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 2.25rem;
+  letter-spacing: -0.025em;
+}
+
+.heroInsight {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 0.75rem;
+  color: var(--color-hero-muted);
+}
+
+.heroInsight > :first-child {
+  color: #4edea3;
+}
+
+/* ---------- Métricas ---------- */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-sm);
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.metricTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-heading);
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.metricIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-container);
+}
+
+.metricIncome {
+  background: var(--color-income-bg);
+  color: var(--color-income);
+}
+
+.metricExpense {
+  background: var(--color-expense-bg);
+  color: var(--color-expense-text);
+}
+
+.metricLabel {
+  font-size: 0.6875rem;
+  color: var(--color-text-muted);
+}
+
+.metricValue {
+  overflow: hidden;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.positive {
+  color: var(--color-income);
+}
+
+.negative {
+  color: var(--color-expense);
+}
+
+/* ---------- Ações / alertas ---------- */
+.quickActions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.quickActions > button:last-child {
+  width: 3rem;
+  height: 3rem;
+  flex-shrink: 0;
+}
+
+.alerts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 0.875rem;
+}
+
+.sectionTitle > :first-child {
+  color: var(--color-income);
+}
+
+/* ---------- Gráfico ---------- */
+.chartFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.chartFooter > span:last-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+
+/* ---------- Categorias ---------- */
+.budgetList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.budget {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.budgetRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.budgetName {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 0;
+  font-family: var(--font-heading);
+  font-weight: 500;
+}
+
+.budgetIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-container);
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.budgetSpent {
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+.budgetMeta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.6875rem;
+  color: var(--color-text-muted);
+}
+
+.textLink {
+  font-family: var(--font-heading);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+[data-theme='dark'] .textLink {
+  color: var(--color-primary);
+}
+
+.textLink:hover {
+  text-decoration: underline;
+}
+
+.wideLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  min-height: 2.75rem;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-container);
+  font-family: var(--font-heading);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+[data-theme='dark'] .wideLink {
+  border: 1px solid var(--color-border-strong);
+  background: transparent;
+}
+
+.wideLink:hover {
+  background: var(--color-surface-high);
+}
+
+/* ---------- Nota ---------- */
+.note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-container);
+}
+
+[data-theme='dark'] .note {
+  background: var(--color-surface);
+}
+
+.note > :first-child {
+  color: var(--color-income);
+}
+
+.note strong {
+  font-family: var(--font-heading);
+  font-size: 0.8125rem;
+}
+
+.note p {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+@media (min-width: 768px) {
+  .heroAmount {
+    font-size: 2.25rem;
+    line-height: 2.75rem;
+  }
+}

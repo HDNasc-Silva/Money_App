@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><title>FinOrg</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "outline": "#76777d", "surface-bright": "#f8f9ff", "inverse-primary": "#bec6e0", "on-secondary-fixed-variant": "#005236", "surface-variant": "#d3e4fe", "inverse-surface": "#213145", "secondary": "#006c49", "on-secondary": "#ffffff", "surface-tint": "#565e74", "error": "#ba1a1a", "on-secondary-container": "#00714d", "on-error": "#ffffff", "on-primary-fixed": "#131b2e", "error-container": "#ffdad6", "primary": "#000000", "on-error-container": "#93000a", "surface-container-highest": "#d3e4fe", "surface-container-high": "#dce9ff", "tertiary": "#000000", "on-primary-container": "#7c839b", "surface-container-low": "#eff4ff", "on-surface": "#0b1c30", "tertiary-fixed-dim": "#ffb2b7", "secondary-fixed-dim": "#4edea3", "secondary-fixed": "#6ffbbe", "tertiary-container": "#40000d", "on-tertiary-fixed-variant": "#92002a", "on-primary": "#ffffff", "primary-fixed-dim": "#bec6e0", "surface-container-lowest": "#ffffff", "secondary-container": "#6cf8bb", "primary-fixed": "dae2fd", "primary-container": "#131b2e", "on-tertiary-fixed": "#40000d", "surface-dim": "#cbdbf5", "on-background": "#0b1c30", "outline-variant": "#c6c6cd", "on-secondary-fixed": "#002113", "background": "#f8f9ff", "inverse-on-surface": "#eaf1ff", "on-tertiary": "#ffffff", "surface-container": "#e5eeff", "on-primary-fixed-variant": "#3f465c", "tertiary-fixed": "#ffdadb", "on-tertiary-container": "#f23d5c", "surface": "#f8f9ff", "on-surface-variant": "#45464d" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "space-lg": "1.25rem", "gutter": "1rem", "space-xs": "0.25rem", "margin": "1rem", "space-md": "0.75rem", "space-xl": "2rem", "space-sm": "0.5rem" }, fontFamily: { "body-md": ["Inter"], "body-sm": ["Inter"], "headline-xl-mobile": ["Geist"], "label-sm": ["Geist"], "headline-xl": ["Geist"], "label-lg": ["Geist"], "label-md": ["Geist"], "headline-md": ["Geist"], "body-lg": ["Inter"], "headline-lg": ["Geist"] }, fontSize: { "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.005em", "fontWeight": "400" }], "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-xl-mobile": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.025em", "fontWeight": "600" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }], "headline-xl": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "600" }], "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }], "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "500" }], "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "400" }], "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }] } } } };</script><style>@layer base { html, body { width: 100vw; margin: 0; padding: 0; min-height: 100%; } body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; } .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); } .pt-safe { padding-top: env(safe-area-inset-top, 0px); } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface antialiased flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.03)]"><div class="h-16 px-margin flex items-center justify-between"><div class="flex items-center gap-space-sm"><img alt="FinOrg Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XuafiD1rzhsEopCn9v1SB_111n3sr3yt8Vln81toD3Ul2eNWhHyPcoQpbYLZGH6nHLzg1J2sjmkOVFJhqoSlHEndQWvgEYNmsCwmfjN_zmlJfcaOfhQi-6Ldfm3DggNrv4YHeyJlaOcpMxTrwnyZHEUt8ctriEG6ewJflKYB5QlaxYGPcZ6oEBpzkELROes8udF0wXuws4xNm8sFHe4u3piWx-kJGZ4XabaQ_aBdZU9A"/><div class="flex flex-col"><span class="font-label-md text-label-md text-on-surface font-semibold tracking-tight">FinOrg</span><span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Início</span></div></div><div class="flex items-center gap-space-xs"><button aria-label="Notificações" class="relative w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container active:scale-95 transition-all"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-secondary ring-2 ring-surface"></span></button><a class="flex items-center justify-center p-0.5 rounded-full hover:ring-2 hover:ring-outline-variant transition-all" data-path="perfil" href="#"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtFsUpGNrsQJ83vhnibL3OYLlBS3g9xfzLFrPG44KTZSABFqBWLcYw0RMGaK69ECHz2qehHYKc9XGCSFIgBp3Ew_pwzLuTezeku3j9vbXpPI_64BqnOMb6dfhBykNEKop6wszW2QMWWE9hQ2B66fj-qMeMEwcL-Kk_YLhTOVC33CD2uhG9NBPui9sEnxpJ3sGjylLMpWIARr0IdFTOv808aN-7_XcNP-S9CTFNbwtN"/></a></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-24 bg-surface"><div class="flex flex-col w-full">
+<div class="px-margin flex flex-col gap-space-lg w-full max-w-lg mx-auto pb-6">
+<!-- Top Greeting & Period Switcher -->
+<section class="flex items-center justify-between pt-2">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface-variant flex items-center gap-1">
+          Olá, Gabriel <span class="inline-block animate-pulse text-xs">✨</span>
+</span>
+<h1 class="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight">
+          Visão Geral
+        </h1>
+</div>
+<!-- Period Selector Pill -->
+<div class="flex items-center bg-surface-container-high rounded-full px-2 py-1 shadow-sm">
+<button aria-label="Mês anterior" class="w-7 h-7 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface active:scale-95 transition-transform" id="prev-month">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<span class="font-label-md text-label-md text-on-surface font-medium px-2 select-none" id="current-month-label">
+          Outubro 2024
+        </span>
+<button aria-label="Próximo mês" class="w-7 h-7 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface active:scale-95 transition-transform" id="next-month">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</section>
+<!-- Main Balance Card (Minimalist Elevation + Clean Slate) -->
+<section class="relative overflow-hidden bg-primary-container text-on-primary rounded-xl p-space-lg shadow-md">
+<!-- Decorative Organic Radial Glow -->
+<div class="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-secondary/20 blur-2xl pointer-events-none"></div>
+<div class="relative z-10 flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed"></span>
+<span class="font-label-md text-label-md text-on-primary-container tracking-wider uppercase">Saldo Atual Disponível</span>
+</div>
+<button aria-label="Ocultar ou exibir saldo" class="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container-highest/20 text-on-primary hover:bg-surface-container-highest/30 active:scale-90 transition-all" id="toggle-balance-visibility">
+<span class="material-symbols-outlined text-[19px]" id="eye-icon">visibility</span>
+</button>
+</div>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-body-md text-body-md text-on-primary-container font-medium">R$</span>
+<span class="font-headline-xl-mobile text-headline-xl-mobile font-semibold tracking-tight" id="balance-display">4.850,00</span>
+</div>
+<div class="flex items-center gap-2 pt-2 mt-1 border-none text-on-primary-container">
+<span class="material-symbols-outlined text-[16px] text-secondary-fixed">verified</span>
+<span class="font-label-sm text-label-sm">Planejamento equilibrado com 59,1% guardado</span>
+</div>
+</div>
+</section>
+<!-- Monthly Metrics Bento Grid -->
+<section class="grid grid-cols-3 gap-space-sm">
+<!-- Incomes Card -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between min-w-0">
+<div class="flex items-center justify-between mb-2">
+<span class="w-7 h-7 rounded-lg bg-secondary-container/40 flex items-center justify-center text-on-secondary-fixed-variant">
+<span class="material-symbols-outlined text-[16px]">arrow_downward</span>
+</span>
+<span class="font-label-sm text-label-sm text-secondary font-semibold">+100%</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant truncate">Receitas</span>
+<span class="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight mt-0.5 truncate">
+            R$ 8.200
+          </span>
+</div>
+</div>
+<!-- Expenses Card -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between min-w-0">
+<div class="flex items-center justify-between mb-2">
+<span class="w-7 h-7 rounded-lg bg-error-container/60 flex items-center justify-center text-on-error-container">
+<span class="material-symbols-outlined text-[16px]">arrow_upward</span>
+</span>
+<span class="font-label-sm text-label-sm text-error font-medium">40,8%</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant truncate">Despesas</span>
+<span class="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight mt-0.5 truncate">
+            R$ 3.350
+          </span>
+</div>
+</div>
+<!-- Savings Card -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between min-w-0">
+<div class="flex items-center justify-between mb-2">
+<span class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[16px]">savings</span>
+</span>
+<span class="font-label-sm text-label-sm text-secondary font-semibold">59,1%</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant truncate">Poupança</span>
+<span class="font-headline-md text-headline-md text-secondary font-semibold tracking-tight mt-0.5 truncate">
+            R$ 4.850
+          </span>
+</div>
+</div>
+</section>
+<!-- Quick Floating Action Buttons Bar -->
+<section class="flex items-center gap-space-sm">
+<button class="flex-1 h-12 bg-primary text-on-primary rounded-xl font-label-lg text-label-lg font-medium flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-all" id="btn-new-entry">
+<span class="material-symbols-outlined text-[20px]">add_circle</span>
+<span>Novo Lançamento</span>
+</button>
+<button class="h-12 px-4 bg-surface-container rounded-xl text-on-surface font-label-lg text-label-lg font-medium flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">history</span>
+<span class="hidden xs:inline">Histórico</span>
+</button>
+</section>
+<!-- System Smart Alerts / Central de Notificações -->
+<section class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">lightbulb</span>
+<h2 class="font-label-lg text-label-lg text-on-surface font-semibold tracking-tight">
+            Alertas &amp; Diagnóstico do Mês
+          </h2>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">4 ativos</span>
+</div>
+<div class="flex flex-col gap-2">
+<!-- Warning / Budget Overrun (Amber soft) -->
+<div class="p-space-md rounded-xl bg-surface-container-high text-on-surface flex items-start gap-3 shadow-sm transition-all hover:bg-surface-container-highest">
+<span class="material-symbols-outlined text-[20px] text-primary shrink-0 mt-0.5">warning</span>
+<div class="flex flex-col gap-0.5 flex-1 min-w-0">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Alerta de Orçamento</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Você ultrapassou o limite da categoria <strong>Alimentação</strong> (104% do teto estipulado para o ciclo).
+            </p>
+</div>
+</div>
+<!-- Expense Increase (Soft Coral / Rose) -->
+<div class="p-space-md rounded-xl bg-error-container/70 text-on-error-container flex items-start gap-3 shadow-sm transition-all">
+<span class="material-symbols-outlined text-[20px] text-error shrink-0 mt-0.5">trending_up</span>
+<div class="flex flex-col gap-0.5 flex-1 min-w-0">
+<span class="font-label-md text-label-md font-semibold text-on-error-container">Atenção aos Gastos</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Seus gastos deste mês estão <strong>12% maiores</strong> em relação ao mesmo período do mês passado.
+            </p>
+</div>
+</div>
+<!-- Goal Milestone (Soft Indigo / Lavender) -->
+<div class="p-space-md rounded-xl bg-surface-container-highest text-on-surface flex items-start gap-3 shadow-sm transition-all">
+<span class="material-symbols-outlined text-[20px] text-secondary shrink-0 mt-0.5">flag</span>
+<div class="flex flex-col gap-0.5 flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Quase lá!</span>
+<span class="font-label-sm text-label-sm text-secondary font-semibold">80%</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Sua meta <strong class="text-on-surface">Reserva de Emergência</strong> atingiu 80% do valor pretendido.
+            </p>
+</div>
+</div>
+<!-- Success Progress (Soft Emerald) -->
+<div class="p-space-md rounded-xl bg-secondary-container/50 text-on-secondary-container flex items-start gap-3 shadow-sm transition-all">
+<span class="material-symbols-outlined text-[20px] text-secondary shrink-0 mt-0.5">auto_awesome</span>
+<div class="flex flex-col gap-0.5 flex-1 min-w-0">
+<span class="font-label-md text-label-md font-semibold text-on-secondary-container">Ótima Notícia</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Você economizou <strong>R$ 620,00 a mais</strong> no ritmo diário quando comparado a setembro.
+            </p>
+</div>
+</div>
+</div>
+</section>
+<!-- Weekly Income vs Expense Inline Chart -->
+<section class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold">
+            Receitas vs Despesas
+          </h2>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Evolução por semana no mês</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-sm bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Entradas</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-sm bg-error-container"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Saídas</span>
+</div>
+</div>
+</div>
+<!-- Minimal SVG Column Chart -->
+<div class="w-full pt-4 pb-2">
+<svg class="w-full h-32 overflow-visible select-none" viewbox="0 0 320 130" xmlns="http://www.w3.org/2000/svg">
+<!-- Background Grid Lines -->
+<line class="text-surface-container-high" stroke="currentColor" stroke-dasharray="3 3" stroke-width="1" x1="0" x2="320" y1="20" y2="20"></line>
+<line class="text-surface-container-high" stroke="currentColor" stroke-dasharray="3 3" stroke-width="1" x1="0" x2="320" y1="65" y2="65"></line>
+<line class="text-outline-variant" stroke="currentColor" stroke-width="1" x1="0" x2="320" y1="110" y2="110"></line>
+<!-- Week 1: Rec 2400, Desp 900 -->
+<rect class="fill-secondary transition-all" height="75" rx="4" width="16" x="25" y="35"></rect>
+<rect class="fill-error-container transition-all" height="30" rx="4" width="16" x="44" y="80"></rect>
+<text class="fill-on-surface-variant font-label-sm text-[11px]" text-anchor="middle" x="42" y="125">Sem 1</text>
+<!-- Week 2: Rec 1800, Desp 850 -->
+<rect class="fill-secondary transition-all" height="58" rx="4" width="16" x="100" y="52"></rect>
+<rect class="fill-error-container transition-all" height="28" rx="4" width="16" x="119" y="82"></rect>
+<text class="fill-on-surface-variant font-label-sm text-[11px]" text-anchor="middle" x="117" y="125">Sem 2</text>
+<!-- Week 3: Rec 2600, Desp 780 -->
+<rect class="fill-secondary transition-all" height="82" rx="4" width="16" x="175" y="28"></rect>
+<rect class="fill-error-container transition-all" height="26" rx="4" width="16" x="194" y="84"></rect>
+<text class="fill-on-surface-variant font-label-sm text-[11px]" text-anchor="middle" x="192" y="125">Sem 3</text>
+<!-- Week 4: Rec 1400, Desp 820 -->
+<rect class="fill-secondary transition-all" height="45" rx="4" width="16" x="250" y="65"></rect>
+<rect class="fill-error-container transition-all" height="27" rx="4" width="16" x="269" y="83"></rect>
+<text class="fill-on-surface-variant font-label-sm text-[11px]" text-anchor="middle" x="267" y="125">Sem 4</text>
+</svg>
+</div>
+<!-- Brief Metric Insight Footer -->
+<div class="flex items-center justify-between pt-2 text-on-surface-variant">
+<span class="font-body-sm text-body-sm">Superávit contínuo semanal</span>
+<span class="font-label-sm text-label-sm font-semibold text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +R$ 1.212/sem
+        </span>
+</div>
+</section>
+<!-- Expenses Breakdown by Category -->
+<section class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold">
+            Gastos por Categoria
+          </h2>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Consumo em relação ao orçamento definido</span>
+</div>
+<button class="font-label-md text-label-md text-primary font-medium hover:underline">
+          Editar Tetos
+        </button>
+</div>
+<div class="flex flex-col gap-space-md">
+<!-- 1. Alimentação (Over Limit Alert) -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2 min-w-0">
+<span class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[16px]">restaurant</span>
+</span>
+<span class="font-label-lg text-label-lg font-medium text-on-surface truncate">Alimentação</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-semibold">
+                Acima do limite
+              </span>
+</div>
+<span class="font-label-lg text-label-lg text-error font-semibold shrink-0">R$ 1.250,00</span>
+</div>
+<!-- Progress bar track -->
+<div class="w-full h-2 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-error rounded-full" style="width: 100%;"></div>
+</div>
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span>Meta: R$ 1.200,00</span>
+<span class="text-error font-medium">104,1%</span>
+</div>
+</div>
+<!-- 2. Moradia -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2 min-w-0">
+<span class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[16px]">home</span>
+</span>
+<span class="font-label-lg text-label-lg font-medium text-on-surface truncate">Moradia</span>
+</div>
+<span class="font-label-lg text-label-lg text-on-surface font-semibold shrink-0">R$ 1.100,00</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 84%;"></div>
+</div>
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span>Meta: R$ 1.300,00</span>
+<span>84,6%</span>
+</div>
+</div>
+<!-- 3. Transporte -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2 min-w-0">
+<span class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[16px]">directions_car</span>
+</span>
+<span class="font-label-lg text-label-lg font-medium text-on-surface truncate">Transporte</span>
+</div>
+<span class="font-label-lg text-label-lg text-on-surface font-semibold shrink-0">R$ 380,00</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 63%;"></div>
+</div>
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span>Meta: R$ 600,00</span>
+<span>63,3%</span>
+</div>
+</div>
+<!-- 4. Lazer -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2 min-w-0">
+<span class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[16px]">theater_comedy</span>
+</span>
+<span class="font-label-lg text-label-lg font-medium text-on-surface truncate">Lazer</span>
+</div>
+<span class="font-label-lg text-label-lg text-on-surface font-semibold shrink-0">R$ 320,00</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 53%;"></div>
+</div>
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span>Meta: R$ 600,00</span>
+<span>53,3%</span>
+</div>
+</div>
+<!-- 5. Saúde -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2 min-w-0">
+<span class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[16px]">favorite</span>
+</span>
+<span class="font-label-lg text-label-lg font-medium text-on-surface truncate">Saúde</span>
+</div>
+<span class="font-label-lg text-label-lg text-on-surface font-semibold shrink-0">R$ 180,00</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 45%;"></div>
+</div>
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span>Meta: R$ 400,00</span>
+<span>45,0%</span>
+</div>
+</div>
+<!-- 6. Outros -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2 min-w-0">
+<span class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[16px]">category</span>
+</span>
+<span class="font-label-lg text-label-lg font-medium text-on-surface truncate">Outros</span>
+</div>
+<span class="font-label-lg text-label-lg text-on-surface font-semibold shrink-0">R$ 120,00</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 30%;"></div>
+</div>
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span>Meta: R$ 400,00</span>
+<span>30,0%</span>
+</div>
+</div>
+</div>
+<!-- Action to View All Transactions -->
+<a class="mt-2 w-full h-11 rounded-xl bg-surface-container flex items-center justify-center gap-2 font-label-md text-label-md text-on-surface font-semibold hover:bg-surface-container-high active:scale-[0.98] transition-all" href="#">
+<span>Ver todas as transações</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</section>
+<!-- Contextual Financial Note / Thought of the Month -->
+<section class="p-space-md rounded-xl bg-surface-container text-on-surface flex items-center gap-3">
+<span class="material-symbols-outlined text-[24px] text-secondary">sentiment_satisfied</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Consistência financeira</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Você registrou seus gastos em 28 dos 31 dias deste ciclo. Parabéns!</span>
+</div>
+</section>
+</div>
+</div>
+<script>
+  (function() {
+    // 1. Balance visibility toggle
+    const toggleBtn = document.getElementById('toggle-balance-visibility');
+    const balanceDisplay = document.getElementById('balance-display');
+    const eyeIcon = document.getElementById('eye-icon');
+    let isHidden = false;
+    const originalBalance = "4.850,00";
+
+    if (toggleBtn && balanceDisplay && eyeIcon) {
+      toggleBtn.addEventListener('click', () => {
+        isHidden = !isHidden;
+        if (isHidden) {
+          balanceDisplay.textContent = "••••••";
+          eyeIcon.textContent = "visibility_off";
+        } else {
+          balanceDisplay.textContent = originalBalance;
+          eyeIcon.textContent = "visibility";
+        }
+      });
+    }
+
+    // 2. Month switcher feedback
+    const months = ["Agosto 2024", "Setembro 2024", "Outubro 2024", "Novembro 2024"];
+    let currentIdx = 2;
+    const monthLabel = document.getElementById('current-month-label');
+    const prevBtn = document.getElementById('prev-month');
+    const nextBtn = document.getElementById('next-month');
+
+    if (prevBtn && nextBtn && monthLabel) {
+      prevBtn.addEventListener('click', () => {
+        if (currentIdx > 0) {
+          currentIdx--;
+          monthLabel.textContent = months[currentIdx];
+        }
+      });
+      nextBtn.addEventListener('click', () => {
+        if (currentIdx < months.length - 1) {
+          currentIdx++;
+          monthLabel.textContent = months[currentIdx];
+        }
+      });
+    }
+
+    // 3. New Entry interaction micro-feedback
+    const newEntryBtn = document.getElementById('btn-new-entry');
+    if (newEntryBtn) {
+      newEntryBtn.addEventListener('click', () => {
+        newEntryBtn.classList.add('scale-95');
+        setTimeout(() => newEntryBtn.classList.remove('scale-95'), 150);
+      });
+    }
+  })();
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-1px_12px_rgba(0,0,0,0.04)]" data-active-classes="text-primary font-semibold [&amp;_span.material-symbols-outlined]:font-variation-settings-'FILL'-1 [&amp;_div.tab-indicator]:bg-primary"><div class="flex items-center justify-around h-16 px-space-xs max-w-lg mx-auto"><a class="flex flex-col items-center justify-center min-w-[52px] h-full gap-0.5 text-on-surface-variant hover:text-on-surface transition-all active:scale-95" data-path="inicio" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="font-label-sm text-label-sm tracking-tight">Início</span><div class="tab-indicator w-1 h-1 rounded-full bg-transparent mt-0.5 transition-colors"></div></a><a class="flex flex-col items-center justify-center min-w-[52px] h-full gap-0.5 text-on-surface-variant hover:text-on-surface transition-all active:scale-95" data-path="lancamentos" href="#"><span class="material-symbols-outlined text-[20px]">receipt_long</span><span class="font-label-sm text-label-sm tracking-tight">Extrato</span><div class="tab-indicator w-1 h-1 rounded-full bg-transparent mt-0.5 transition-colors"></div></a><a class="flex flex-col items-center justify-center min-w-[52px] h-full gap-0.5 text-on-surface-variant hover:text-on-surface transition-all active:scale-95" data-path="categorias" href="#"><span class="material-symbols-outlined text-[20px]">category</span><span class="font-label-sm text-label-sm tracking-tight">Gastos</span><div class="tab-indicator w-1 h-1 rounded-full bg-transparent mt-0.5 transition-colors"></div></a><a class="flex flex-col items-center justify-center min-w-[52px] h-full gap-0.5 text-on-surface-variant hover:text-on-surface transition-all active:scale-95" data-path="metas" href="#"><span class="material-symbols-outlined text-[20px]">flag</span><span class="font-label-sm text-label-sm tracking-tight">Metas</span><div class="tab-indicator w-1 h-1 rounded-full bg-transparent mt-0.5 transition-colors"></div></a><a class="flex flex-col items-center justify-center min-w-[52px] h-full gap-0.5 text-on-surface-variant hover:text-on-surface transition-all active:scale-95" data-path="relatorios" href="#"><span class="material-symbols-outlined text-[20px]">analytics</span><span class="font-label-sm text-label-sm tracking-tight">Gráficos</span><div class="tab-indicator w-1 h-1 rounded-full bg-transparent mt-0.5 transition-colors"></div></a><a class="flex flex-col items-center justify-center min-w-[52px] h-full gap-0.5 text-on-surface-variant hover:text-on-surface transition-all active:scale-95" data-path="perfil" href="#"><span class="material-symbols-outlined text-[20px]">tune</span><span class="font-label-sm text-label-sm tracking-tight">Ajustes</span><div class="tab-indicator w-1 h-1 rounded-full bg-transparent mt-0.5 transition-colors"></div></a></div></nav></body></html>

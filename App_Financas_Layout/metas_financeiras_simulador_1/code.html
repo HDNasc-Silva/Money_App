@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><title>Metas - FinOrg</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "outline": "#76777d", "surface-bright": "#f8f9ff", "inverse-primary": "#bec6e0", "on-secondary-fixed-variant": "#005236", "surface-variant": "#d3e4fe", "inverse-surface": "#213145", "secondary": "#006c49", "on-secondary": "#ffffff", "surface-tint": "#565e74", "error": "#ba1a1a", "on-secondary-container": "#00714d", "on-error": "#ffffff", "on-primary-fixed": "#131b2e", "error-container": "#ffdad6", "primary": "#000000", "on-error-container": "#93000a", "surface-container-highest": "#d3e4fe", "surface-container-high": "#dce9ff", "tertiary": "#000000", "on-primary-container": "#7c839b", "surface-container-low": "#eff4ff", "on-surface": "#0b1c30", "tertiary-fixed-dim": "#ffb2b7", "secondary-fixed-dim": "#4edea3", "secondary-fixed": "#6ffbbe", "tertiary-container": "#40000d", "on-tertiary-fixed-variant": "#92002a", "on-primary": "#ffffff", "primary-fixed-dim": "#bec6e0", "surface-container-lowest": "#ffffff", "secondary-container": "#6cf8bb", "primary-fixed": "#dae2fd", "primary-container": "#131b2e", "on-tertiary-fixed": "#40000d", "surface-dim": "#cbdbf5", "on-background": "#0b1c30", "outline-variant": "#c6c6cd", "on-secondary-fixed": "#002113", "background": "#f8f9ff", "inverse-on-surface": "#eaf1ff", "on-tertiary": "#ffffff", "surface-container": "#e5eeff", "on-primary-fixed-variant": "#3f465c", "tertiary-fixed": "#ffdadb", "on-tertiary-container": "#f23d5c", "surface": "#f8f9ff", "on-surface-variant": "#45464d" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "space-lg": "1.25rem", "gutter": "1rem", "space-xs": "0.25rem", "margin": "1rem", "space-md": "0.75rem", "space-xl": "2rem", "space-sm": "0.5rem" }, fontFamily: { "body-md": ["Inter"], "body-sm": ["Inter"], "headline-xl-mobile": ["Geist"], "label-sm": ["Geist"], "headline-xl": ["Geist"], "label-lg": ["Geist"], "label-md": ["Geist"], "headline-md": ["Geist"], "body-lg": ["Inter"], "headline-lg": ["Geist"] }, fontSize: { "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.005em", "fontWeight": "400" }], "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-xl-mobile": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.025em", "fontWeight": "600" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }], "headline-xl": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "600" }], "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }], "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "500" }], "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "400" }], "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }] } } } };</script><style>@layer base { html, body { width: 100vw; margin: 0; padding: 0; min-height: 100%; } body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; } .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); } .pt-safe { padding-top: env(safe-area-inset-top, 0px); } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface antialiased flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.03)]"><div class="h-16 px-margin flex items-center justify-between"><div class="flex items-center gap-space-sm"><img alt="FinOrg Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XuafiD1rzhsEopCn9v1SB_111n3sr3yt8Vln81toD3Ul2eNWhHyPcoQpbYLZGH6nHLzg1J2sjmkOVFJhqoSlHEndQWvgEYNmsCwmfjN_zmlJfcaOfhQi-6Ldfm3DggNrv4YHeyJlaOcpMxTrwnyZHEUt8ctriEG6ewJflKYB5QlaxYGPcZ6oEBpzkELROes8udF0wXuws4xNm8sFHe4u3piWx-kJGZ4XabaQ_aBdZU9A"/><div class="flex flex-col"><span class="font-label-md text-label-md text-on-surface font-semibold tracking-tight">FinOrg</span><span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Metas</span></div></div><div class="flex items-center gap-space-xs"><button aria-label="Notificações" class="relative w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container active:scale-95 transition-all"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-secondary ring-2 ring-surface"></span></button><a class="flex items-center justify-center p-0.5 rounded-full hover:ring-2 hover:ring-outline-variant transition-all active:scale-95" data-path="ajustes" href="#"><img alt="Foto de Perfil" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtFsUpGNrsQJ83vhnibL3OYLlBS3g9xfzLFrPG44KTZSABFqBWLcYw0RMGaK69ECHz2qehHYKc9XGCSFIgBp3Ew_pwzLuTezeku3j9vbXpPI_64BqnOMb6dfhBykNEKop6wszW2QMWWE9hQ2B66fj-qMeMEwcL-Kk_YLhTOVC33CD2uhG9NBPui9sEnxpJ3sGjylLMpWIARr0IdFTOv808aN-7_XcNP-S9CTFNbwtN"/></a></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-24 bg-surface"><div class="flex flex-col w-full">
+<div class="px-margin pt-space-md pb-space-lg flex flex-col gap-space-lg">
+<!-- Cabeçalho da Página -->
+<div class="flex flex-col gap-space-xs">
+<div class="inline-flex items-center gap-1.5 self-start px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+<span class="material-symbols-outlined text-[13px] text-secondary">trending_up</span>
+<span>Planejamento Ativo</span>
+</div>
+<h1 class="font-headline-xl-mobile text-headline-xl-mobile text-on-surface tracking-tight">Metas Financeiras</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Conquiste seus objetivos com consistência e autonomia.</p>
+</div>
+<!-- Card de Resumo Geral -->
+<div class="relative overflow-hidden rounded-xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Total Acumulado</span>
+<div class="flex items-baseline gap-1 mt-0.5">
+<span class="font-headline-xl-mobile text-headline-xl-mobile text-on-surface font-semibold">R$ 14.800,00</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">de R$ 26.000,00 pretendidos</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-md text-label-md font-semibold">
+            56.9%
+          </span>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-1">4 ativas</span>
+</div>
+</div>
+<!-- Barra de Progresso Geral -->
+<div class="flex flex-col gap-1.5">
+<div class="w-full h-2.5 rounded-full bg-surface-container overflow-hidden flex">
+<div class="h-full bg-secondary rounded-full transition-all duration-700" style="width: 56.9%"></div>
+</div>
+<div class="flex justify-between items-center font-label-sm text-label-sm text-on-surface-variant">
+<span>Início do trajeto</span>
+<span>Faltam R$ 11.200,00</span>
+</div>
+</div>
+<!-- Dica Rápida de Consistência -->
+<div class="flex items-center gap-space-sm p-space-sm rounded-lg bg-surface-container-low text-on-surface">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center shrink-0 text-secondary">
+<span class="material-symbols-outlined text-[18px]">lightbulb</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Guardando <strong class="text-on-surface font-medium">R$ 650/mês</strong> você atinge todas as metas previstas para 2025.
+        </p>
+</div>
+</div>
+<!-- Seção Interativa: Simulador de Aportes & Projeção -->
+<div class="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">calculate</span>
+</div>
+<span class="font-headline-md text-headline-md text-on-surface">Simulador de Aportes</span>
+</div>
+<span class="font-label-sm text-label-sm text-secondary bg-surface-container-low px-2 py-0.5 rounded-full font-medium">Tempo real</span>
+</div>
+<!-- Seletor de Meta -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-on-surface-variant font-medium" for="metaSelector">Selecione a meta para simular</label>
+<div class="relative w-full">
+<select class="w-full h-11 px-3 pr-8 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md appearance-none focus:outline-none focus:ring-0" id="metaSelector">
+<option value="reserva">Reserva de Emergência (Resta R$ 2.000,00)</option>
+<option value="viagem">Viagem Férias 2025 (Resta R$ 2.200,00)</option>
+<option value="notebook">Upgrade Notebook PJ (Resta R$ 2.600,00)</option>
+<option value="reforma">Reforma do Quarto (Resta R$ 4.400,00)</option>
+</select>
+<span class="material-symbols-outlined pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">expand_more</span>
+</div>
+</div>
+<!-- Controle de Aporte Mensal -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md text-on-surface-variant">Aporte Mensal Estimado</span>
+<span class="font-headline-md text-headline-md text-on-surface font-semibold" id="aporteValorTexto">R$ 500</span>
+</div>
+<input class="w-full accent-primary h-2 bg-surface-container rounded-lg cursor-pointer" id="sliderAporte" max="2000" min="150" step="50" type="range" value="500"/>
+<!-- Atalhos de Valores -->
+<div class="grid grid-cols-3 gap-space-xs mt-1">
+<button class="btn-preset py-1.5 px-2 rounded-lg bg-surface-container-low hover:bg-surface-container active:scale-95 text-on-surface font-label-sm text-label-sm transition-all" data-val="500" type="button">R$ 500/mês</button>
+<button class="btn-preset py-1.5 px-2 rounded-lg bg-surface-container-low hover:bg-surface-container active:scale-95 text-on-surface font-label-sm text-label-sm transition-all" data-val="800" type="button">R$ 800/mês</button>
+<button class="btn-preset py-1.5 px-2 rounded-lg bg-surface-container-low hover:bg-surface-container active:scale-95 text-on-surface font-label-sm text-label-sm transition-all" data-val="1200" type="button">R$ 1.200/mês</button>
+</div>
+</div>
+<!-- Resultado da Projeção Dinâmica -->
+<div class="p-space-md rounded-xl bg-secondary-container text-on-secondary-container flex flex-col gap-1 transition-all" id="resultadoBox">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span class="font-label-lg text-label-lg font-semibold" id="resultadoPrazo">Em 4 meses você conclui sua meta!</span>
+</div>
+<div class="flex items-center justify-between text-on-secondary-container opacity-90 font-body-sm text-body-sm">
+<span>Previsão de conclusão:</span>
+<span class="font-medium" id="resultadoData">Julho 2025</span>
+</div>
+</div>
+<!-- Tabela Comparativa de Cenários -->
+<div class="flex flex-col gap-2 pt-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Cenários Comparativos</span>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-low">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-outline"></span>
+<span class="font-label-md text-label-md text-on-surface">Conservador</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-body-sm text-body-sm text-on-surface-variant">R$ 400/mês</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold" id="cenarioConservador">5 meses</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-low">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-label-md text-label-md text-on-surface">Moderado</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-body-sm text-body-sm text-on-surface-variant">R$ 750/mês</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold" id="cenarioModerado">3 meses</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-low">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-label-md text-label-md text-on-surface">Foco Total</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-body-sm text-body-sm text-on-surface-variant">R$ 1.200/mês</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold" id="cenarioFoco">2 meses</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Lista de Metas Ativas -->
+<div class="flex flex-col gap-space-md">
+<div class="flex items-center justify-between px-0.5">
+<h2 class="font-headline-md text-headline-md text-on-surface">Metas em Andamento</h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">4 ativas</span>
+</div>
+<!-- Meta 1: Reserva de Emergência -->
+<div class="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[22px]">shield</span>
+</div>
+<div class="flex flex-col">
+<h3 class="font-label-lg text-label-lg font-semibold text-on-surface">Reserva de Emergência</h3>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Segurança Financeira</span>
+</div>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-semibold">
+            Quase lá!
+          </span>
+</div>
+<div class="flex justify-between items-baseline">
+<span class="font-headline-md text-headline-md font-semibold text-on-surface">R$ 8.000,00</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Meta: R$ 10.000,00</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="w-full h-2 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 80%"></div>
+</div>
+<div class="flex justify-between items-center font-label-sm text-label-sm text-on-surface-variant">
+<span>80% alcançado</span>
+<span>Resta R$ 2.000,00</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Previsão: Maio/2025</span>
+<button class="btn-aportar h-9 px-3.5 rounded-lg bg-primary text-on-primary font-label-sm text-label-sm font-semibold hover:bg-primary-container active:scale-95 transition-all flex items-center gap-1" data-meta="Reserva de Emergência" type="button">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span>Aportar</span>
+</button>
+</div>
+</div>
+<!-- Meta 2: Viagem Férias 2025 -->
+<div class="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">flight_takeoff</span>
+</div>
+<div class="flex flex-col">
+<h3 class="font-label-lg text-label-lg font-semibold text-on-surface">Viagem Férias 2025</h3>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Lazer &amp; Descanso</span>
+</div>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm font-medium">
+            Em ritmo
+          </span>
+</div>
+<div class="flex justify-between items-baseline">
+<span class="font-headline-md text-headline-md font-semibold text-on-surface">R$ 3.800,00</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Meta: R$ 6.000,00</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="w-full h-2 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 63.3%"></div>
+</div>
+<div class="flex justify-between items-center font-label-sm text-label-sm text-on-surface-variant">
+<span>63,3% alcançado</span>
+<span>Resta R$ 2.200,00</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Previsão: Julho/2025</span>
+<button class="btn-aportar h-9 px-3.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold active:scale-95 transition-all flex items-center gap-1" data-meta="Viagem Férias 2025" type="button">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span>Aportar</span>
+</button>
+</div>
+</div>
+<!-- Meta 3: Upgrade Notebook PJ -->
+<div class="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">laptop_mac</span>
+</div>
+<div class="flex flex-col">
+<h3 class="font-label-lg text-label-lg font-semibold text-on-surface">Upgrade Notebook PJ</h3>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Trabalho &amp; Produção</span>
+</div>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">
+            Médio prazo
+          </span>
+</div>
+<div class="flex justify-between items-baseline">
+<span class="font-headline-md text-headline-md font-semibold text-on-surface">R$ 2.400,00</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Meta: R$ 5.000,00</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="w-full h-2 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 48%"></div>
+</div>
+<div class="flex justify-between items-center font-label-sm text-label-sm text-on-surface-variant">
+<span>48% alcançado</span>
+<span>Resta R$ 2.600,00</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Previsão: Outubro/2025</span>
+<button class="btn-aportar h-9 px-3.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold active:scale-95 transition-all flex items-center gap-1" data-meta="Upgrade Notebook PJ" type="button">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span>Aportar</span>
+</button>
+</div>
+</div>
+<!-- Meta 4: Reforma do Quarto -->
+<div class="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">format_paint</span>
+</div>
+<div class="flex flex-col">
+<h3 class="font-label-lg text-label-lg font-semibold text-on-surface">Reforma do Quarto</h3>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Moradia &amp; Bem-estar</span>
+</div>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm">
+            Iniciada
+          </span>
+</div>
+<div class="flex justify-between items-baseline">
+<span class="font-headline-md text-headline-md font-semibold text-on-surface">R$ 600,00</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Meta: R$ 5.000,00</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="w-full h-2 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 12%"></div>
+</div>
+<div class="flex justify-between items-center font-label-sm text-label-sm text-on-surface-variant">
+<span>12% alcançado</span>
+<span>Resta R$ 4.400,00</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Previsão: Dezembro/2025</span>
+<button class="btn-aportar h-9 px-3.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold active:scale-95 transition-all flex items-center gap-1" data-meta="Reforma do Quarto" type="button">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span>Aportar</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Botão de Ação: Criar Nova Meta -->
+<div class="pt-space-xs">
+<button class="w-full h-12 rounded-xl bg-primary text-on-primary hover:bg-primary-container active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm font-label-lg text-label-lg font-semibold" id="btnNovaMeta" type="button">
+<span class="material-symbols-outlined text-[20px]">add_circle</span>
+<span>Criar Nova Meta</span>
+</button>
+</div>
+<!-- Feedback Visual Flutuante Temporário para Microinterações -->
+<div class="fixed bottom-20 left-1/2 -translate-x-1/2 z-40 bg-inverse-surface text-inverse-on-surface px-4 py-2 rounded-full shadow-lg font-body-sm text-body-sm opacity-0 pointer-events-none transition-opacity duration-300 flex items-center gap-2" id="toastAporte">
+<span class="material-symbols-outlined text-[18px] text-secondary-fixed">check_circle</span>
+<span id="toastMsg">Simulação atualizada</span>
+</div>
+</div>
+</div>
+<script>
+  (function() {
+    const metaRestantes = {
+      reserva: 2000,
+      viagem: 2200,
+      notebook: 2600,
+      reforma: 4400
+    };
+
+    const mesesNomes = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+
+    const slider = document.getElementById('sliderAporte');
+    const valorTexto = document.getElementById('aporteValorTexto');
+    const metaSelector = document.getElementById('metaSelector');
+    const resultadoPrazo = document.getElementById('resultadoPrazo');
+    const resultadoData = document.getElementById('resultadoData');
+    const cenarioConservador = document.getElementById('cenarioConservador');
+    const cenarioModerado = document.getElementById('cenarioModerado');
+    const cenarioFoco = document.getElementById('cenarioFoco');
+    const presets = document.querySelectorAll('.btn-preset');
+    const toast = document.getElementById('toastAporte');
+    const toastMsg = document.getElementById('toastMsg');
+    const btnNovaMeta = document.getElementById('btnNovaMeta');
+    const botoesAportar = document.querySelectorAll('.btn-aportar');
+
+    let toastTimer = null;
+
+    function mostrarToast(mensagem) {
+      if (!toast || !toastMsg) return;
+      toastMsg.textContent = mensagem;
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function() {
+        toast.classList.add('opacity-0', 'pointer-events-none');
+      }, 2500);
+    }
+
+    function calcularPrevisao(meses) {
+      const hoje = new Date();
+      hoje.setMonth(hoje.getMonth() + meses);
+      return mesesNomes[hoje.getMonth()] + ' ' + hoje.getFullYear();
+    }
+
+    function atualizarCalculos() {
+      if (!slider || !metaSelector) return;
+      const metaKey = metaSelector.value;
+      const valorRestante = metaRestantes[metaKey] || 2000;
+      const aporte = parseInt(slider.value, 10);
+
+      valorTexto.textContent = 'R$ ' + aporte.toLocaleString('pt-BR');
+
+      const mesesNecessarios = Math.ceil(valorRestante / aporte);
+      resultadoPrazo.textContent = 'Em ' + mesesNecessarios + (mesesNecessarios === 1 ? ' mês ' : ' meses ') + 'você conclui sua meta!';
+      resultadoData.textContent = calcularPrevisao(mesesNecessarios);
+
+      const mConservador = Math.ceil(valorRestante / 400);
+      const mModerado = Math.ceil(valorRestante / 750);
+      const mFoco = Math.ceil(valorRestante / 1200);
+
+      cenarioConservador.textContent = mConservador + (mConservador === 1 ? ' mês' : ' meses');
+      cenarioModerado.textContent = mModerado + (mModerado === 1 ? ' mês' : ' meses');
+      cenarioFoco.textContent = mFoco + (mFoco === 1 ? ' mês' : ' meses');
+    }
+
+    if (slider) {
+      slider.addEventListener('input', atualizarCalculos);
+    }
+
+    if (metaSelector) {
+      metaSelector.addEventListener('change', function() {
+        atualizarCalculos();
+        mostrarToast('Meta selecionada atualizada');
+      });
+    }
+
+    presets.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        const val = this.getAttribute('data-val');
+        if (slider) {
+          slider.value = val;
+          atualizarCalculos();
+          mostrarToast('Aporte ajustado para R$ ' + val);
+        }
+      });
+    });
+
+    botoesAportar.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        const nome = this.getAttribute('data-meta') || 'Meta';
+        mostrarToast('Aporte registrado para: ' + nome);
+      });
+    });
+
+    if (btnNovaMeta) {
+      btnNovaMeta.addEventListener('click', function() {
+        mostrarToast('Abriu o assistente de nova meta');
+      });
+    }
+
+    atualizarCalculos();
+  })();
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-1px_12px_rgba(0,0,0,0.04)]" data-active-classes="text-primary font-semibold [&amp;_span.material-symbols-outlined]:font-variation-settings-'FILL'-1 [&amp;_div.tab-indicator]:bg-primary"><div class="flex items-center justify-between h-16 px-space-xs max-w-lg mx-auto"><a class="flex-1 flex flex-col items-center justify-center min-w-[48px] h-full gap-0.5 text-on-surface-variant hover:text-on-surface transition-all active:scale-95" data-path="inicio" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="font-label-sm text-label-sm tracking-tight">Início</span><div class="tab-indicator w-1 h-1 rounded-full bg-transparent mt-0.5 transition-colors"></div></a><a class="flex-1 flex flex-col items-center justify-center min-w-[48px] h-full gap-0.5 text-on-surface-variant hover:text-on-surface transition-all active:scale-95" data-path="lancamentos" href="#"><span class="material-symbols-outlined text-[20px]">receipt_long</span><span class="font-label-sm text-label-sm tracking-tight">Extrato</span><div class="tab-indicator w-1 h-1 rounded-full bg-transparent mt-0.5 transition-colors"></div></a><a class="flex-1 flex flex-col items-center justify-center min-w-[48px] h-full gap-0.5 text-on-surface-variant hover:text-on-surface transition-all active:scale-95" data-path="categorias" href="#"><span class="material-symbols-outlined text-[20px]">category</span><span class="font-label-sm text-label-sm tracking-tight">Gastos</span><div class="tab-indicator w-1 h-1 rounded-full bg-transparent mt-0.5 transition-colors"></div></a><a aria-current="page" class="flex-1 flex flex-col items-center justify-center min-w-[48px] h-full gap-0.5 transition-all active:scale-95 text-primary font-semibold [&amp;_span.material-symbols-outlined]:font-variation-settings-'FILL'-1 [&amp;_div.tab-indicator]:bg-primary" data-path="metas" href="#"><span class="material-symbols-outlined text-[20px]">flag</span><span class="font-label-sm text-label-sm tracking-tight">Metas</span><div class="tab-indicator w-1 h-1 rounded-full bg-transparent mt-0.5 transition-colors"></div></a><a class="flex-1 flex flex-col items-center justify-center min-w-[48px] h-full gap-0.5 text-on-surface-variant hover:text-on-surface transition-all active:scale-95" data-path="relatorios" href="#"><span class="material-symbols-outlined text-[20px]">analytics</span><span class="font-label-sm text-label-sm tracking-tight">Gráficos</span><div class="tab-indicator w-1 h-1 rounded-full bg-transparent mt-0.5 transition-colors"></div></a><a class="flex-1 flex flex-col items-center justify-center min-w-[48px] h-full gap-0.5 text-on-surface-variant hover:text-on-surface transition-all active:scale-95" data-path="ajustes" href="#"><span class="material-symbols-outlined text-[20px]">tune</span><span class="font-label-sm text-label-sm tracking-tight">Ajustes</span><div class="tab-indicator w-1 h-1 rounded-full bg-transparent mt-0.5 transition-colors"></div></a></div></nav></body></html>

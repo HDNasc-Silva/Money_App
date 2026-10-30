@@ -1,0 +1,143 @@
+.chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  user-select: none;
+}
+
+.gridLine {
+  stroke: var(--color-divider);
+  stroke-dasharray: 3 3;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.axisLine {
+  stroke: var(--color-border-strong);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.axisLabel {
+  fill: var(--color-text-muted);
+  font-family: var(--font-heading);
+  font-size: 10px;
+}
+
+.axisLabelActive {
+  fill: var(--color-text);
+  font-weight: 600;
+}
+
+.group {
+  cursor: pointer;
+  outline: none;
+  transition: opacity var(--duration-fast) ease;
+}
+
+.group:focus-visible rect:first-child {
+  fill: var(--color-surface-container);
+}
+
+.dimmed {
+  opacity: 0.45;
+}
+
+.details {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px var(--space-md);
+  min-height: 2.25rem;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-low);
+  font-size: 0.75rem;
+}
+
+.detailsLabel {
+  font-family: var(--font-heading);
+  font-weight: 600;
+}
+
+.detailsValue {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-text-muted);
+}
+
+.detailsValue strong {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.detailsHint {
+  color: var(--color-text-subtle);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-heading);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.swatch {
+  display: inline-block;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 3px;
+}
+
+.donut {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.donutSvg {
+  width: 100%;
+  height: 100%;
+}
+
+.slice {
+  transition:
+    stroke-width var(--duration-fast) ease,
+    opacity var(--duration-fast) ease;
+}
+
+.donutCenter {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+}
+
+.donutCenter strong {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.donutCenter span {
+  font-size: 0.625rem;
+  color: var(--color-text-muted);
+}

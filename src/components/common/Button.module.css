@@ -1,0 +1,128 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-family: var(--font-heading);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  transition:
+    transform var(--duration-fast) ease,
+    background-color var(--duration-fast) ease;
+}
+
+.button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.button:disabled {
+  opacity: 0.5;
+}
+
+.md {
+  min-height: 3rem;
+  padding: 0 1.25rem;
+  font-size: 0.875rem;
+}
+
+.sm {
+  min-height: 2.25rem;
+  padding: 0 0.75rem;
+  font-size: 0.75rem;
+  border-radius: var(--radius-sm);
+}
+
+.full {
+  width: 100%;
+}
+
+.primary {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-weight: 600;
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.secondary {
+  background: var(--color-secondary-bg);
+  color: var(--color-secondary-text);
+}
+
+[data-theme='dark'] .secondary {
+  border-color: var(--color-border-strong);
+}
+
+.secondary:hover:not(:disabled) {
+  background: var(--color-surface-high);
+}
+
+.ghost {
+  background: transparent;
+  color: var(--color-text);
+}
+
+.ghost:hover:not(:disabled) {
+  background: var(--color-surface-container);
+}
+
+.danger {
+  background: var(--color-expense-bg);
+  color: var(--color-expense-text);
+  border-color: color-mix(in srgb, var(--color-expense) 25%, transparent);
+}
+
+.danger:hover:not(:disabled) {
+  background: var(--color-expense-strong);
+  color: var(--color-on-primary);
+}
+
+.iconButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-muted);
+  transition:
+    transform var(--duration-fast) ease,
+    background-color var(--duration-fast) ease;
+}
+
+.iconButton:hover {
+  color: var(--color-text);
+  background: var(--color-surface-container);
+}
+
+.iconButton:active {
+  transform: scale(0.95);
+}
+
+.icon-tonal {
+  background: var(--color-surface-container);
+  border-radius: var(--radius-md);
+}
+
+[data-theme='dark'] .icon-tonal {
+  border-color: var(--color-border-strong);
+}
+
+.badge {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: var(--radius-full);
+  background: var(--color-income);
+  box-shadow: 0 0 0 2px var(--color-bg);
+}

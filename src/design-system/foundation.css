@@ -1,0 +1,52 @@
+/*
+ * Tokens comuns aos dois Design Systems (forma, espaço, tipografia, movimento).
+ * As cores ficam em slate-flow/ (claro) e obsidian-capital/ (escuro), com os mesmos nomes.
+ */
+:root {
+  --font-heading: 'Geist', 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 0.75rem;
+  --space-lg: 1.25rem;
+  --space-xl: 2rem;
+  --page-margin: 1rem;
+
+  --header-height: 4rem;
+  --bottom-nav-height: 4rem;
+  --side-nav-width: 15rem;
+  --content-max: 32rem;
+  --touch-target: 2.75rem;
+
+  --duration-fast: 120ms;
+  --duration-theme: 200ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (min-width: 768px) {
+  :root {
+    --page-margin: 1.5rem;
+    --content-max: 46rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --content-max: 68rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-theme: 0ms;
+  }
+}

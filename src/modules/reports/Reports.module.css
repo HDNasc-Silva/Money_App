@@ -1,0 +1,346 @@
+.muted {
+  color: var(--color-text-muted);
+}
+
+.good {
+  color: var(--color-income);
+  font-weight: 600;
+}
+
+.bad {
+  color: var(--color-expense);
+  font-weight: 600;
+}
+
+.dimmed {
+  opacity: 0.45;
+}
+
+/* ---------- Diagnóstico ---------- */
+.diagnostic {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-hero-bg);
+  color: var(--color-hero-text);
+  box-shadow: var(--shadow-raised);
+}
+
+.diagnosticTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.diagnosticLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.diagnosticIcon {
+  display: inline-flex;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  background: rgba(78, 222, 163, 0.15);
+  color: #4edea3;
+}
+
+.diagnosticDelta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: rgba(78, 222, 163, 0.15);
+  color: #4edea3;
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.diagnosticDeltaDown {
+  background: rgba(255, 178, 183, 0.15);
+  color: #ffb2b7;
+}
+
+.diagnosticRate {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+}
+
+.diagnosticRate strong {
+  font-size: 2.25rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.diagnosticRate span {
+  color: var(--color-hero-muted);
+}
+
+.diagnosticText {
+  font-size: 0.8125rem;
+  color: var(--color-hero-muted);
+}
+
+.heroHighlight {
+  color: #4edea3;
+  font-weight: 600;
+}
+
+.heroWarning {
+  color: #ffb2b7;
+  font-weight: 600;
+}
+
+.diagnosticFooter {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--color-hero-muted);
+}
+
+.diagnostic [role='progressbar'] {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* ---------- Gráficos ---------- */
+.chartFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.chartFooter strong {
+  color: var(--color-text);
+}
+
+/* ---------- Tabela de comparação ---------- */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.table th,
+.table td {
+  padding: var(--space-sm) 4px;
+  border-bottom: 1px solid var(--color-divider);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.table th:first-child {
+  text-align: left;
+}
+
+.table thead th {
+  font-family: var(--font-heading);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.table tbody th {
+  font-weight: 500;
+}
+
+.table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+/* ---------- Distribuição ---------- */
+.donutRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.legendList {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8125rem;
+}
+
+.legendList li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  transition: opacity var(--duration-fast) ease;
+}
+
+.dot {
+  width: 0.625rem;
+  height: 0.625rem;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+}
+
+.legendName {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin: var(--space-sm) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.breakdownRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-bottom: 6px;
+}
+
+.breakdownName {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 0;
+  font-weight: 500;
+}
+
+.breakdownValues {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.breakdownValues .muted {
+  min-width: 3rem;
+  text-align: right;
+  font-size: 0.75rem;
+}
+
+.breakdownTrack {
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--color-track);
+}
+
+.breakdownTrack > div {
+  height: 100%;
+  border-radius: inherit;
+}
+
+/* ---------- Insights ---------- */
+.insights {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.insights h2 {
+  font-size: 1rem;
+}
+
+.insight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.insightIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--radius-md);
+}
+
+.insightGood {
+  background: var(--color-income-bg);
+  color: var(--color-income);
+}
+
+.insightBad {
+  background: var(--color-expense-bg);
+  color: var(--color-expense);
+}
+
+.insightInfo {
+  background: var(--color-info-bg);
+  color: var(--color-info);
+}
+
+.insightNeutral {
+  background: var(--color-surface-container);
+  color: var(--color-text);
+}
+
+.insightText {
+  flex: 1;
+  min-width: 0;
+}
+
+.insightTitle {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.insightTitle strong {
+  font-family: var(--font-heading);
+  font-size: 0.875rem;
+}
+
+.insightTitle span {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.insightText p {
+  overflow: hidden;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-overflow: ellipsis;
+}
+
+.exportButtons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+}

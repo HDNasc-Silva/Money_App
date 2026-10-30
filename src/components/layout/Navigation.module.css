@@ -1,0 +1,173 @@
+/* ---------- Barra inferior ---------- */
+.bottom {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 50;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: var(--color-header-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--color-divider);
+}
+
+.bottomInner {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  height: var(--bottom-nav-height);
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0 var(--space-xs);
+}
+
+.bottom .link {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 3.25rem;
+  color: var(--color-text-muted);
+  transition: color var(--duration-fast) ease;
+}
+
+.bottom .link:active {
+  transform: scale(0.95);
+}
+
+.bottomLabel {
+  font-family: var(--font-heading);
+  font-size: 0.6875rem;
+  letter-spacing: -0.01em;
+}
+
+.indicator {
+  width: 4px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: transparent;
+}
+
+.bottom .active {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+[data-theme='dark'] .bottom .active {
+  color: var(--color-primary);
+}
+
+.bottom .active .indicator {
+  background: currentColor;
+}
+
+/* ---------- Lateral ---------- */
+.side {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .bottom {
+    display: none;
+  }
+
+  .side {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    width: var(--side-nav-width);
+    padding: var(--space-lg) var(--space-md);
+    border-right: 1px solid var(--color-divider);
+    background: var(--color-surface);
+  }
+
+  [data-theme='dark'] .side {
+    background: var(--color-surface-low);
+  }
+
+  .sideBrand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: 0 var(--space-sm) var(--space-md);
+  }
+
+  .sideLogo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--radius-md);
+    background: var(--color-hero-bg);
+    color: #4edea3;
+  }
+
+  .sideName {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  .sideAction {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    min-height: 2.75rem;
+    margin-bottom: var(--space-md);
+    border: 0;
+    border-radius: var(--radius-md);
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    font-family: var(--font-heading);
+    font-weight: 600;
+  }
+
+  .sideAction:hover {
+    background: var(--color-primary-hover);
+  }
+
+  .sideLinks {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .side .link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    min-height: 2.75rem;
+    padding: 0 var(--space-md);
+    border-radius: var(--radius-md);
+    color: var(--color-text-muted);
+    font-family: var(--font-heading);
+    font-weight: 500;
+  }
+
+  .side .link:hover {
+    background: var(--color-surface-container);
+    color: var(--color-text);
+  }
+
+  .side .active {
+    background: var(--color-surface-container);
+    color: var(--color-text);
+    font-weight: 600;
+  }
+
+  [data-theme='dark'] .side .active {
+    background: var(--color-income-bg);
+    color: var(--color-primary);
+  }
+}
