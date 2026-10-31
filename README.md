@@ -4,15 +4,16 @@ Aplicativo web de gerenciamento de finanças pessoais, mobile-first, com tema cl
 
 ## Objetivo
 
-Registrar receitas e despesas, controlar limites de orçamento por categoria, guardar dinheiro em metas financeiras (com simulador de aportes) e acompanhar nos gráficos quanto está sendo guardado — tudo integrado e salvo localmente no navegador.
+Registrar receitas e despesas, controlar limites de orçamento por categoria, acompanhar as assinaturas mensais, guardar dinheiro em metas financeiras (com simulador de aportes) e acompanhar nos gráficos quanto está sendo guardado — tudo integrado e salvo localmente no navegador.
 
 ## Módulos
 
 | Módulo | O que faz |
 |---|---|
 | Visão Geral | Saldo disponível (já descontados os aportes em metas), receitas, despesas, poupança (aportes em metas no mês), alertas, gráfico semanal, gastos por categoria |
-| Lançamentos | Cadastro, edição, exclusão, busca e filtros de receitas e despesas |
-| Categorias | Categorias, limites mensais, consumo e alertas |
+| Lançamentos ("Extrato") | Cadastro, edição, exclusão, busca e filtros de receitas e despesas; selo "Assinatura" nos lançamentos gerados |
+| Categorias ("Gastos") | Categorias, limites mensais, consumo, alertas e o bloco "Assinaturas do mês" (lançadas e previstas) |
+| Assinaturas | Assinaturas mensais (Netflix, Spotify, Claude...): valor, dia de cobrança, pausar/retomar, total mensal e anual; as cobranças viram despesas automaticamente no dia de cobrança |
 | Metas | Metas, aportes, progresso e simulador de economia |
 | Relatórios ("Gráficos") | Centrados nas metas: total guardado, aportes por mês, evolução do total guardado, distribuição por meta e progresso de cada meta; receitas × despesas como seção secundária; exportação CSV/PDF |
 | Boas-vindas | No primeiro acesso, pergunta como prefere ser chamado (e, opcionalmente, a renda mensal) |
@@ -77,7 +78,7 @@ Depois de aberto uma vez, o app abre também sem internet (os dados ficam no pr�
 src/
 ├── app/            rotas e providers
 ├── components/     common, layout, charts, forms
-├── modules/        dashboard, transactions, categories, goals, reports, settings, onboarding
+├── modules/        dashboard, transactions, categories, subscriptions, goals, reports, settings, onboarding
 ├── domain/         regras de negócio puras (cálculos)
 ├── services/       storage, repositórios, exportação, pwa (service worker e instalação)
 ├── store/          estado global, dados iniciais e de demonstração
@@ -106,8 +107,9 @@ App_Financas_Layout/  layouts de referência (não alterar)
 - Componentes usam apenas tokens de `src/design-system/` — nunca cores fixas — para funcionar nos dois temas.
 - Os dados ficam no `localStorage` do navegador (chave `money-app:data:v1`). Na primeira execução o app começa **vazio**, apenas com as categorias padrão (`src/store/defaultCategories.ts`), e mostra a tela de boas-vindas. Dados de demonstração só são carregados a pedido, em Ajustes → "Carregar dados de demonstração"; ficam identificados na interface e são removíveis por "Apagar todos os dados" (que mantém nome, renda e as categorias padrão). Documentos salvos por versões anteriores continuam válidos (ver DT-014; a antiga meta de poupança em % é descartada na leitura, DT-016).
 - **Poupança = aportes em metas** (v1.5.0, DT-016): não há taxa nem meta de poupança em %. Os aportes não viram lançamentos, mas saem do saldo disponível. Funções em `src/domain/goals.ts` (`contributionsInPeriod`, `contributionsUntil`, `monthlyContributions`, `savedEvolution`, `savedDistribution`).
+- **Assinaturas** (v1.6.0, DT-017): cada cobrança vencida (data ≤ hoje) vira uma despesa real com `subscriptionId`/`subscriptionMonth`, gerada de forma idempotente por `syncSubscriptionCharges` (`src/domain/subscriptions.ts`) ao abrir o app, ao voltar para ele e ao salvar uma assinatura. Meses futuros são só previsões (descontadas do saldo previsto). Excluir um lançamento gerado marca o mês em `skippedMonths`. A barra inferior tem 6 itens (DT-018).
 - Antes de qualquer alteração, consulte `ESCOPO_PROJETO.md` e `CHANGELOG.md`; depois, atualize-os.
 - No Windows, os comandos acima funcionam no PowerShell. Se o Node acabou de ser instalado, abra um terminal novo para que `npm` seja encontrado.
-- Os testes (`tests/`) cobrem utilitários, regras de negócio, validações, persistência, exportação CSV, tema e a integração entre os módulos.
+- Os testes (`tests/`) cobrem utilitários, regras de negócio (inclusive a geração das assinaturas), validações, persistência e migração, exportação CSV, tema e a integração entre os módulos.
 - Fontes (Geist, Inter, JetBrains Mono) e ícones (Material Symbols) são carregados do Google Fonts; sem internet, os ícones aparecem como texto.
 - `App_Financas_Layout/` é apenas referência visual e não faz parte do build.

@@ -2,8 +2,8 @@
 
 > Documento oficial de referência. Representa o **estado atual real** do aplicativo e deve ser atualizado a cada alteração do sistema (ver `CHANGELOG.md` e `DECISOES_TECNICAS.md`).
 
-**Versão atual:** 1.5.0 (Gráficos centrados nas metas; poupança = aportes em metas; saldo disponível desconta aportes; taxa/meta de poupança em % removida)
-**Última atualização:** 30/10/2026
+**Versão atual:** 1.6.0 (Assinaturas mensais com lançamentos automáticos, bloco em Gastos e selo no Extrato)
+**Última atualização:** 31/10/2026
 
 ---
 
@@ -25,7 +25,7 @@ Falta de visão consolidada das finanças pessoais: gastos acima do planejado s�
 
 ## 4. Descrição geral
 
-SPA executada no navegador, sem backend nesta fase. Os dados ficam no `localStorage` por meio de uma camada de repositórios preparada para troca futura por uma API. Cinco módulos principais (Visão Geral, Lançamentos, Categorias, Metas, Relatórios) compartilham um único estado financeiro; qualquer alteração é refletida imediatamente em todos eles.
+SPA executada no navegador, sem backend nesta fase. Os dados ficam no `localStorage` por meio de uma camada de repositórios preparada para troca futura por uma API. Seis módulos principais (Visão Geral, Lançamentos, Categorias/Gastos, Assinaturas, Metas, Relatórios) compartilham um único estado financeiro; qualquer alteração é refletida imediatamente em todos eles.
 
 ## 5. Auditoria da pasta `App_Financas_Layout`
 
@@ -111,7 +111,7 @@ Money_APP/
 │   │   ├── charts/           # BarChart (agrupado/empilhado), DonutChart, LineChart
 │   │   └── forms/            # campos reutilizáveis (MoneyField, Field, Select)
 │   ├── modules/
-│   │   ├── dashboard/  transactions/  categories/  goals/  reports/  settings/  onboarding/
+│   │   ├── dashboard/  transactions/  categories/  subscriptions/  goals/  reports/  settings/  onboarding/
 │   ├── domain/               # regras de negócio puras
 │   ├── services/             # storage, repositórios, exportação, pwa (service worker, instalação)
 │   ├── store/                # estado global financeiro, dados iniciais e de demonstração
@@ -132,8 +132,9 @@ Money_APP/
 | Módulo | Responsabilidade |
 |---|---|
 | **Visão Geral** (`modules/dashboard`) | Saldo disponível (descontados os aportes em metas), receitas, despesas, poupança (aportes em metas no mês), alertas do mês, gráfico semanal, gastos por categoria vs. limite, seletor de mês, atalho para novo lançamento |
-| **Lançamentos** (`modules/transactions`) | CRUD de receitas/despesas, histórico agrupado por dia, busca, filtros (período, tipo, categoria), duplicar |
-| **Categorias** (`modules/categories`) | CRUD de categorias, limite mensal, gasto atual, % consumido, alertas de limite, teto global, filtro por grupo |
+| **Lançamentos** (`modules/transactions`) | CRUD de receitas/despesas, histórico agrupado por dia, busca, filtros (período, tipo, categoria), duplicar, selo "Assinatura" nos lançamentos gerados |
+| **Categorias / Gastos** (`modules/categories`) | CRUD de categorias, limite mensal, gasto atual, % consumido, alertas de limite, teto global, filtro por grupo, bloco "Assinaturas do mês" |
+| **Assinaturas** (`modules/subscriptions`) | CRUD de assinaturas mensais (nome, ícone, valor, dia de cobrança, categoria, primeiro/último mês, ativa/pausada, observação), sugestões rápidas, total mensal e estimativa anual, próxima cobrança, pausar/retomar, excluir mantendo ou não os lançamentos; componente do bloco "Assinaturas do mês" usado em Gastos |
 | **Metas** (`modules/goals`) | CRUD de metas, valor alvo/acumulado, prazo, progresso, aportes, simulador de aporte mensal e cenários |
 | **Relatórios / Gráficos** (`modules/reports`) | Centrado nas metas: total guardado, aportes no período, aportes por mês por meta, evolução acumulada do total guardado, distribuição por meta, progresso e previsão de cada meta, estado vazio com atalho para Metas. Secundário: receitas × despesas por mês, distribuição por categoria, comparação com período anterior (inclui aportes), hábitos de gastos, exportação CSV/PDF |
 | **Boas-vindas** (`modules/onboarding`) | Tela do primeiro acesso ("Como prefere ser chamado?": nome obrigatório e renda mensal opcional) e `OnboardingGate`, que mostra o carregamento e redireciona entre boas-vindas e app conforme `settings.onboardingCompleted` |
@@ -165,7 +166,8 @@ Money_APP/
 - Status: dentro do planejado (< 80%), atenção (80–100%), ultrapassado (> 100%).
 - Teto global (soma dos limites) e disponível até o fechamento; alerta de compensação.
 - Exclusão bloqueada se houver lançamentos vinculados (mensagem orienta a reatribuir).
-- Ícone escolhido num catálogo único (`design-system/icons.ts`, 139 ícones, compartilhado com Metas) com busca em português.
+- Ícone escolhido num catálogo único (`design-system/icons.ts`, 150 ícones desde a v1.6.0, compartilhado com Metas e Assinaturas) com busca em português.
+- Bloco **"Assinaturas do mês"** (v1.6.0): cobranças de assinaturas do mês selecionado — lançadas e previstas —, com data, selo "Lançada"/"Prevista", valor, total do mês e link "Gerenciar" para a aba Assinaturas (seção 10.6).
 - Também gerenciáveis em **Ajustes → Categorias** (lista compacta por Despesas/Receitas, criar, editar, excluir e "Restaurar categorias padrão"), com o mesmo formulário e as mesmas regras.
 
 ### 10.4 Metas
@@ -185,6 +187,15 @@ Money_APP/
 - Sem metas: estado vazio com botão "Ir para Metas".
 - Seção secundária "Receitas × despesas": barras mensais de receitas e despesas, comparação entre períodos (receitas, despesas, saldo, aportes em metas, variação %), distribuição de despesas por categoria, hábitos (dias sem gastos, maior despesa, média diária).
 - Exportação CSV (lançamentos do intervalo) e PDF (via impressão do navegador).
+
+### 10.6 Assinaturas (v1.6.0, DT-017)
+- Aba própria (`/assinaturas`) na barra inferior e na lateral (DT-018).
+- Resumo: total mensal das assinaturas ativas, quantidade de ativas e estimativa anual (mensal × 12).
+- Lista (ativas, depois pausadas e encerradas, por nome): ícone, nome, valor/mês, dia de cobrança, próxima cobrança, status (Ativa / Pausada / Encerrada), botões Pausar/Retomar e Editar.
+- Formulário: sugestões rápidas (só nome e ícone), nome, valor mensal (máscara da regra 24), dia de cobrança, categoria de despesa (padrão "Assinaturas", criada ao salvar se ainda não existir), primeira cobrança (mês), última cobrança opcional (mês, ao cancelar), ativa, observação e ícone com busca.
+- Excluir com confirmação; opção de excluir também os lançamentos já gerados (padrão: manter).
+- Cobranças lançadas automaticamente como despesas reais no dia de cobrança (regras 39–47); meses futuros aparecem como previstos.
+- Estado vazio com "Adicionar assinatura".
 
 ## 11. Regras de negócio
 
@@ -208,7 +219,7 @@ Money_APP/
 18. Alertas do mês corrente comparam com o **mesmo intervalo de dias** do mês anterior (ex.: 1–10 vs 1–10); aumento de gastos gera alerta a partir de 10%.
 19. Uma categoria com lançamentos não pode mudar de tipo (despesa ↔ receita).
 20. ~~O seletor de mês não avança para meses futuros.~~ Substituída na v1.3.0 (DT-012): o seletor de mês avança até **60 meses à frente** do mês atual (`MAX_FUTURE_MONTHS`; em 30/10/2026 o limite é Outubro de 2031) e volta sem limite. Meses posteriores ao atual exibem "Mês futuro" no seletor; na Visão Geral o saldo vira "Saldo previsto ao fim do mês" (saldo acumulado até o último dia do mês, incluindo lançamentos planejados). No mês atual, o saldo continua considerando apenas lançamentos até hoje.
-21. **Categorias padrão** (`store/defaultCategories.ts`): Alimentação, Moradia, Transporte, Lazer, Saúde, Educação e Outros (despesa, com limites mensais) e Salário, Freelance e Rendimentos (receita, sem limite). São as mesmas usadas na demonstração.
+21. **Categorias padrão** (`store/defaultCategories.ts`): Alimentação, Moradia, Transporte, Lazer, Saúde, Educação, Assinaturas (desde a v1.6.0, teto R$ 250) e Outros (despesa, com limites mensais) e Salário, Freelance e Rendimentos (receita, sem limite). São as mesmas usadas na demonstração.
 22. "Apagar todos os dados" (Ajustes, também acessado por "Começar do zero") remove lançamentos, metas e categorias personalizadas, mantém o nome e a renda mensal do usuário, volta as demais preferências ao padrão e **recria as categorias padrão**, para que seja sempre possível lançar em seguida.
 23. "Criar categorias padrão" adiciona apenas as categorias padrão ausentes: uma categoria é considerada existente quando há outra do mesmo tipo com o mesmo nome (sem acento e sem diferenciar maiúsculas, como na regra 16); ids padrão já ocupados recebem um id novo, nunca sobrescrevendo dados do usuário.
 24. **Entrada de valores monetários** (máscara pelos centavos, `formatMoneyInput`): só dígitos são considerados e os dois últimos são os centavos ("15000" → "150,00"; "1234567" → "12.345,67"); letras, vírgulas e pontos digitados são ignorados; colar "1.234,56" ou "R$ 1234,56" resulta em "1.234,56"; backspace remove o último dígito; sem dígitos significativos o campo fica vazio (a validação de obrigatório continua valendo); no máximo os dígitos de `MAX_AMOUNT` (R$ 999.999.999,99). Valores pré-preenchidos aparecem no mesmo formato ("1.234,56").
@@ -226,6 +237,15 @@ Money_APP/
 36. **Saldo disponível** = Σ receitas − Σ despesas − Σ aportes em metas, todos com data até a data de referência (mês atual: hoje; mês passado/futuro: último dia do mês). O dinheiro aportado sai do saldo disponível, mas não aparece como despesa, no extrato, nos limites de categoria nem no CSV. Valores iniciais das metas não são descontados.
 37. **Gráficos das metas**: total guardado, falta para concluir, concluídas, distribuição e progresso refletem a situação atual; o período escolhido define os aportes do período, a comparação com o período anterior e a janela dos gráficos. Na evolução acumulada, o valor inicial de cada meta conta a partir do mês de criação; os aportes, pela data. O total guardado usa o valor real (sem limitar ao alvo).
 38. **Migração (v1.5.0)**: documentos e backups com `settings.savingsTarget` carregam normalmente; o campo é descartado na leitura e removido do storage no próximo salvamento.
+39. **Assinatura** (v1.6.0, DT-017): nome obrigatório (até 40 caracteres), valor mensal > 0 (regra 2), dia de cobrança 1–31, categoria de despesa, ícone, ativa/pausada, primeiro mês (no máximo 12 meses atrás e até o mês limite da regra 20; na edição, o primeiro mês já salvo é sempre aceito), último mês opcional (≥ primeiro mês), observação opcional (até 200 caracteres).
+40. **Data de cobrança** = dia de cobrança no mês, limitado ao último dia do mês (31 → 28/29 em fevereiro, 30 em abril).
+41. **Lançamento automático**: cada assinatura ativa gera uma despesa (descrição = nome da assinatura, valor, categoria e data de cobrança) para cada mês entre o primeiro e o último mês cujo dia de cobrança **já chegou (≤ hoje)**. Acontece ao abrir o app, ao voltar para ele, ao salvar/pausar/retomar uma assinatura e ao importar um backup. Um mês nunca é lançado duas vezes, mesmo que o lançamento tenha sido editado. Os lançamentos gerados contam em tudo (saldo, despesas, limites, alertas, gráficos, CSV) como qualquer despesa e trazem o selo "Assinatura" no Extrato.
+42. **Excluir uma cobrança gerada** (no Extrato): o mês fica marcado como ignorado e não é lançado de novo. Editar mantém o vínculo; duplicar cria um lançamento manual.
+43. **Pausar**: assinatura pausada não gera lançamentos nem previsões; meses cujo dia de cobrança chega durante a pausa ficam ignorados, e retomar não lança cobranças retroativas. Antes de pausar, as cobranças já vencidas são lançadas.
+44. **Editar assinatura**: valor, dia, categoria e nome novos valem só para os meses ainda não lançados.
+45. **Previsões**: cobrança prevista = assinatura ativa, mês entre o primeiro e o último, não lançada, não ignorada e data depois de hoje. Meses futuros não têm lançamentos gerados, só previsões. No Início, o **saldo previsto ao fim do mês** de um mês futuro desconta as cobranças previstas entre hoje e o fim daquele mês ("Inclui R$ X em assinaturas previstas"); no mês atual e em meses passados o saldo usa só lançamentos. Previsões não entram em "Despesas", limites, gráficos nem CSV.
+46. **Status e totais**: Encerrada quando o último mês já passou (ou a última cobrança já aconteceu); Pausada quando inativa; senão Ativa. Total mensal = Σ valores das ativas; estimativa anual = total mensal × 12. Próxima cobrança = primeira data de cobrança depois de hoje (nenhuma se pausada ou encerrada).
+47. **Excluir assinatura**: deixa de gerar cobranças; os lançamentos já gerados são mantidos por padrão (podem ser excluídos juntos marcando a opção). Categorias usadas por assinaturas não podem ser excluídas nem mudar de tipo. Sem a categoria "Assinaturas", o formulário oferece "Assinaturas (nova categoria)", criada ao salvar conforme a regra 23.
 
 ## 12. Fluxos de navegação
 
@@ -234,7 +254,10 @@ Abrir app → (primeira vez) dados vazios + categorias padrão → Boas-vindas (
 Abrir app → (já usa o app) → Visão Geral
 Ajustes → "Carregar dados de demonstração" → confirmação → demonstração (aviso "Começar do zero" nas demais telas → Ajustes → "Apagar todos os dados")
 Ajustes → "Instalar app" → diálogo do navegador (ou instruções no iPhone)
-Navegação: Visão Geral ⇄ Lançamentos ⇄ Categorias ⇄ Metas ⇄ Relatórios (barra inferior / lateral)
+Navegação: Visão Geral ⇄ Lançamentos (Extrato) ⇄ Categorias (Gastos) ⇄ Assinaturas ⇄ Metas ⇄ Relatórios (Gráficos) (barra inferior / lateral)
+Abrir app / voltar para ele → cobranças de assinaturas vencidas são lançadas como despesas
+Assinaturas → "Adicionar assinatura" / "Nova assinatura" → formulário (sugestões rápidas) → salvar → cobranças até hoje lançadas · Pausar/Retomar · Editar → Excluir (manter ou não os lançamentos)
+Gastos → bloco "Assinaturas do mês" → "Gerenciar" → Assinaturas
 Cabeçalho: alternar tema · notificações (lista de alertas) · Ajustes
 Visão Geral → "Novo Lançamento" → formulário (sheet, data sugerida no mês selecionado) → salvar → todos os módulos recalculam
 Visão Geral → "Editar tetos" → Categorias
@@ -269,8 +292,9 @@ Os tokens ficam em `src/design-system/` como variáveis CSS com **nomes semânti
 ## 15. Armazenamento e persistência
 
 - `StorageAdapter` (get/set/remove de JSON) com implementações `LocalStorageAdapter` (produção) e `MemoryStorageAdapter` (testes/fallback quando o storage estiver indisponível).
-- Chave única versionada `money-app:data:v1` com `{ schemaVersion, transactions, categories, goals, settings }`.
-- Repositórios assíncronos (`TransactionRepository`, `CategoryRepository`, `GoalRepository`, `SettingsRepository`) — a UI nunca acessa o storage diretamente.
+- Chave única versionada `money-app:data:v1` com `{ schemaVersion, transactions, categories, goals, subscriptions, settings }`.
+- Repositórios assíncronos (transações, categorias, metas, assinaturas e preferências) — a UI nunca acessa o storage diretamente.
+- Assinaturas (v1.6.0): documentos e backups sem `subscriptions` carregam com lista vazia; cada assinatura é validada (valor em centavos, dia 1–31, mês `AAAA-MM`) e saneada (`active`, `endMonth`, `skippedMonths`, `notes`); lançamentos com `subscriptionId`/`subscriptionMonth` inválidos tornam o documento inválido. O backup JSON inclui as assinaturas.
 - Erros de leitura (JSON corrompido) → dados preservados em chave de backup e app inicia vazio com aviso; erros de gravação (cota) → toast de erro, estado não é perdido em memória.
 - Nenhum dado sensível (senhas, documentos) é armazenado.
 - Preferências (`settings`) são saneadas campo a campo na leitura (`sanitizeSettings` em `FinanceDocument.ts`): ausentes ou inválidos recebem o padrão (migração da v1.4.0, regra 31); campos que não existem mais, como o antigo `savingsTarget`, são descartados (regra 38). O `schemaVersion` continua 1.
@@ -300,6 +324,8 @@ Os tokens ficam em `src/design-system/` como variáveis CSS com **nomes semânti
 | RF-14 | Tela de boas-vindas no primeiro acesso (nome obrigatório, renda opcional) |
 | RF-15 | Renda mensal no perfil (referência; a meta de poupança em % foi removida na v1.5.0) |
 | RF-16 | Instalar o app no celular/computador (PWA) e abrir offline após o primeiro acesso |
+| RF-17 | Cadastrar, editar, pausar/retomar e excluir assinaturas mensais, com lançamento automático das cobranças vencidas |
+| RF-18 | Exibir as assinaturas do mês (lançadas e previstas) na aba Gastos e identificar os lançamentos gerados no Extrato |
 
 ## 18. Requisitos não funcionais
 
@@ -391,6 +417,15 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 - ✅ Tela de Gráficos centrada nas metas: resumo, aportes por mês empilhados por meta, evolução acumulada, distribuição por meta, progresso com previsão, estado vazio com "Ir para Metas"; receitas × despesas como seção secundária (10.5, regra 37).
 - ✅ 151 testes automatizados (9 unitários em `tests/goalSavings.test.ts` e 3 de integração em `tests/goalReports.test.tsx` novos; testes da meta de poupança substituídos).
 
+### Concluído (v1.6.0 — testado automaticamente)
+- ✅ Aba Assinaturas (10.6): lista, resumo mensal/anual, próxima cobrança, status, pausar/retomar, criar/editar com sugestões rápidas, excluir mantendo ou removendo lançamentos, estado vazio (regras 39, 46, 47).
+- ✅ Lançamentos automáticos idempotentes das cobranças vencidas; exclusão sem regeneração; pausa sem retroativos; edição só para meses não lançados; dia 31 em meses curtos (regras 40–44, DT-017).
+- ✅ Previsões de meses futuros no bloco de Gastos e no saldo previsto do Início (regra 45).
+- ✅ Bloco "Assinaturas do mês" em Gastos e selo "Assinatura" no Extrato.
+- ✅ Categoria padrão "Assinaturas"; migração/validação do novo array; backup com assinaturas; demonstração com assinaturas.
+- ✅ Navegação com 6 itens (DT-018).
+- ✅ 185 testes automatizados (28 unitários em `tests/subscriptions.test.ts` e 6 de integração em `tests/subscriptionsFlow.test.tsx` novos).
+
 ### Em desenvolvimento
 - Nenhum.
 
@@ -416,9 +451,12 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 - Boas-vindas e Ajustes (v1.4.0): validados em jsdom; a aparência da tela de boas-vindas e do card "Instalar app" ainda não foi conferida visualmente no navegador nos dois temas.
 - PWA (v1.4.0): a instalação real (Android/Chrome e iPhone/Safari) e o funcionamento offline não foram testados em dispositivos; o service worker só é registrado no build de produção (GitHub Pages ou `npm run preview`), não no `npm run dev`. `CACHE_VERSION` em `public/sw.js` precisa ser atualizado a cada release. Offline, fontes e ícones do Google Fonts só aparecem se já estiverem no cache HTTP do navegador. A cor de abertura (splash) do app instalado é a do tema claro (o manifest aceita uma única cor).
 
+- Assinaturas (v1.6.0): validadas em jsdom; a aparência da aba, do bloco em Gastos, do selo no Extrato e da barra inferior com 6 itens (rótulo "Assinaturas" em 320–375 px) **não foi conferida visualmente** no navegador nos dois temas (DT-018). Os novos ícones (`live_tv`, `smart_toy`, `library_music`...) não foram conferidos na fonte real. A geração depende de o app ser aberto: ao abrir depois de muito tempo, todos os meses pendentes são lançados de uma vez. Quem já lançava a assinatura manualmente terá o valor em dobro nos meses em comum (excluir um dos dois). Em meses futuros, "Despesas" não inclui as previsões (só o saldo previsto). Alertas e limites de categoria só consideram cobranças já lançadas.
+
 ### Próximas etapas (sugestões)
 1. Inicializar repositório Git.
 2. Fontes e ícones locais (hoje do Google Fonts) para uso offline completo do PWA; aviso de "nova versão disponível".
-3. Lançamentos recorrentes e parcelados.
-4. Testes E2E com Playwright.
-5. Backend e sincronização (trocar os repositórios por implementações HTTP).
+3. Lançamentos recorrentes genéricos (receitas fixas, contas) e parcelados — as assinaturas (v1.6.0) já cobrem despesas mensais recorrentes; avaliar generalizar `domain/subscriptions`.
+4. Conferir visualmente a aba Assinaturas e a barra inferior de 6 itens em 320/375 px nos dois temas.
+5. Testes E2E com Playwright.
+6. Backend e sincronização (trocar os repositórios por implementações HTTP).

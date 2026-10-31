@@ -27,7 +27,7 @@ export function DashboardPage() {
   const { settings } = useFinanceData();
   const { openNew } = useTransactionEditor();
   const navigate = useNavigate();
-  const { summary, saved, savedChange, incomeChange, balance, isFuture, weeks, budgets, alerts, indicators } = useDashboard();
+  const { summary, saved, savedChange, incomeChange, balance, projectedSubscriptions, isFuture, weeks, budgets, alerts, indicators } = useDashboard();
 
   const weeklyAverage = weeks.length ? Math.round(summary.balance / weeks.length) : 0;
   const chartData = weeks.map((w) => ({
@@ -41,7 +41,7 @@ export function DashboardPage() {
     <Page title="Visão Geral" eyebrow={<>{greeting} ✨</>} action={<MonthSwitcher />}>
       <PageGrid>
         <PageColumn>
-          <BalanceCard balance={balance} monthBalance={summary.balance} saved={saved} hasIncome={summary.income > 0} projected={isFuture} />
+          <BalanceCard balance={balance} monthBalance={summary.balance} saved={saved} hasIncome={summary.income > 0} projected={isFuture} projectedSubscriptions={projectedSubscriptions} />
           <MetricCards summary={summary} incomeChange={incomeChange} saved={saved} savedChange={savedChange} />
 
           <div className={styles.quickActions}>

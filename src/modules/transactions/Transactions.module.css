@@ -210,6 +210,23 @@
   color: var(--color-text-subtle);
 }
 
+/* Indicador discreto de lançamento gerado por assinatura (v1.6.0). */
+.itemTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-right: 6px;
+  padding: 0 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-info-bg);
+  color: var(--color-info);
+  font-family: var(--font-heading);
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 1rem;
+  vertical-align: 1px;
+}
+
 .itemAmount {
   flex-shrink: 0;
   font-size: 0.875rem;

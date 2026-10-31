@@ -15,9 +15,11 @@ interface BalanceCardProps {
   hasIncome: boolean;
   /** Mês futuro: o saldo é uma previsão para o fim do mês. */
   projected?: boolean;
+  /** Cobranças de assinaturas previstas incluídas no saldo previsto (DT-017). */
+  projectedSubscriptions?: Cents;
 }
 
-export function BalanceCard({ balance, monthBalance, saved, hasIncome, projected = false }: BalanceCardProps) {
+export function BalanceCard({ balance, monthBalance, saved, hasIncome, projected = false, projectedSubscriptions = 0 }: BalanceCardProps) {
   const { hideBalances } = useFinanceData().settings;
   const { updateSettings } = useFinanceActions();
   const money = (value: Cents) => (hideBalances ? HIDDEN_VALUE : formatCurrency(value));
@@ -56,6 +58,12 @@ export function BalanceCard({ balance, monthBalance, saved, hasIncome, projected
         <Icon name={monthBalance < 0 ? 'error' : 'verified'} size={16} />
         <span>{insight}</span>
       </div>
+      {projected && projectedSubscriptions > 0 && (
+        <div className={styles.heroInsight}>
+          <Icon name="subscriptions" size={16} />
+          <span>Inclui {money(projectedSubscriptions)} em assinaturas previstas</span>
+        </div>
+      )}
     </section>
   );
 }

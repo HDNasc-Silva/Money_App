@@ -168,8 +168,8 @@ export function SettingsPage() {
         title={pending === 'clear' ? 'Apagar todos os dados?' : 'Carregar dados de demonstração?'}
         message={
           pending === 'clear'
-            ? 'Lançamentos, metas e categorias personalizadas serão removidos deste dispositivo; as categorias padrão serão recriadas para você começar do zero. Seu nome e sua renda mensal são mantidos. Exporte um backup antes, se quiser guardá-los.'
-            : 'Seus lançamentos, categorias e metas atuais serão substituídos pelos dados de demonstração. Seu nome e preferências são mantidos. Exporte um backup antes, se quiser guardar seus dados.'
+            ? 'Lançamentos, metas, assinaturas e categorias personalizadas serão removidos deste dispositivo; as categorias padrão serão recriadas para você começar do zero. Seu nome e sua renda mensal são mantidos. Exporte um backup antes, se quiser guardá-los.'
+            : 'Seus lançamentos, categorias, metas e assinaturas atuais serão substituídos pelos dados de demonstração. Seu nome e preferências são mantidos. Exporte um backup antes, se quiser guardar seus dados.'
         }
         confirmLabel={pending === 'clear' ? 'Apagar tudo' : 'Carregar demonstração'}
         onConfirm={confirmPending}

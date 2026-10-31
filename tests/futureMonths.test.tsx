@@ -17,6 +17,7 @@ function setup(path = '/') {
     transactions: [tx({ type: 'income', amount: 500_000, date: todayIso(), description: 'Salário', categoryId: 'salary' })],
     categories,
     goals: [],
+    subscriptions: [],
     settings: { ...DEFAULT_SETTINGS, userName: 'Ana' },
   };
   const adapter = new MemoryStorageAdapter();

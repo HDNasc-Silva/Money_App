@@ -20,6 +20,12 @@ export function TransactionItem({ transaction, category, onOpenActions }: Transa
       <div className={styles.itemText}>
         <span className={styles.itemTitle}>{transaction.description}</span>
         <span className={styles.itemMeta}>
+          {transaction.subscriptionId && (
+            <span className={styles.itemTag} title="Gerado automaticamente por uma assinatura">
+              <Icon name="autorenew" size={12} />
+              Assinatura
+            </span>
+          )}
           {category?.name ?? 'Sem categoria'}
           {transaction.note && <span className={styles.itemNote}> · {transaction.note}</span>}
         </span>

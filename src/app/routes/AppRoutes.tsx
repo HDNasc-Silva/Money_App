@@ -7,6 +7,7 @@ import { ONBOARDING_PATH, OnboardingGate } from '@/modules/onboarding/Onboarding
 import { OnboardingPage } from '@/modules/onboarding/OnboardingPage';
 import { ReportsPage } from '@/modules/reports/ReportsPage';
 import { SettingsPage } from '@/modules/settings/SettingsPage';
+import { SubscriptionsPage } from '@/modules/subscriptions/SubscriptionsPage';
 import { TransactionsPage } from '@/modules/transactions/TransactionsPage';
 
 export function AppRoutes() {
@@ -19,6 +20,7 @@ export function AppRoutes() {
           <Route index element={<DashboardPage />} />
           <Route path="lancamentos" element={<TransactionsPage />} />
           <Route path="categorias" element={<CategoriesPage />} />
+          <Route path="assinaturas" element={<SubscriptionsPage />} />
           <Route path="metas" element={<GoalsPage />} />
           <Route path="relatorios" element={<ReportsPage />} />
           <Route path="ajustes" element={<SettingsPage />} />

@@ -11,6 +11,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { to: '/', label: 'Visão Geral', shortLabel: 'Início', icon: 'grid_view', title: 'Início' },
   { to: '/lancamentos', label: 'Lançamentos', shortLabel: 'Extrato', icon: 'receipt_long', title: 'Lançamentos' },
   { to: '/categorias', label: 'Categorias', shortLabel: 'Gastos', icon: 'category', title: 'Categorias' },
+  { to: '/assinaturas', label: 'Assinaturas', shortLabel: 'Assinaturas', icon: 'subscriptions', title: 'Assinaturas' },
   { to: '/metas', label: 'Metas', shortLabel: 'Metas', icon: 'flag', title: 'Metas' },
   { to: '/relatorios', label: 'Relatórios', shortLabel: 'Gráficos', icon: 'analytics', title: 'Relatórios' },
 ];

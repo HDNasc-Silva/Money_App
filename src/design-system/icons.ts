@@ -58,6 +58,18 @@ export const ICON_CATALOG: readonly IconOption[] = [
   icon('request_quote', 'Orçamento', 'conta boleto cobranca'),
   icon('calendar_month', 'Mensalidade', 'calendario recorrente agenda'),
   icon('subscriptions', 'Assinaturas', 'streaming servicos mensalidade'),
+  // Assinaturas e serviços digitais
+  icon('live_tv', 'Streaming de vídeo', 'netflix filmes series tv assinatura'),
+  icon('play_circle', 'Vídeos', 'youtube video streaming assinatura'),
+  icon('library_music', 'Streaming de música', 'spotify deezer musica playlist assinatura'),
+  icon('podcasts', 'Podcasts', 'audio programa assinatura'),
+  icon('cloud', 'Nuvem', 'icloud google drive armazenamento backup assinatura'),
+  icon('smart_toy', 'Inteligência artificial', 'ia ai claude chatgpt robo assinatura'),
+  icon('auto_awesome', 'IA criativa', 'ia ai inteligencia artificial assinatura'),
+  icon('local_shipping', 'Entregas', 'amazon prime frete delivery assinatura'),
+  icon('newspaper', 'Notícias', 'jornal revista leitura assinatura'),
+  icon('apps', 'Aplicativos', 'apps software programa assinatura'),
+  icon('vpn_key', 'Senhas e VPN', 'seguranca chave senha vpn assinatura'),
   // Transporte
   icon('directions_car', 'Carro', 'transporte automovel veiculo'),
   icon('commute', 'Deslocamento', 'transporte trajeto trabalho'),

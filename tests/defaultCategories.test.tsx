@@ -22,6 +22,7 @@ function storageWith(data: Partial<FinanceData>): MemoryStorageAdapter {
     transactions: [],
     categories: [],
     goals: [],
+    subscriptions: [],
     settings: { ...DEFAULT_SETTINGS, userName: 'Ana' },
     ...data,
   };

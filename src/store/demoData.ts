@@ -1,7 +1,17 @@
-import { DEFAULT_SETTINGS, type FinanceData, type Goal, type IsoDate, type Transaction, type TransactionType } from '@/models';
-import { addMonths, daysInMonth, monthKeyOf } from '@/utils/dates';
+import { syncSubscriptionCharges } from '@/domain/subscriptions';
+import {
+  DEFAULT_SETTINGS,
+  type FinanceData,
+  type Goal,
+  type IsoDate,
+  type MonthKey,
+  type Subscription,
+  type Transaction,
+  type TransactionType,
+} from '@/models';
+import { addMonths, daysInMonth, lastDayOfMonth, monthKeyOf } from '@/utils/dates';
 import { fromReais } from '@/utils/money';
-import { buildDefaultCategories } from './defaultCategories';
+import { buildDefaultCategories, SUBSCRIPTIONS_CATEGORY_ID } from './defaultCategories';
 
 /**
  * DADOS DE DEMONSTRAÇÃO.
@@ -50,7 +60,6 @@ function monthEntries(random: () => number, monthIndex: number): Entry[] {
     { day: 21, type: 'expense', description: 'Posto Shell Combustível', categoryId: 'cat-transport', amount: vary(170, 60) },
     { day: 14, type: 'expense', description: 'Farmácia Droga Raia', categoryId: 'cat-health', amount: vary(85, 60) },
     { day: 20, type: 'expense', description: 'Cinema e Restaurante', categoryId: 'cat-leisure', amount: vary(115, 70) },
-    { day: 8, type: 'expense', description: 'Assinatura Streaming', categoryId: 'cat-leisure', amount: 55.9 },
     { day: 28, type: 'income', description: 'Rendimento CDB', categoryId: 'cat-yield', amount: vary(60, 30) },
   ];
   if (monthIndex % 2 === 0) {
@@ -88,6 +97,47 @@ const goal = (
   createdAt: CREATED_AT,
 });
 
+const subscription = (
+  id: string,
+  name: string,
+  icon: string,
+  amount: number,
+  billingDay: number,
+  startMonth: MonthKey,
+): Subscription => ({
+  id,
+  name,
+  icon,
+  amount: fromReais(amount),
+  billingDay,
+  categoryId: SUBSCRIPTIONS_CATEGORY_ID,
+  active: true,
+  startMonth,
+  endMonth: null,
+  skippedMonths: [],
+  createdAt: CREATED_AT,
+  updatedAt: CREATED_AT,
+});
+
+/**
+ * Assinaturas de demonstração desde 5 meses atrás, com as cobranças lançadas pela mesma regra do app
+ * (DT-017). O YouTube Premium foi pausado há 2 meses: tem histórico até então e os meses seguintes ignorados.
+ */
+function demoSubscriptions(currentMonth: MonthKey, today: IsoDate, transactions: Transaction[]) {
+  const start = addMonths(currentMonth, -5);
+  const all = [
+    subscription('sub-netflix', 'Netflix', 'live_tv', 44.9, 8, start),
+    subscription('sub-spotify', 'Spotify', 'library_music', 21.9, 15, start),
+    subscription('sub-prime', 'Amazon Prime', 'local_shipping', 19.9, 22, start),
+    subscription('sub-claude', 'Claude Pro', 'smart_toy', 99.9, 3, start),
+    subscription('sub-icloud', 'iCloud+', 'cloud', 4.9, 27, start),
+    subscription('sub-youtube', 'YouTube Premium', 'play_circle', 26.9, 12, start),
+  ];
+  const beforePause = syncSubscriptionCharges(all, transactions, lastDayOfMonth(addMonths(currentMonth, -3)), CREATED_AT);
+  const paused = beforePause.subscriptions.map((s) => (s.id === 'sub-youtube' ? { ...s, active: false } : s));
+  return syncSubscriptionCharges(paused, beforePause.transactions, today, CREATED_AT);
+}
+
 export function buildDemoData(today: IsoDate): FinanceData {
   const currentMonth = monthKeyOf(today);
   const todayDay = Number(today.slice(8, 10));
@@ -122,9 +172,12 @@ export function buildDemoData(today: IsoDate): FinanceData {
       .filter((ago) => ago > 0 || todayDay >= 6)
       .map((ago) => ({ id: `demo-contrib-${goalKey}-${ago}`, amount: fromReais(amount), date: `${addMonths(currentMonth, -ago)}-06` }));
 
+  const withSubscriptions = demoSubscriptions(currentMonth, today, transactions);
+
   return {
-    transactions,
+    transactions: withSubscriptions.transactions,
     categories: DEMO_CATEGORIES,
+    subscriptions: withSubscriptions.subscriptions,
     goals: [
       goal('goal-emergency', 'Reserva de Emergência', 'Segurança Financeira', 'shield', 10000, 4500, 500, `${year + 1}-06-30`, contributions('emergency', 500, [5, 4, 3, 2, 1, 0])),
       goal('goal-trip', 'Viagem de Férias', 'Lazer & Descanso', 'flight_takeoff', 6000, 2000, 400, `${year + 1}-07-31`, contributions('trip', 400, [4, 3, 2, 1])),

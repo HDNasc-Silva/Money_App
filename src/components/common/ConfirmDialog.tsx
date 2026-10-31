@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Button } from './Button';
 import { Sheet } from './Sheet';
 
@@ -6,11 +7,13 @@ interface ConfirmDialogProps {
   title: string;
   message: string;
   confirmLabel?: string;
+  /** Conteúdo adicional abaixo da mensagem (ex.: uma opção da exclusão). */
+  children?: ReactNode;
   onConfirm(): void;
   onCancel(): void;
 }
 
-export function ConfirmDialog({ open, title, message, confirmLabel = 'Excluir', onConfirm, onCancel }: ConfirmDialogProps) {
+export function ConfirmDialog({ open, title, message, confirmLabel = 'Excluir', children, onConfirm, onCancel }: ConfirmDialogProps) {
   return (
     <Sheet
       open={open}
@@ -28,6 +31,7 @@ export function ConfirmDialog({ open, title, message, confirmLabel = 'Excluir', 
       }
     >
       <p>{message}</p>
+      {children}
     </Sheet>
   );
 }

@@ -29,7 +29,8 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
-  min-width: 3.25rem;
+  /* 6 itens (DT-018): sem largura mínima fixa, para caberem em 320 px sem scroll horizontal. */
+  min-width: 0;
   color: var(--color-text-muted);
   transition: color var(--duration-fast) ease;
 }
@@ -39,9 +40,24 @@
 }
 
 .bottomLabel {
+  max-width: 100%;
+  overflow: hidden;
   font-family: var(--font-heading);
   font-size: 0.6875rem;
   letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+/* Telas muito estreitas (320–359 px): fonte um pouco menor para "Assinaturas" caber inteira. */
+@media (max-width: 359px) {
+  .bottomInner {
+    padding: 0 2px;
+  }
+
+  .bottomLabel {
+    font-size: 0.625rem;
+    letter-spacing: -0.02em;
+  }
 }
 
 .indicator {

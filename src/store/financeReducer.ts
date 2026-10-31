@@ -1,4 +1,4 @@
-import { EMPTY_DATA, type Category, type FinanceData, type Goal, type Settings, type Transaction } from '@/models';
+import { EMPTY_DATA, type Category, type FinanceData, type Goal, type Settings, type Subscription, type Transaction } from '@/models';
 
 export type LoadNotice = 'corrupted' | 'not-persistent' | 'load-failed' | null;
 
@@ -20,6 +20,10 @@ export type FinanceAction =
   | { type: 'categories/added'; categories: Category[] }
   | { type: 'goal/saved'; goal: Goal }
   | { type: 'goal/removed'; id: string }
+  | { type: 'subscription/saved'; subscription: Subscription }
+  | { type: 'subscription/removed'; id: string }
+  /** Resultado da geração de cobranças (lançamentos criados e meses ignorados registrados). */
+  | { type: 'subscriptions/synced'; transactions: Transaction[]; subscriptions: Subscription[] }
   | { type: 'settings/saved'; settings: Settings }
   | { type: 'notice/dismissed' };
 
@@ -50,6 +54,12 @@ export function financeReducer(state: FinanceState, action: FinanceAction): Fina
       return { ...state, data: { ...data, goals: upsert(data.goals, action.goal) } };
     case 'goal/removed':
       return { ...state, data: { ...data, goals: withoutId(data.goals, action.id) } };
+    case 'subscription/saved':
+      return { ...state, data: { ...data, subscriptions: upsert(data.subscriptions, action.subscription) } };
+    case 'subscription/removed':
+      return { ...state, data: { ...data, subscriptions: withoutId(data.subscriptions, action.id) } };
+    case 'subscriptions/synced':
+      return { ...state, data: { ...data, transactions: action.transactions, subscriptions: action.subscriptions } };
     case 'settings/saved':
       return { ...state, data: { ...data, settings: action.settings } };
     case 'notice/dismissed':

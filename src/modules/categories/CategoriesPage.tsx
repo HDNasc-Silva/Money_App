@@ -14,6 +14,7 @@ import { categoryBudgets, globalBudget } from '@/domain/budgets';
 import { monthPeriod } from '@/domain/periods';
 import { filterByPeriod } from '@/domain/summary';
 import type { Category } from '@/models';
+import { MonthSubscriptionsCard } from '@/modules/subscriptions/MonthSubscriptionsCard';
 import { useFinanceData } from '@/store/FinanceProvider';
 import { useSelectedMonth } from '@/store/SelectedMonth';
 import { formatPercent } from '@/utils/format';
@@ -91,6 +92,8 @@ export function CategoriesPage() {
           {compensation && ` Considere compensar reduzindo gastos em ${compensation.category.name} até o fechamento.`}
         </AlertCard>
       )}
+
+      <MonthSubscriptionsCard month={month} />
 
       <div className={styles.toolbar}>
         <SegmentedControl variant="pills" label="Filtrar categorias" options={filterOptions} value={filter} onChange={setFilter} />

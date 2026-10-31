@@ -140,7 +140,7 @@ describe('usuários que já tinham dados salvos', () => {
 
   it('sem nome salvo, a saudação é apenas "Olá"', async () => {
     const adapter = new MemoryStorageAdapter();
-    adapter.write(DATA_KEY, serializeFinanceData({ transactions: [], categories, goals: [], settings: DEFAULT_SETTINGS }));
+    adapter.write(DATA_KEY, serializeFinanceData({ transactions: [], categories, goals: [], subscriptions: [], settings: DEFAULT_SETTINGS }));
     renderApp(adapter);
     expect(await screen.findByRole('heading', { name: 'Visão Geral' })).toBeInTheDocument();
     expect(screen.getByText(/^Olá/)).toHaveTextContent(/^Olá ✨$/);

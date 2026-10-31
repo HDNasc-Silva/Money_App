@@ -1,4 +1,4 @@
-import { DEFAULT_SETTINGS, USER_NAME_MAX, type FinanceData, type Settings } from '@/models';
+import { DEFAULT_SETTINGS, USER_NAME_MAX, type FinanceData, type Settings, type Subscription } from '@/models';
 import { MAX_AMOUNT } from '@/utils/money';
 import type { StorageAdapter } from './StorageAdapter';
 
@@ -6,8 +6,10 @@ export const DATA_KEY = 'money-app:data:v1';
 export const CORRUPTED_BACKUP_KEY = 'money-app:data:corrupted';
 export const SCHEMA_VERSION = 1;
 
-interface StoredDocument extends FinanceData {
+/** Documentos anteriores à v1.6.0 não têm `subscriptions` (migração: lista vazia). */
+interface StoredDocument extends Omit<FinanceData, 'subscriptions'> {
   schemaVersion: number;
+  subscriptions?: unknown;
 }
 
 export type LoadResult =
@@ -29,17 +31,62 @@ const TRANSACTION_SHAPE: Shape = { id: 'string', type: 'string', description: 's
 const CATEGORY_SHAPE: Shape = { id: 'string', name: 'string', icon: 'string', kind: 'string', group: 'string' };
 const GOAL_SHAPE: Shape = { id: 'string', name: 'string', icon: 'string', targetAmount: 'number', initialAmount: 'number', monthlyContribution: 'number', contributions: 'object' };
 
+const SUBSCRIPTION_SHAPE: Shape = { id: 'string', name: 'string', icon: 'string', amount: 'number', billingDay: 'number', categoryId: 'string', startMonth: 'string' };
+
+const MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/;
+const isMonthKey = (value: unknown): value is string => typeof value === 'string' && MONTH_PATTERN.test(value);
+const isOptional = (value: unknown, check: (v: unknown) => boolean) => value === undefined || check(value);
+
 const allMatch = (value: unknown, shape: Shape, check: (item: Record<string, unknown>) => boolean = () => true) =>
   Array.isArray(value) && value.every((item) => matches(item, shape) && check(item as Record<string, unknown>));
+
+/** Vínculo opcional com uma assinatura (v1.6.0): se presente, precisa ser coerente. */
+const hasValidSubscriptionLink = (t: Record<string, unknown>) =>
+  isOptional(t.subscriptionId, (v) => typeof v === 'string') && isOptional(t.subscriptionMonth, isMonthKey);
+
+const isValidSubscription = (s: Record<string, unknown>) =>
+  isIntegerCents(s.amount) &&
+  (s.amount as number) <= MAX_AMOUNT &&
+  Number.isInteger(s.billingDay) &&
+  (s.billingDay as number) >= 1 &&
+  (s.billingDay as number) <= 31 &&
+  isMonthKey(s.startMonth);
 
 /** Validação estrutural de dados vindos do storage ou de um backup importado (não confiáveis). */
 function isStoredDocument(value: unknown): value is StoredDocument {
   if (!isRecord(value) || typeof value.schemaVersion !== 'number' || !isRecord(value.settings)) return false;
   return (
-    allMatch(value.transactions, TRANSACTION_SHAPE, (t) => isIntegerCents(t.amount)) &&
+    allMatch(value.transactions, TRANSACTION_SHAPE, (t) => isIntegerCents(t.amount) && hasValidSubscriptionLink(t)) &&
     allMatch(value.categories, CATEGORY_SHAPE) &&
-    allMatch(value.goals, GOAL_SHAPE, (g) => isIntegerCents(g.targetAmount) && Array.isArray(g.contributions))
+    allMatch(value.goals, GOAL_SHAPE, (g) => isIntegerCents(g.targetAmount) && Array.isArray(g.contributions)) &&
+    (value.subscriptions === undefined || allMatch(value.subscriptions, SUBSCRIPTION_SHAPE, isValidSubscription))
   );
+}
+
+/**
+ * Normaliza uma assinatura já validada estruturalmente: campos opcionais ausentes ou inválidos
+ * recebem o padrão (ativa, sem fim, sem meses ignorados).
+ */
+function sanitizeSubscription(raw: Record<string, unknown>): Subscription {
+  const startMonth = raw.startMonth as string;
+  const endMonth = isMonthKey(raw.endMonth) && raw.endMonth >= startMonth ? raw.endMonth : null;
+  const skipped = Array.isArray(raw.skippedMonths) ? raw.skippedMonths.filter(isMonthKey) : [];
+  const createdAt = typeof raw.createdAt === 'string' ? raw.createdAt : '';
+  return {
+    id: raw.id as string,
+    name: raw.name as string,
+    icon: raw.icon as string,
+    amount: raw.amount as number,
+    billingDay: raw.billingDay as number,
+    categoryId: raw.categoryId as string,
+    active: typeof raw.active === 'boolean' ? raw.active : true,
+    startMonth,
+    endMonth,
+    skippedMonths: [...new Set(skipped)].sort(),
+    ...(typeof raw.notes === 'string' && raw.notes ? { notes: raw.notes } : {}),
+    createdAt,
+    updatedAt: typeof raw.updatedAt === 'string' ? raw.updatedAt : createdAt,
+  };
 }
 
 const pick = <T>(value: unknown, isValid: (v: unknown) => boolean, fallback: T): T => (isValid(value) ? (value as T) : fallback);
@@ -73,6 +120,10 @@ export function parseFinanceData(raw: string): FinanceData | null {
       transactions: parsed.transactions,
       categories: parsed.categories,
       goals: parsed.goals,
+      // Migração da v1.6.0: documentos sem assinaturas recebem uma lista vazia.
+      subscriptions: Array.isArray(parsed.subscriptions)
+        ? (parsed.subscriptions as Record<string, unknown>[]).map(sanitizeSubscription)
+        : [],
       settings: sanitizeSettings(parsed.settings as unknown as Record<string, unknown>),
     };
   } catch {
@@ -111,7 +162,7 @@ export class FinanceDocument {
   get(): FinanceData {
     if (!this.cache) {
       const result = this.load();
-      this.cache = result.status === 'ok' ? result.data : { transactions: [], categories: [], goals: [], settings: DEFAULT_SETTINGS };
+      this.cache = result.status === 'ok' ? result.data : { transactions: [], categories: [], goals: [], subscriptions: [], settings: DEFAULT_SETTINGS };
     }
     return this.cache;
   }

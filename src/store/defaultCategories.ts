@@ -9,6 +9,10 @@ import { fromReais } from '@/utils/money';
  * demonstração possam referenciá-los.
  */
 
+/** Categoria padrão sugerida para as assinaturas (v1.6.0, DT-017). */
+export const SUBSCRIPTIONS_CATEGORY_ID = 'cat-subscriptions';
+export const SUBSCRIPTIONS_CATEGORY_NAME = 'Assinaturas';
+
 interface DefaultCategoryDefinition {
   id: string;
   name: string;
@@ -27,6 +31,7 @@ const DEFINITIONS: readonly DefaultCategoryDefinition[] = [
   { id: 'cat-leisure', name: 'Lazer', description: 'Passeios, cinema e entretenimento', icon: 'sports_esports', kind: 'expense', group: 'lifestyle', limit: 400 },
   { id: 'cat-health', name: 'Saúde', description: 'Medicamentos, consultas e cuidados', icon: 'health_and_safety', kind: 'expense', group: 'essential', limit: 300 },
   { id: 'cat-education', name: 'Educação', description: 'Livros, cursos e workshops', icon: 'school', kind: 'expense', group: 'lifestyle', limit: 200 },
+  { id: SUBSCRIPTIONS_CATEGORY_ID, name: SUBSCRIPTIONS_CATEGORY_NAME, description: 'Streaming, música, nuvem e apps mensais', icon: 'subscriptions', kind: 'expense', group: 'lifestyle', limit: 250 },
   { id: 'cat-other', name: 'Outros', description: 'Reservas pontuais e pequenas demandas', icon: 'category', kind: 'expense', group: 'lifestyle', limit: 300 },
   { id: 'cat-salary', name: 'Salário', description: 'Receita principal', icon: 'account_balance_wallet', kind: 'income', group: 'essential', limit: null },
   { id: 'cat-freelance', name: 'Freelance', description: 'Trabalhos extras', icon: 'payments', kind: 'income', group: 'lifestyle', limit: null },
@@ -59,4 +64,19 @@ export function missingDefaultCategories(
   return buildDefaultCategories(createdAt)
     .filter((c) => !names.has(nameKey(c.kind, c.name)))
     .map((c) => (ids.has(c.id) ? { ...c, id: newId() } : c));
+}
+
+/** Categoria de despesa chamada "Assinaturas" (sem acento e sem diferenciar maiúsculas), se existir. */
+export function findSubscriptionsCategory(categories: readonly Category[]): Category | undefined {
+  const key = nameKey('expense', SUBSCRIPTIONS_CATEGORY_NAME);
+  return categories.find((c) => nameKey(c.kind, c.name) === key);
+}
+
+/** A categoria padrão "Assinaturas" pronta para ser criada, seguindo as mesmas regras de `missingDefaultCategories`. */
+export function subscriptionsCategoryToCreate(
+  existing: readonly Category[],
+  createdAt: string,
+  newId: () => string,
+): Category | null {
+  return missingDefaultCategories(existing, createdAt, newId).find((c) => c.name === SUBSCRIPTIONS_CATEGORY_NAME) ?? null;
 }

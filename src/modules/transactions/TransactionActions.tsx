@@ -77,7 +77,9 @@ export function TransactionActions({ transaction, onClose }: TransactionActionsP
       <ConfirmDialog
         open={confirming}
         title="Excluir lançamento?"
-        message={`"${transaction.description}" será removido e todos os indicadores serão recalculados.`}
+        message={`"${transaction.description}" será removido e todos os indicadores serão recalculados.${
+          transaction.subscriptionId ? ' Esta cobrança de assinatura não será lançada de novo neste mês.' : ''
+        }`}
         onConfirm={remove}
         onCancel={() => setConfirming(false)}
       />

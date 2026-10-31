@@ -5,12 +5,15 @@ import {
   type Cents,
   type Goal,
   type IsoDate,
+  type MonthKey,
   type Settings,
+  type Subscription,
   type Transaction,
   type TransactionType,
 } from '@/models';
-import { maxPlanningDate } from '@/domain/periods';
-import { formatDateBr, isValidIso } from '@/utils/dates';
+import { maxPlanningDate, maxPlanningMonth } from '@/domain/periods';
+import { BILLING_DAY_MAX, BILLING_DAY_MIN, SUBSCRIPTION_BACKFILL_MONTHS } from '@/domain/subscriptions';
+import { addMonths, formatDateBr, formatMonthLabel, isValidIso, monthKeyOf } from '@/utils/dates';
 import { normalizeText } from '@/utils/format';
 import { MAX_AMOUNT, parseMoney } from '@/utils/money';
 
@@ -258,6 +261,100 @@ export function validateProfileSettings(values: ProfileSettingsFormValues): Vali
   if (income.error) errors.monthlyIncome = income.error;
   if (Object.keys(errors).length > 0) return { ok: false, errors };
   return { ok: true, value: { userName: name.value, monthlyIncome: income.value } };
+}
+
+/* ---------- Assinatura ---------- */
+
+/**
+ * Valor especial do campo de categoria: "criar a categoria padrão Assinaturas ao salvar"
+ * (oferecido quando ela ainda não existe).
+ */
+export const CREATE_SUBSCRIPTIONS_CATEGORY = '__create-subscriptions-category__';
+
+export interface SubscriptionFormValues {
+  name: string;
+  amount: string;
+  billingDay: string;
+  categoryId: string;
+  icon: string;
+  active: boolean;
+  startMonth: string;
+  endMonth: string;
+  notes: string;
+}
+
+export type SubscriptionDraft = Pick<
+  Subscription,
+  'name' | 'icon' | 'amount' | 'billingDay' | 'categoryId' | 'active' | 'startMonth' | 'endMonth' | 'notes'
+>;
+type SubscriptionField = keyof SubscriptionFormValues;
+
+const isMonthInput = (value: string) => /^\d{4}-(0[1-9]|1[0-2])$/.test(value);
+
+/**
+ * Primeiro mês: no máximo `SUBSCRIPTION_BACKFILL_MONTHS` meses atrás (as cobranças desses meses são
+ * lançadas ao salvar) e no máximo o mês limite de planejamento. Último mês opcional, ≥ primeiro mês.
+ * Na edição, manter o primeiro mês já salvo é sempre aceito (previousStartMonth), mesmo que antigo.
+ */
+export function validateSubscription(
+  values: SubscriptionFormValues,
+  categories: readonly Category[],
+  today: IsoDate,
+  previousStartMonth?: MonthKey,
+): ValidationResult<SubscriptionDraft, SubscriptionField> {
+  const errors: FieldErrors<SubscriptionField> = {};
+
+  const name = validateText(values.name, 'Nome', NAME_MAX);
+  if (name.error) errors.name = name.error;
+
+  const amount = validateAmount(values.amount);
+  if (amount.error) errors.amount = amount.error;
+
+  const day = Number(values.billingDay);
+  if (!/^\d{1,2}$/.test(values.billingDay.trim()) || day < BILLING_DAY_MIN || day > BILLING_DAY_MAX) {
+    errors.billingDay = `Informe um dia entre ${BILLING_DAY_MIN} e ${BILLING_DAY_MAX}.`;
+  }
+
+  if (values.categoryId !== CREATE_SUBSCRIPTIONS_CATEGORY) {
+    const category = categories.find((c) => c.id === values.categoryId);
+    if (!category) errors.categoryId = 'Selecione uma categoria.';
+    else if (category.kind !== 'expense') errors.categoryId = 'Escolha uma categoria de despesa.';
+  }
+
+  if (!values.icon) errors.icon = 'Escolha um ícone.';
+
+  const earliest = addMonths(monthKeyOf(today), -SUBSCRIPTION_BACKFILL_MONTHS);
+  const latest = maxPlanningMonth(today);
+  if (!isMonthInput(values.startMonth)) errors.startMonth = 'Informe um mês válido.';
+  else if (values.startMonth < earliest && values.startMonth !== previousStartMonth) errors.startMonth = `O primeiro mês deve ser a partir de ${formatMonthLabel(earliest)}.`;
+  else if (values.startMonth > latest) errors.startMonth = `O primeiro mês deve ser até ${formatMonthLabel(latest)}.`;
+
+  let endMonth: MonthKey | null = null;
+  if (values.endMonth.trim()) {
+    if (!isMonthInput(values.endMonth)) errors.endMonth = 'Informe um mês válido.';
+    else if (isMonthInput(values.startMonth) && values.endMonth < values.startMonth) errors.endMonth = 'O último mês deve ser igual ou posterior ao primeiro.';
+    else if (values.endMonth > latest) errors.endMonth = `O último mês deve ser até ${formatMonthLabel(latest)}.`;
+    else endMonth = values.endMonth;
+  }
+
+  const notes = validateText(values.notes, 'Observação', NOTE_MAX, false);
+  if (notes.error) errors.notes = notes.error;
+
+  if (Object.keys(errors).length > 0) return { ok: false, errors };
+  return {
+    ok: true,
+    value: {
+      name: name.value,
+      icon: values.icon,
+      amount: amount.value as Cents,
+      billingDay: day,
+      categoryId: values.categoryId,
+      active: values.active,
+      startMonth: values.startMonth,
+      endMonth,
+      notes: notes.value || undefined,
+    },
+  };
 }
 
 /* ---------- Aporte ---------- */

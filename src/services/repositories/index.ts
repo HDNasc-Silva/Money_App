@@ -1,4 +1,4 @@
-import type { Category, FinanceData, Goal, Settings, Transaction } from '@/models';
+import type { Category, FinanceData, Goal, Settings, Subscription, Transaction } from '@/models';
 import { FinanceDocument, type LoadResult } from '../storage/FinanceDocument';
 import type { StorageAdapter } from '../storage/StorageAdapter';
 
@@ -24,10 +24,11 @@ export interface Repositories {
   transactions: CollectionRepository<Transaction>;
   categories: CollectionRepository<Category>;
   goals: CollectionRepository<Goal>;
+  subscriptions: CollectionRepository<Subscription>;
   settings: SettingsRepository;
 }
 
-type CollectionKey = 'transactions' | 'categories' | 'goals';
+type CollectionKey = 'transactions' | 'categories' | 'goals' | 'subscriptions';
 
 function createCollectionRepository<K extends CollectionKey>(
   doc: FinanceDocument,
@@ -68,6 +69,7 @@ export function createRepositories(adapter: StorageAdapter): Repositories {
     transactions: createCollectionRepository(doc, 'transactions'),
     categories: createCollectionRepository(doc, 'categories'),
     goals: createCollectionRepository(doc, 'goals'),
+    subscriptions: createCollectionRepository(doc, 'subscriptions'),
     settings: {
       async get() {
         return doc.get().settings;

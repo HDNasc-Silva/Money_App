@@ -17,6 +17,37 @@ export interface Transaction {
   date: IsoDate;
   categoryId: string;
   note?: string;
+  /** Assinatura que gerou este lançamento automaticamente (DT-017). Ausente em lançamentos manuais. */
+  subscriptionId?: string;
+  /** Mês de referência da cobrança gerada; chave de idempotência junto com `subscriptionId`. */
+  subscriptionMonth?: MonthKey;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Assinatura mensal (streaming, música, nuvem, IA...). Cada mês cobrado vira um lançamento de despesa
+ * real, gerado no dia de cobrança quando a data chega (DT-017).
+ */
+export interface Subscription {
+  id: string;
+  name: string;
+  icon: string;
+  /** Valor mensal; alterá-lo afeta só os meses ainda não lançados. */
+  amount: Cents;
+  /** Dia de cobrança (1–31); em meses mais curtos, vale o último dia do mês. */
+  billingDay: number;
+  /** Categoria de despesa dos lançamentos gerados. */
+  categoryId: string;
+  /** `false` = pausada: meses cuja cobrança chega durante a pausa não são lançados. */
+  active: boolean;
+  /** Primeiro mês cobrado. */
+  startMonth: MonthKey;
+  /** Último mês cobrado (assinatura cancelada); `null` = sem fim. */
+  endMonth: MonthKey | null;
+  /** Meses que não devem ser lançados: lançamento excluído pelo usuário ou cobrança durante a pausa. */
+  skippedMonths: MonthKey[];
+  notes?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -70,6 +101,7 @@ export interface FinanceData {
   transactions: Transaction[];
   categories: Category[];
   goals: Goal[];
+  subscriptions: Subscription[];
   settings: Settings;
 }
 
@@ -98,5 +130,6 @@ export const EMPTY_DATA: FinanceData = {
   transactions: [],
   categories: [],
   goals: [],
+  subscriptions: [],
   settings: DEFAULT_SETTINGS,
 };

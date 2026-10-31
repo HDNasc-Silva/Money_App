@@ -7,6 +7,38 @@ Categorias: **Adicionado** · **Modificado** · **Corrigido** · **Removido** ·
 
 ---
 
+## [1.6.0] - 31/10/2026 — Assinaturas mensais
+
+### Adicionado
+- **Aba Assinaturas** (`src/modules/subscriptions`, rota `/assinaturas`): lista com ícone, nome, valor mensal, dia de cobrança, próxima cobrança e status (Ativa / Pausada / Encerrada); resumo com **total mensal** das ativas, quantidade e **estimativa anual**; botões Pausar/Retomar e Editar; estado vazio com "Adicionar assinatura".
+- Formulário (sheet) de criar/editar assinatura: nome, valor mensal (`MoneyField` com máscara), dia de cobrança (1–31), categoria, primeira cobrança e última cobrança opcional (mês), "Assinatura ativa", observação e ícone (`IconPicker` com busca). **Sugestões rápidas** (Netflix, Spotify, Amazon Prime, Claude, ChatGPT, YouTube Premium, Disney+, iCloud+, Google One, Xbox Game Pass) que preenchem só nome e ícone, sem preços.
+- Excluir assinatura com confirmação, perguntando se os lançamentos já gerados devem ser excluídos também (padrão: manter). `ConfirmDialog` aceita conteúdo extra (`children`).
+- **Geração automática dos lançamentos** (DT-017): cada assinatura ativa gera uma despesa real no dia de cobrança quando a data chega — ao abrir o app, ao voltar para ele (`visibilitychange`), ao salvar/pausar/retomar uma assinatura e ao importar um backup. Idempotente (`subscriptionId` + `subscriptionMonth` e id determinístico `sub-<id>-<mês>`); dia 31 vira o último dia em meses curtos.
+- Gastos (Categorias): bloco **"Assinaturas do mês"** com as cobranças do mês selecionado (lançadas e previstas), data, selo "Lançada"/"Prevista", total do mês e link **"Gerenciar"** para a aba Assinaturas.
+- Extrato: lançamentos gerados por assinatura exibem o selo discreto **"Assinatura"**.
+- Início: em meses futuros, o saldo previsto ao fim do mês desconta as cobranças de assinaturas previstas e o cartão informa "Inclui R$ X em assinaturas previstas".
+- Categoria padrão **"Assinaturas"** (`cat-subscriptions`, despesa, Estilo de Vida, teto R$ 250,00). Quem já usa o app recebe a categoria ao salvar a primeira assinatura com a opção "Assinaturas (nova categoria)" ou por "Restaurar categorias padrão".
+- Modelo `Subscription` e campos opcionais `Transaction.subscriptionId`/`subscriptionMonth`; repositório `subscriptions`; ações `saveSubscription`, `setSubscriptionActive`, `deleteSubscription` e `syncSubscriptions` no `FinanceProvider`; funções puras em `src/domain/subscriptions.ts`; `validateSubscription`.
+- Ícones no catálogo: `live_tv`, `play_circle`, `library_music`, `podcasts`, `cloud`, `smart_toy`, `auto_awesome`, `local_shipping`, `newspaper`, `apps`, `vpn_key` (150 ícones).
+- Dados de demonstração: Netflix, Spotify, Amazon Prime, Claude Pro, iCloud+ e YouTube Premium (pausado há 2 meses), com as cobranças dos últimos 6 meses geradas pela mesma regra.
+- Testes: `tests/subscriptions.test.ts` (28 unitários: data de cobrança, geração idempotente, dia 31 em fevereiro, pausa, edição de valor, exclusão não regenera, último mês, previsões, saldo previsto, status/próxima cobrança/totais, migração e validação estrutural, categoria padrão, `validateSubscription`, demonstração) e `tests/subscriptionsFlow.test.tsx` (6 de integração: criar → Assinaturas, Gastos e Extrato com totais; geração ao abrir sem duplicar e exclusão sem regenerar; pausar/retomar; saldo previsto de mês futuro; excluir mantendo/removendo lançamentos; navegação e bloqueio de exclusão de categoria usada). Total: 185 testes.
+
+### Modificado
+- **Navegação com 6 itens** (DT-018): Início, Extrato, Gastos, **Assinaturas**, Metas, Gráficos na barra inferior e na lateral. Na barra inferior os itens não têm mais largura mínima fixa, os rótulos não quebram linha e, abaixo de 360 px, usam fonte de 10 px.
+- Editar um lançamento gerado mantém o vínculo com a assinatura; duplicar cria um lançamento manual (sem vínculo); excluir registra o mês em `skippedMonths` para que não seja gerado de novo (o diálogo avisa).
+- Categorias usadas por assinaturas não podem ser excluídas nem mudar de tipo.
+- Ajustes: textos de "Apagar todos os dados" e "Carregar dados de demonstração" mencionam as assinaturas.
+- Demonstração: o lançamento manual "Assinatura Streaming" (Lazer) foi substituído pelas assinaturas.
+
+### Técnico
+- Migração sem mudar `schemaVersion`: documentos e backups sem `subscriptions` carregam com lista vazia; assinaturas são validadas (valor em centavos, dia 1–31, mês `AAAA-MM`) e saneadas (`active`, `endMonth`, `skippedMonths`, `notes`); vínculos de lançamentos inválidos tornam o documento inválido. Backup JSON inclui as assinaturas.
+- `CACHE_VERSION` do service worker: `v1.6.0`. Versão do pacote: 1.5.0 → 1.6.0 (MINOR).
+
+### Documentação
+- `DECISOES_TECNICAS.md`: DT-017 (geração materializada dos lançamentos) e DT-018 (navegação com 6 itens; DT-007 parcialmente substituída). `ESCOPO_PROJETO.md`: módulo Assinaturas, funcionalidades 10.3/10.6, regras 21, 39–47, fluxos, persistência, RF-17/RF-18, acompanhamento v1.6.0 e limitações. `README.md`: módulos, estrutura e notas.
+
+---
+
 ## [1.5.0] - 30/10/2026 — Gráficos centrados nas metas; poupança = aportes em metas
 
 ### Adicionado
