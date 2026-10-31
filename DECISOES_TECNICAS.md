@@ -260,3 +260,25 @@ Status possíveis: **Aceita** · **Substituída por DT-XXX** · **Obsoleta**
 - **Vantagens:** mesma validação do app, sem dependência; reversível pelo usuário (prévia antes de gravar); compatível com o próprio CSV exportado.
 - **Desvantagens:** planilhas só de despesas com valores positivos viram receitas, a menos que tenham a coluna `Tipo` ou valores negativos (explicado na tela); não há mapeamento manual de colunas nem de categorias; arquivos em codificação diferente de UTF-8 (ANSI antigo do Excel) podem trazer acentos trocados.
 - **Módulos afetados:** `services/import` (novo), `store/FinanceProvider` (`importTransactions`), `modules/settings` (`CsvImportSheet`, `SettingsPage`), `modules/transactions` (exportação do filtro).
+
+## DT-021 — Navegação em 2 níveis: barra inferior com 3+Mais, hub "Mais" agrupado
+
+- **Data:** 31/10/2026 · **Status:** Aceita (revisa parcialmente DT-007/DT-018; `NAV_ITEMS` continua existindo e alimenta a navegação lateral e o hub)
+- **Contexto:** Com 6 módulos (Início, Extrato, Gastos, Assinaturas, Metas, Gráficos) mais Ajustes, a barra inferior já precisava de fonte reduzida e sem largura mínima (DT-018) para caber em 320 px; o usuário pediu uma navegação mais fácil de usar à medida que o app cresce, mantendo acesso rápido.
+- **Decisão:**
+  - **Barra inferior (mobile) com 4 itens**: Início, Extrato, Metas e **Mais** (`PRIMARY_NAV_ITEMS` + `MORE_ITEM` em `navItems.ts`). Início, Extrato e Metas são os destinos usados a cada lançamento/consulta rápida; o restante foi para o hub.
+  - **Hub "Mais"** (`/mais`, `modules/more/MorePage.tsx`): lista os demais destinos agrupados por assunto, cada um com ícone, nome e descrição curta (`MORE_NAV_GROUPS`):
+    - **Dinheiro saindo**: Gastos (Categorias) e Assinaturas — ambos são sobre para onde o dinheiro vai e os limites/cobranças recorrentes.
+    - **Acompanhar**: Gráficos (Relatórios) — evolução e comparação, não é algo consultado a cada lançamento.
+    - **Conta**: Ajustes — perfil, aparência, categorias e dados; já tinha atalho próprio no cabeçalho, mantido.
+  - **Navegação lateral (desktop, ≥ 1024 px) sem alteração**: continua mostrando todos os 6 itens de `NAV_ITEMS` mais Ajustes no rodapé, porque há espaço e o uso em telas largas tende a alternar mais entre módulos.
+  - `titleForPath` passou a reconhecer `/mais` (título "Mais" no cabeçalho).
+  - Nenhuma rota mudou: `/lancamentos`, `/categorias`, `/assinaturas`, `/metas`, `/relatorios`, `/ajustes` continuam os mesmos caminhos; só a barra inferior reorganiza como chegar até eles.
+- **Alternativas consideradas:**
+  - *Manter 6 itens na barra, só reduzindo fonte ainda mais*: já estava no limite (DT-018); mais um item futuro quebraria de novo, e o problema (muitos itens de uma vez) continuaria.
+  - *Barra rolável horizontalmente*: esconde itens fora da tela sem indicação clara e complica navegação por teclado.
+  - *"Mais" como bottom sheet em vez de página própria*: mais rápido para abrir, porém a lista de 4 destinos com descrição cabe melhor numa página com scroll e fica acessível por URL direta e por "voltar" do navegador.
+  - *5 itens primários (incluir Gráficos ou Gastos na barra)*: cogitado, mas o pedido explícito foi reduzir para ficar fácil de usar; Gastos e Gráficos são consultados com menor frequência que lançar uma despesa ou ver o extrato/metas.
+- **Vantagens:** a barra inferior nunca mais some ou precisa de fonte reduzida ao crescer (novos módulos entram no hub); descrições no hub ajudam quem está perdido entre tantas telas; zero mudança de rotas ou de modelo de dados; a navegação lateral não perde nada.
+- **Desvantagens e consequências:** Gastos, Assinaturas e Gráficos passam a exigir 2 toques no mobile (antes 1); usuários que tinham o hábito de tocar direto em "Gráficos"/"Gastos" precisam aprender o novo caminho (mitigado pelas descrições e pelos atalhos que já existem dentro das telas, ex. "Ver extrato", "Editar tetos", "Gerenciar" assinaturas). Não foi verificado em navegador real nesta versão (só jsdom e CSS), como nas revisões anteriores da barra.
+- **Módulos afetados:** `components/layout` (`navItems.ts`, `Navigation.tsx`), `app/routes`, `modules/more` (novo).

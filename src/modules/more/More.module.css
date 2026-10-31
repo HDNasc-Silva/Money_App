@@ -1,0 +1,87 @@
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.groupTitle {
+  padding: 0 var(--space-xs);
+  color: var(--color-text-muted);
+  font-family: var(--font-heading);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.entry {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  min-height: var(--touch-target, 44px);
+  padding: var(--space-md);
+  color: var(--color-text);
+  text-decoration: none;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.list .entry:last-child {
+  border-bottom: 0;
+}
+
+.entry:hover,
+.entry:focus-visible {
+  background: var(--color-surface-container);
+}
+
+.entryIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.entryText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.entryLabel {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.entryDescription {
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+}
+
+.entryChevron {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}

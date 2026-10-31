@@ -2,8 +2,8 @@
 
 > Documento oficial de referência. Representa o **estado atual real** do aplicativo e deve ser atualizado a cada alteração do sistema (ver `CHANGELOG.md` e `DECISOES_TECNICAS.md`).
 
-**Versão atual:** 1.7.0 (Temas escolhíveis, lançamento rápido, Início reorganizado, Extrato com cara de planilha e importação/exportação CSV)
-**Última atualização:** 31/10/2026 (v1.7.0)
+**Versão atual:** 1.8.0 (Navegação em 2 níveis: barra inferior simplificada e hub "Mais")
+**Última atualização:** 31/10/2026 (v1.8.0)
 
 ---
 
@@ -139,6 +139,7 @@ Money_APP/
 | **Relatórios / Gráficos** (`modules/reports`) | Centrado nas metas: total guardado, aportes no período, aportes por mês por meta, evolução acumulada do total guardado, distribuição por meta, progresso e previsão de cada meta, estado vazio com atalho para Metas. Secundário: receitas × despesas por mês, distribuição por categoria, comparação com período anterior (inclui aportes), hábitos de gastos, exportação CSV/PDF |
 | **Boas-vindas** (`modules/onboarding`) | Tela do primeiro acesso ("Como prefere ser chamado?": nome obrigatório e renda mensal opcional) e `OnboardingGate`, que mostra o carregamento e redireciona entre boas-vindas e app conforme `settings.onboardingCompleted` |
 | **Ajustes** (`modules/settings`) | Perfil (nome e renda mensal), Aparência (tema de cores com prévia, modo claro/escuro/automático, tamanho do texto, ocultar valores), gerenciamento de categorias (lista, criar, editar, excluir, restaurar padrão), instalar app (PWA), planilha (exportar CSV e importar CSV com prévia), carregar dados de demonstração, apagar dados (recriando as categorias padrão), exportar/importar backup JSON |
+| **Mais** (`modules/more`, v1.8.0, DT-021) | Hub da navegação (`/mais`), acessível só pela barra inferior do mobile: agrupa Gastos/Categorias e Assinaturas ("Dinheiro saindo"), Gráficos/Relatórios ("Acompanhar") e Ajustes ("Conta"), cada um com ícone, nome e descrição curta |
 | Design System (`design-system`, `theme`) | Tokens dos modos claro/escuro, paletas (`palettes.css`), escala tipográfica; modo, paleta e tamanho do texto com persistência (DT-019) |
 | Persistência (`services`) | Leitura/gravação segura e versionada dos dados; importação de planilha CSV (`services/import`, DT-020) |
 
@@ -281,7 +282,8 @@ Ajustes → Planilha (CSV) → "Exportar para planilha" (download) · "Importar 
 Novo lançamento → valor → chip de categoria → descrição (sugestões) → "Adicionar lançamento" ou "Salvar e adicionar outro" (repete)
 Início → "Últimos lançamentos" → tocar → edição · "Ver extrato" → Lançamentos · "Próximas cobranças" → Assinaturas · "Suas metas" → Metas
 Ajustes → "Instalar app" → diálogo do navegador (ou instruções no iPhone)
-Navegação: Visão Geral ⇄ Lançamentos (Extrato) ⇄ Categorias (Gastos) ⇄ Assinaturas ⇄ Metas ⇄ Relatórios (Gráficos) (barra inferior / lateral)
+Navegação lateral (desktop, ≥ 1024 px): Visão Geral ⇄ Lançamentos (Extrato) ⇄ Categorias (Gastos) ⇄ Assinaturas ⇄ Metas ⇄ Relatórios (Gráficos) ⇄ Ajustes, todos visíveis ao mesmo tempo
+Navegação inferior (mobile, v1.8.0, DT-021): Visão Geral ⇄ Lançamentos (Extrato) ⇄ Metas ⇄ Mais (hub) → Gastos (Categorias) / Assinaturas / Relatórios (Gráficos) / Ajustes
 Abrir app / voltar para ele → cobranças de assinaturas vencidas são lançadas como despesas
 Assinaturas → "Adicionar assinatura" / "Nova assinatura" → formulário (sugestões rápidas) → salvar → cobranças até hoje lançadas · Pausar/Retomar · Editar → Excluir (manter ou não os lançamentos)
 Gastos → bloco "Assinaturas do mês" → "Gerenciar" → Assinaturas
@@ -479,6 +481,12 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 - ✅ Barra inferior sem transbordo do rótulo ativo (revisão da DT-018); alvos de toque maiores, foco visível, esqueleto de carregamento, microanimações respeitando `prefers-reduced-motion`.
 - ✅ 218 testes automatizados (33 novos/reescritos: tema 13, lançamento rápido 7 + 5, Início 4, CSV 6 + 2).
 
+### Concluído (v1.8.0 — testado automaticamente)
+- ✅ Navegação em 2 níveis (DT-021): barra inferior (mobile) com 4 itens — Início, Extrato, Metas, Mais — em vez de 6; hub "Mais" (`/mais`) agrupando Gastos e Assinaturas ("Dinheiro saindo"), Gráficos ("Acompanhar") e Ajustes ("Conta"), cada um com ícone, nome e descrição curta.
+- ✅ Navegação lateral (desktop) sem alteração: continua com todos os 6 destinos e Ajustes.
+- ✅ Nenhuma rota mudou (`/lancamentos`, `/categorias`, `/assinaturas`, `/metas`, `/relatorios`, `/ajustes`).
+- ✅ 223 testes automatizados (5 novos em `tests/navigation.test.tsx`: barra com 4 itens, chegar a cada destino inclusive pelo "Mais", hub "Mais" com os 4 destinos agrupados, lateral intacta com 7 itens, barra inferior nunca com 6–7 itens).
+
 ### Em desenvolvimento
 - Nenhum.
 
@@ -510,6 +518,7 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 - Botões pequenos (`size="sm"`) e opções do controle segmentado têm 40 px de altura (os demais alvos têm ≥ 44 px).
 - Importação CSV: sem mapeamento manual de colunas/categorias; planilhas só com valores positivos e sem coluna Tipo viram receitas; arquivos em ANSI (Excel antigo) podem trazer acentos trocados.
 - As preferências de aparência não fazem parte do backup JSON (são do dispositivo).
+- Navegação v1.8.0 (DT-021): Gastos, Assinaturas e Gráficos passam a exigir 2 toques no mobile (Mais → destino) em vez de 1; não foi conferida visualmente no navegador real (320–430 px), só em jsdom.
 
 ### Próximas etapas (sugestões)
 1. Conferir visualmente a v1.7.0 no navegador (5 temas × claro/escuro, 320–430 px e 1366 px) e medir os contrastes com uma ferramenta (axe/Lighthouse).

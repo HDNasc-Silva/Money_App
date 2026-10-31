@@ -1,17 +1,20 @@
 ﻿import { NavLink } from 'react-router-dom';
 import { Icon } from '@/components/common/Icon';
 import { useTransactionEditor } from '@/modules/transactions/TransactionEditor';
-import { NAV_ITEMS, SETTINGS_ITEM } from './navItems';
+import { MORE_ITEM, NAV_ITEMS, PRIMARY_NAV_ITEMS, SETTINGS_ITEM } from './navItems';
 import styles from './Navigation.module.css';
 
 const linkClass = ({ isActive }: { isActive: boolean }) => [styles.link, isActive && styles.active].filter(Boolean).join(' ');
 
-/** Barra inferior (mobile/tablet). */
+/**
+ * Barra inferior (mobile/tablet), DT-021: só os destinos de uso mais frequente a um toque
+ * (Início, Extrato, Metas) e "Mais", que leva ao hub com o restante das telas.
+ */
 export function BottomNav() {
   return (
     <nav className={styles.bottom} aria-label="Navegação principal">
       <div className={styles.bottomInner}>
-        {NAV_ITEMS.map((item) => (
+        {[...PRIMARY_NAV_ITEMS, MORE_ITEM].map((item) => (
           <NavLink key={item.to} to={item.to} end={item.to === '/'} className={linkClass}>
             {({ isActive }) => (
               <>

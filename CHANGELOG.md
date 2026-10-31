@@ -7,6 +7,27 @@ Categorias: **Adicionado** · **Modificado** · **Corrigido** · **Removido** ·
 
 ---
 
+## [1.8.0] - 31/10/2026 — Navegação em 2 níveis: barra inferior simplificada e hub "Mais"
+
+### Adicionado
+- **Hub "Mais"** (`/mais`, `src/modules/more/MorePage.tsx`): tela que agrupa os destinos que saíram da barra inferior, com ícone, nome e descrição curta de cada um — **Dinheiro saindo** (Gastos, Assinaturas), **Acompanhar** (Gráficos) e **Conta** (Ajustes).
+- `PRIMARY_NAV_ITEMS`, `MORE_ITEM` e `MORE_NAV_GROUPS` em `src/components/layout/navItems.ts`.
+- Testes: `tests/navigation.test.tsx` (5 testes: barra inferior com 4 itens, chegar a cada destino inclusive pelo "Mais", hub "Mais" com os 4 destinos agrupados, navegação lateral com os 7 itens originais, barra inferior nunca com 6–7 itens). Total: 223 testes.
+
+### Modificado
+- **Barra inferior (mobile/tablet)**: passou de 6 itens (Início, Extrato, Gastos, Assinaturas, Metas, Gráficos) para **4** (Início, Extrato, Metas, Mais), eliminando a fonte reduzida e o risco de transbordo em 320 px das versões anteriores (DT-018).
+- Navegação lateral (desktop, ≥ 1024 px) **sem alteração**: continua com todos os 6 destinos mais Ajustes no rodapé.
+- Cabeçalho reconhece a rota `/mais` (título "Mais").
+
+### Técnico
+- Nenhuma rota mudou: `/lancamentos`, `/categorias`, `/assinaturas`, `/metas`, `/relatorios`, `/ajustes` continuam os mesmos caminhos.
+- `CACHE_VERSION` do service worker: `v1.8.0`. Versão do pacote: 1.7.0 → 1.8.0 (MINOR).
+
+### Documentação
+- `DECISOES_TECNICAS.md`: DT-021 (navegação em 2 níveis, revisa parcialmente DT-007/DT-018). `ESCOPO_PROJETO.md`: seção de navegação/fluxos, módulo "Mais" e acompanhamento v1.8.0.
+
+---
+
 ## [1.7.0] - 31/10/2026 — Temas escolhíveis e "substituir a planilha"
 
 ### Adicionado
