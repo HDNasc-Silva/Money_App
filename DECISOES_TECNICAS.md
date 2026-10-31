@@ -310,3 +310,15 @@ Status possíveis: **Aceita** · **Substituída por DT-XXX** · **Obsoleta**
 - **Vantagens:** zero duplicação de UI; navegação de mês consistente entre Visão Geral, Categorias, Relatórios e agora Extrato; mudança pequena e localizada em `domain/transactions.ts` (parâmetro opcional, compatível com os testes existentes).
 - **Desvantagens e consequências:** o Extrato muda de comportamento — "Mês selecionado" deixa de ser sempre o mês real e passa a seguir a navegação; um teste existente (`tests/newTransactionDate.test.tsx`) precisou ser ajustado para voltar ao mês correto antes de editar um lançamento de outro mês.
 - **Módulos afetados:** `domain/transactions`, `modules/transactions/TransactionsPage`, `components/common/MonthSwitcher` (reaproveitado, sem alteração).
+
+## DT-024 — Categoria "Assinaturas" protegida contra exclusão por identidade, não só por uso
+
+- **Data:** 31/10/2026 · **Status:** Aceita
+- **Contexto:** `deleteCategory` (`src/store/FinanceProvider.tsx`) já impedia excluir qualquer categoria usada por assinaturas ativas (`usedBySubscriptions`). Isso não cobria o caso de a categoria "Assinaturas" existir sem nenhuma assinatura vinculada ainda (ex.: app recém-criado ou todas as assinaturas removidas): nesse caso ela podia ser excluída normalmente, quebrando o fluxo de criação automática usado em `CREATE_SUBSCRIPTIONS_CATEGORY` (`src/validations`) e em `subscriptionsCategoryToCreate`.
+- **Decisão:** `deleteCategory` passa a identificar a categoria "Assinaturas" por identidade (nome + tipo, via `findSubscriptionsCategory` de `src/store/defaultCategories.ts`, já usado em outros pontos do app) e bloquear a exclusão incondicionalmente, com `DomainError` explicando que ela agrega as assinaturas recorrentes vinculadas. A verificação por uso (`usedBySubscriptions`) continua existindo para as demais categorias.
+- **Alternativas consideradas:**
+  - *Marcar a categoria com uma flag "protegida" persistida (`Category.protected`)*: exigiria migração de dados e mudança de modelo só para um único caso especial. Rejeitada por desproporcional ao problema.
+  - *Esconder o botão "Excluir categoria" na UI só para essa categoria*: resolveria a interação principal, mas deixaria a regra de negócio sem proteção no nível do store (qualquer outro caminho de chamada ficaria vulnerável). Rejeitada como solução única; a regra de negócio precisa estar no `FinanceProvider`.
+- **Vantagens:** reaproveita a mesma função de identidade (`findSubscriptionsCategory`) já usada para criar/restaurar a categoria, sem introduzir novo conceito; protege a regra de negócio na camada de dados, não só na UI; mensagem de erro já é exibida pelo fluxo existente de `ConfirmDialog` + `DomainError` em `CategoryFormSheet`.
+- **Desvantagens e consequências:** se o usuário renomear a categoria "Assinaturas" para outro nome, ela deixa de ser protegida (comportamento aceito: a identidade é pelo nome padrão, igual às demais funções que a localizam).
+- **Módulos afetados:** `store/FinanceProvider` (`deleteCategory`), `store/defaultCategories` (reaproveitado, sem alteração), `modules/categories/CategoryForm` (mensagem exibida sem alteração de código).

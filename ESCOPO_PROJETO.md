@@ -3,7 +3,7 @@
 > Documento oficial de referência. Representa o **estado atual real** do aplicativo e deve ser atualizado a cada alteração do sistema (ver `CHANGELOG.md` e `DECISOES_TECNICAS.md`).
 
 **Versão atual:** 1.9.0 (Lembretes de assinatura, saldo projetado e sugestão de lançamento fixo)
-**Última atualização:** 31/10/2026 (v1.10.0)
+**Última atualização:** 31/10/2026 (v1.11.0)
 
 ---
 
@@ -503,6 +503,11 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 ### Concluído (v1.10.0 — testado automaticamente)
 - ✅ Seletor de mês no Extrato (regra 60, DT-023): `MonthSwitcher` reaproveitado como ação do cabeçalho de Lançamentos; filtros "Mês selecionado" e "Mês anterior ao selecionado" seguem o mês navegado, sincronizado com as demais telas.
 - ✅ 231 testes automatizados (nenhum teste novo dedicado; `tests/newTransactionDate.test.tsx` ajustado para o novo comportamento de filtro por mês).
+
+### Concluído (v1.11.0 — testado automaticamente)
+- ✅ Alertas do mês no topo do Início (DT-024, ajuste de layout): `AlertsSummary` passa a ser a primeira seção visível no Início, antes do saldo e dos cards de resumo.
+- ✅ Categoria "Assinaturas" protegida contra exclusão (regra de negócio, DT-024): `deleteCategory` bloqueia a exclusão dessa categoria por identidade (nome), mesmo sem assinaturas vinculadas no momento, com mensagem explicativa.
+- ✅ 231 testes automatizados (suíte existente, sem testes novos dedicados a estas correções pontuais).
 
 ### Em desenvolvimento
 - Nenhum.

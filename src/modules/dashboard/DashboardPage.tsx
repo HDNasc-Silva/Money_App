@@ -28,8 +28,8 @@ const WEEK_SERIES: ChartSeries[] = [
 ];
 
 /**
- * Início (v1.7.0), em ordem de importância: saudação e mês → saldo → resumo do mês → ação rápida →
- * próximas cobranças → últimos lançamentos → metas → alertas → análises (gráfico e categorias).
+ * Início (v1.11.0), em ordem de importância: saudação e mês → alertas do mês → saldo → resumo do mês →
+ * ação rápida → próximas cobranças → últimos lançamentos → metas → análises (gráfico e categorias).
  */
 export function DashboardPage() {
   const { settings, categories } = useFinanceData();
@@ -49,6 +49,7 @@ export function DashboardPage() {
 
   return (
     <Page title="Visão Geral" eyebrow={<>{greeting} ✨</>} action={<MonthSwitcher />}>
+      <AlertsSummary alerts={alerts} />
       <PageGrid>
         <PageColumn>
           <BalanceCard
@@ -87,7 +88,6 @@ export function DashboardPage() {
 
         <PageColumn>
           <GoalsHighlightCard goals={dashboard.goals} />
-          <AlertsSummary alerts={alerts} />
 
           <Card>
             <CardHeader title="Receitas vs Despesas" subtitle="Evolução por semana no mês" action={<ChartLegend series={WEEK_SERIES} />} />

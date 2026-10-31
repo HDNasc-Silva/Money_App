@@ -263,6 +263,12 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
       },
 
       async deleteCategory(id) {
+        const category = data().categories.find((c) => c.id === id);
+        if (category && findSubscriptionsCategory([category])) {
+          throw new DomainError(
+            'A categoria "Assinaturas" não pode ser excluída: ela agrega as assinaturas recorrentes vinculadas.',
+          );
+        }
         const used = data().transactions.filter((t) => t.categoryId === id).length;
         if (used > 0) {
           throw new DomainError(

@@ -7,6 +7,22 @@ Categorias: **Adicionado** · **Modificado** · **Corrigido** · **Removido** ·
 
 ---
 
+## [1.11.0] - 31/10/2026 — Alertas no topo do Início e categoria "Assinaturas" protegida
+
+### Modificado
+- **Início** (`src/modules/dashboard/DashboardPage.tsx`): a seção de Alertas (`AlertsSummary`) passa a ser a primeira coisa exibida na tela, logo após o cabeçalho (saudação e seletor de mês) e antes do saldo, dos cards de resumo e das metas. Antes aparecia mais abaixo, na segunda coluna, depois de Metas.
+
+### Corrigido
+- **Categoria "Assinaturas" não pode mais ser excluída** mesmo quando nenhuma assinatura está vinculada no momento: `deleteCategory` (`src/store/FinanceProvider.tsx`) agora identifica essa categoria por nome (reaproveitando `findSubscriptionsCategory`, de `src/store/defaultCategories.ts`) e bloqueia a exclusão com uma mensagem explicando que ela agrega as assinaturas recorrentes vinculadas. A regra que já impedia excluir categorias com assinaturas ativas vinculadas continua valendo para qualquer outra categoria usada por assinaturas.
+
+### Técnico
+- `CACHE_VERSION` do service worker: `v1.11.0`. Versão do pacote: 1.10.0 → 1.11.0 (MINOR).
+
+### Documentação
+- `DECISOES_TECNICAS.md`: DT-024 (categoria "Assinaturas" é protegida contra exclusão por identidade, não só por uso). `ESCOPO_PROJETO.md`: acompanhamento v1.11.0.
+
+---
+
 ## [1.10.0] - 31/10/2026 — Seletor de mês no Extrato
 
 ### Adicionado
