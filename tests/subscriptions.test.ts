@@ -6,6 +6,7 @@ import {
   projectedSubscriptionExpenses,
   skipMonth,
   sortSubscriptions,
+  subscriptionsChargingSoon,
   subscriptionStatus,
   subscriptionTotals,
   summarizeCharges,
@@ -172,6 +173,28 @@ describe('previsões e cobranças do mês', () => {
     expect(projectedSubscriptionExpenses(subscriptions, transactions, '2026-10-15', '2026-10-31')).toBe(2190);
     expect(projectedSubscriptionExpenses(subscriptions, transactions, '2026-10-15', '2026-11-30')).toBe(2190 + 4490 + 2190);
     expect(projectedSubscriptionExpenses(subscriptions, transactions, '2026-10-15', '2026-09-30')).toBe(0);
+  });
+});
+
+describe('subscriptionsChargingSoon (lembretes do Início)', () => {
+  it('lista só as cobranças previstas nos próximos N dias (não lançadas, ativas)', () => {
+    const synced = syncSubscriptionCharges([sub(), sub({ id: 's2', name: 'Spotify', billingDay: 20, amount: 2190 })], [], '2026-10-15', TS);
+    const soon = subscriptionsChargingSoon(synced.subscriptions, synced.transactions, '2026-10-15', 3);
+    expect(soon).toEqual([]);
+    const closer = subscriptionsChargingSoon(synced.subscriptions, synced.transactions, '2026-10-18', 3);
+    expect(closer).toEqual([{ subscriptionId: 's2', name: 'Spotify', icon: 'live_tv', amount: 2190, date: '2026-10-20', daysUntil: 2 }]);
+  });
+
+  it('não repete uma cobrança já lançada nem considera assinatura pausada', () => {
+    const synced = syncSubscriptionCharges([sub({ billingDay: 16 })], [], '2026-10-16', TS);
+    expect(subscriptionsChargingSoon(synced.subscriptions, synced.transactions, '2026-10-16', 3)).toEqual([]);
+    const paused = synced.subscriptions.map((s) => ({ ...s, active: false }));
+    expect(subscriptionsChargingSoon(paused, synced.transactions, '2026-11-13', 3)).toEqual([]);
+  });
+
+  it('cobrança de amanhã tem daysUntil 1', () => {
+    const result = subscriptionsChargingSoon([sub({ billingDay: 19, startMonth: '2026-10' })], [], '2026-10-18', 3);
+    expect(result).toEqual([{ subscriptionId: 's1', name: 'Netflix', icon: 'live_tv', amount: 4490, date: '2026-10-19', daysUntil: 1 }]);
   });
 });
 

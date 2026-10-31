@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { highlightedGoals } from '@/domain/goals';
-import { categoriesByUsage, descriptionSuggestions, lastCategoryForDescription } from '@/domain/quickEntry';
+import { categoriesByUsage, descriptionSuggestions, findRecurringCandidate, lastCategoryForDescription } from '@/domain/quickEntry';
 import { latestTransactions } from '@/domain/transactions';
 import { categories, goal, tx } from './helpers';
 
@@ -59,6 +59,32 @@ describe('lançamento rápido: sugestões de descrição', () => {
     expect(lastCategoryForDescription(history, 'pao de acucar', 'expense')).toBe('food');
     expect(lastCategoryForDescription(history, 'Inexistente', 'expense')).toBeNull();
     expect(lastCategoryForDescription(history, 'Pagamento', 'expense')).toBeNull();
+  });
+});
+
+describe('findRecurringCandidate (sugestão de fixo/recorrente)', () => {
+  const history = [
+    tx({ type: 'expense', amount: 150_000, date: '2026-09-05', description: 'Aluguel', categoryId: 'misc' }),
+    tx({ type: 'expense', amount: 3_000, date: '2026-09-10', description: 'Cinema', categoryId: 'fun' }),
+  ];
+
+  it('encontra um lançamento parecido (mesma categoria, descrição e valor) do mês anterior', () => {
+    const match = findRecurringCandidate(history, 'expense', 'misc', 'Aluguel', 152_000, '2026-10-05');
+    expect(match?.description).toBe('Aluguel');
+  });
+
+  it('não sugere fora da tolerância de valor, categoria diferente, tipo diferente ou campos vazios', () => {
+    expect(findRecurringCandidate(history, 'expense', 'misc', 'Aluguel', 300_000, '2026-10-05')).toBeNull();
+    expect(findRecurringCandidate(history, 'expense', 'fun', 'Aluguel', 150_000, '2026-10-05')).toBeNull();
+    expect(findRecurringCandidate(history, 'income', 'misc', 'Aluguel', 150_000, '2026-10-05')).toBeNull();
+    expect(findRecurringCandidate(history, 'expense', '', 'Aluguel', 150_000, '2026-10-05')).toBeNull();
+    expect(findRecurringCandidate(history, 'expense', 'misc', '', 150_000, '2026-10-05')).toBeNull();
+    expect(findRecurringCandidate(history, 'expense', 'misc', 'Aluguel', 0, '2026-10-05')).toBeNull();
+  });
+
+  it('ignora lançamentos já gerados por uma assinatura (já são fixos)', () => {
+    const generated = [tx({ type: 'expense', amount: 150_000, date: '2026-09-05', description: 'Aluguel', categoryId: 'misc', subscriptionId: 'sub-1' })];
+    expect(findRecurringCandidate(generated, 'expense', 'misc', 'Aluguel', 150_000, '2026-10-05')).toBeNull();
   });
 });
 

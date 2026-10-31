@@ -1,10 +1,11 @@
-import type { Category, Goal, IsoDate, MonthKey, Transaction } from '@/models';
+import type { Category, Goal, IsoDate, MonthKey, Subscription, Transaction } from '@/models';
 import { addMonths, lastDayOfMonth, monthKeyOf } from '@/utils/dates';
 import { formatPercent } from '@/utils/format';
 import { formatCurrency } from '@/utils/money';
 import { categoryBudgets } from './budgets';
 import { contributionsInPeriod, goalProgress } from './goals';
 import { filterByPeriod, percentChange, summarize } from './summary';
+import { subscriptionsChargingSoon } from './subscriptions';
 
 export type AlertTone = 'warning' | 'danger' | 'info' | 'success';
 
@@ -22,6 +23,8 @@ export interface FinanceAlert {
 const GOAL_MILESTONE_RATIO = 0.8;
 /** Variação mínima de gastos para gerar alerta (10%). */
 const SPENDING_CHANGE_THRESHOLD = 0.1;
+/** Lembrete de assinatura: cobranças previstas dentro desta janela (dias). */
+const SUBSCRIPTION_REMINDER_DAYS = 3;
 
 interface AlertInput {
   transactions: readonly Transaction[];
@@ -29,6 +32,15 @@ interface AlertInput {
   goals: readonly Goal[];
   month: MonthKey;
   today: IsoDate;
+  /** Assinaturas ativas; usadas para os lembretes de cobrança próxima (opcional, padrão nenhuma). */
+  subscriptions?: readonly Subscription[];
+}
+
+/** "hoje" / "amanhã" / "em N dias", para o lembrete de cobrança. */
+function dueInWords(daysUntil: number): string {
+  if (daysUntil <= 0) return 'hoje';
+  if (daysUntil === 1) return 'amanhã';
+  return `em ${daysUntil} dias`;
 }
 
 /**
@@ -50,8 +62,19 @@ function comparableRanges(month: MonthKey, today: IsoDate) {
   };
 }
 
-export function buildAlerts({ transactions, categories, goals, month, today }: AlertInput): FinanceAlert[] {
+export function buildAlerts({ transactions, categories, goals, month, today, subscriptions = [] }: AlertInput): FinanceAlert[] {
   const alerts: FinanceAlert[] = [];
+
+  for (const charge of subscriptionsChargingSoon(subscriptions, transactions, today, SUBSCRIPTION_REMINDER_DAYS)) {
+    alerts.push({
+      id: `subscription-due-${charge.subscriptionId}-${charge.date}`,
+      tone: 'info',
+      icon: 'event_upcoming',
+      title: 'Cobrança chegando',
+      message: `${charge.name} desconta ${dueInWords(charge.daysUntil)} (${formatCurrency(charge.amount)}).`,
+      to: '/assinaturas',
+    });
+  }
 
   for (const budget of categoryBudgets(transactions, categories, month)) {
     if (budget.status === 'exceeded' && budget.ratio !== null) {

@@ -1,3 +1,29 @@
+.recurringHint {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-container);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+[data-theme='dark'] .recurringHint {
+  background: var(--color-surface);
+}
+
+.recurringHint > :first-child {
+  flex-shrink: 0;
+  color: var(--color-income);
+}
+
+.recurringHintText {
+  flex: 1;
+  min-width: 0;
+}
+
 .descriptionField {
   display: flex;
   flex-direction: column;

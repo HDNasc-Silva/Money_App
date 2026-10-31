@@ -2,8 +2,8 @@
 
 > Documento oficial de referência. Representa o **estado atual real** do aplicativo e deve ser atualizado a cada alteração do sistema (ver `CHANGELOG.md` e `DECISOES_TECNICAS.md`).
 
-**Versão atual:** 1.8.0 (Navegação em 2 níveis: barra inferior simplificada e hub "Mais")
-**Última atualização:** 31/10/2026 (v1.8.0)
+**Versão atual:** 1.9.0 (Lembretes de assinatura, saldo projetado e sugestão de lançamento fixo)
+**Última atualização:** 31/10/2026 (v1.9.0)
 
 ---
 
@@ -148,11 +148,12 @@ Money_APP/
 ### 10.1 Visão Geral
 - Saldo disponível (receitas − despesas − aportes em metas, acumulados até a data de referência; regra 36); botão para ocultar valores (preferência persistida). O cartão informa quanto foi guardado em metas no mês (ou "Mês negativo" quando as despesas superam as receitas).
 - Resumo do mês (um cartão com três colunas): Receitas, Despesas e Poupança = aportes em metas no mês (regra 35), cada um com a variação vs mês anterior em formato discreto (regra 50). Até a v1.6.0, Despesas mostrava o % das receitas.
-- Ordem da tela (v1.7.0, regra 49): saudação e mês → saldo → resumo → "Novo Lançamento" → **Próximas cobranças** → **Últimos lançamentos** → **Suas metas** → **Alertas do mês** → gráfico semanal → gastos por categoria → consistência. No desktop (≥ 1280 px), metas, alertas e análises ficam na segunda coluna.
+- Ordem da tela (v1.7.0, regra 49; v1.9.0 adiciona o saldo projetado): saudação e mês → saldo → resumo → **saldo projetado até o fim do mês** (só no mês atual) → "Novo Lançamento" → **Próximas cobranças** → **Últimos lançamentos** → **Suas metas** → **Alertas do mês** (inclui lembretes de assinatura) → gráfico semanal → gastos por categoria → consistência. No desktop (≥ 1280 px), metas, alertas e análises ficam na segunda coluna.
+- **Saldo projetado até o fim do mês** (v1.9.0, regra 57): só no mês corrente, `receitas do mês − despesas já lançadas − assinaturas que ainda vão descontar até o fim do mês`; não substitui o saldo disponível do cartão principal (que desconta aportes em metas).
 - **Próximas cobranças**: assinaturas previstas do mês selecionado (no mês atual, as que ainda vão acontecer; regra 45) com data, valor e "Total previsto"; sem assinaturas cadastradas, convite "Cadastre suas assinaturas"; oculto em meses passados.
 - **Últimos lançamentos**: os 5 mais recentes do mês selecionado; tocar abre a edição; link "Ver extrato"; vazio → "Registrar lançamento".
 - **Suas metas**: até 3 metas (em andamento mais próximas de concluir primeiro, depois concluídas) com barra e "R$ X de R$ Y"; sem metas → "Crie sua primeira meta".
-- Alertas automáticos: categoria acima do limite, categoria acima de 80%, gastos maiores que o mês anterior, meta ≥ 80%, aportes em metas maiores que no mesmo período do mês anterior. No Início aparecem compactos: no máximo 2 e o restante em "Ver todos (+N)" (regra 51); a lista completa continua nas Notificações do cabeçalho.
+- Alertas automáticos: **cobrança de assinatura chegando (próximos 3 dias, v1.9.0, regra 58)**, categoria acima do limite, categoria acima de 80%, gastos maiores que o mês anterior, meta ≥ 80%, aportes em metas maiores que no mesmo período do mês anterior. No Início aparecem compactos: no máximo 2 e o restante em "Ver todos (+N)" (regra 51); a lista completa continua nas Notificações do cabeçalho.
 - Gráfico Receitas vs Despesas por semana do mês (interativo).
 - Gastos por categoria com barra de limite; "Editar tetos" leva a Categorias.
 - Seletor de mês (anterior/próximo) compartilhado com Categorias e Relatórios; permite meses futuros até 60 meses à frente, com indicação "Mês futuro" e saldo previsto (regras 20 e 27).
@@ -162,6 +163,7 @@ Money_APP/
 - Criar, editar, duplicar e excluir (com confirmação) receitas e despesas.
 - Campos: tipo, valor, categoria, descrição, data, observação opcional (nesta ordem desde a v1.7.0).
 - **Lançamento rápido** (v1.7.0, regras 52–54): o valor recebe o foco ao abrir (teclado numérico); categorias em **chips com ícone**, das mais usadas para as menos usadas (até 8 visíveis + "Mais N"); a descrição mostra até 4 **sugestões** de descrições anteriores com a categoria usada da última vez; **"Salvar e adicionar outro"** grava, mantém tipo e data, limpa os demais campos e volta ao valor. As validações são as mesmas (regras 2–4, 27).
+- **Sugestão de fixo/recorrente** (v1.9.0, regra 59): ao criar uma despesa, se valor (±10%) e descrição (sem acento/maiúsculas) forem parecidos com uma despesa da mesma categoria no mês anterior, aparece "Marcar como fixo", que cria uma assinatura com os dados do lançamento (os meses seguintes passam a ser gerados automaticamente, como em Assinaturas). Só em lançamentos novos (não na edição); ignora lançamentos já vinculados a uma assinatura.
 - Extrato agrupado por dia com a contagem de itens e o total do dia; **resumo do filtro** com entradas, saídas e saldo do que está filtrado (regra 55).
 - Busca por descrição/categoria/observação; filtros em **chips**: período (este mês, 7 dias, mês anterior, todos), tipo e categoria (ao escolher um tipo, só aparecem as categorias desse tipo); "Limpar filtros"; estado vazio com "limpar filtros" ou, sem filtros, o convite "Seu extrato começa aqui" com "Novo lançamento".
 - Desktop (≥ 1024 px): linhas em colunas Descrição | Categoria | Valor, com cabeçalho, como numa planilha.
@@ -270,6 +272,9 @@ Money_APP/
 54. **"Salvar e adicionar outro"** (só em novos lançamentos): valida como o botão principal; ao salvar, mantém tipo e data, limpa valor, categoria, descrição e observação e volta o foco ao valor; o subtítulo conta os lançamentos adicionados na sequência.
 55. **Resumo do Extrato**: entradas, saídas e saldo (entradas − saídas) dos lançamentos que passam por todos os filtros (período, tipo, categoria e busca). Até a v1.6.0 o resumo ignorava tipo e busca.
 56. **Importação de planilha (CSV)** (DT-020): cabeçalho obrigatório com Data, Descrição e Valor (Categoria, Tipo e Observação opcionais); datas `DD/MM/AAAA`, `DD/MM/AA` ou `AAAA-MM-DD`; sem coluna Tipo, valor negativo = despesa e positivo = receita (valor zero é inválido); categoria pelo nome no mesmo tipo, senão "Outros" (ou a primeira do tipo), indicada na prévia; cada linha segue as regras 2–4 e 27; linhas inválidas são ignoradas com o motivo; uma linha igual (data, descrição sem acento/maiúsculas, valor e tipo) a um lançamento já existente é ignorada, mas repetições dentro do arquivo são importadas; máximo 2 MB e 5.000 linhas. Nada é gravado antes de "Importar N lançamentos". A exportação usa o mesmo formato (ida e volta sem perdas).
+57. **Saldo projetado até o fim do mês** (v1.9.0, DT-022): só no mês corrente; `Σ receitas do mês − Σ despesas já lançadas no mês − Σ cobranças de assinaturas previstas entre hoje e o fim do mês`. Independe do saldo disponível do cartão principal (regra 36, que desconta aportes em metas).
+58. **Lembrete de assinatura chegando** (v1.9.0, DT-022): para cada cobrança prevista (ativa, ainda não lançada, não ignorada) com data entre hoje e os próximos 3 dias (inclusive), um alerta "`<nome>` desconta hoje/amanhã/em N dias (`<valor>`)", com link para Assinaturas. Entra em `buildAlerts` antes dos demais alertas (regra 51).
+59. **Sugestão de fixo/recorrente no lançamento rápido** (v1.9.0, DT-022): ao criar uma despesa, se existir uma despesa da mesma categoria no mês anterior com a mesma descrição (sem acento/maiúsculas) e valor dentro de ±10%, mostra "Marcar como fixo". Confirmar cria uma assinatura (nome = descrição, valor, categoria, dia de cobrança = dia da data informada, primeiro mês = mês da data informada); os meses seguintes são gerados automaticamente (regras 39–47). Não sugere na edição nem quando o lançamento comparado já é gerado por uma assinatura.
 
 ## 12. Fluxos de navegação
 
@@ -486,6 +491,12 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 - ✅ Navegação lateral (desktop) sem alteração: continua com todos os 6 destinos e Ajustes.
 - ✅ Nenhuma rota mudou (`/lancamentos`, `/categorias`, `/assinaturas`, `/metas`, `/relatorios`, `/ajustes`).
 - ✅ 223 testes automatizados (5 novos em `tests/navigation.test.tsx`: barra com 4 itens, chegar a cada destino inclusive pelo "Mais", hub "Mais" com os 4 destinos agrupados, lateral intacta com 7 itens, barra inferior nunca com 6–7 itens).
+
+### Concluído (v1.9.0 — testado automaticamente)
+- ✅ Lembrete de assinatura no Início (regra 58, DT-022): alerta "Cobrança chegando" quando uma assinatura ativa vai descontar nos próximos 3 dias, com valor e link para Assinaturas; aparece no Início (compacto) e nas Notificações do cabeçalho.
+- ✅ Saldo projetado até o fim do mês (regra 57, DT-022): novo cartão no Início, só no mês corrente, com receitas − despesas já lançadas − assinaturas ainda não descontadas até o fim do mês.
+- ✅ Sugestão de fixo/recorrente no lançamento rápido (regra 59, DT-022): "Marcar como fixo" quando a nova despesa é parecida (categoria, descrição e valor ±10%) com uma do mês anterior; confirmar cria uma assinatura a partir do lançamento.
+- ✅ 231 testes automatizados (8 novos: 3 em `tests/subscriptions.test.ts` para `subscriptionsChargingSoon`, 2 em `tests/domain.test.ts` para o alerta de cobrança chegando, 3 em `tests/quickEntry.test.ts` para `findRecurringCandidate`).
 
 ### Em desenvolvimento
 - Nenhum.

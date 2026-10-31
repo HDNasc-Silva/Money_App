@@ -1,4 +1,5 @@
-import type { Category, Transaction, TransactionType } from '@/models';
+import type { Category, Cents, IsoDate, Transaction, TransactionType } from '@/models';
+import { addMonths, monthKeyOf } from '@/utils/dates';
 import { normalizeText } from '@/utils/format';
 import { sortByDateDesc } from './transactions';
 
@@ -70,6 +71,42 @@ export function descriptionSuggestions(
   const startsWith = all.filter(([key]) => key.startsWith(wanted));
   const contains = all.filter(([key]) => !key.startsWith(wanted));
   return [...startsWith, ...contains].slice(0, limit).map(([, suggestion]) => suggestion);
+}
+
+/** Tolerância de valor para considerar dois lançamentos "parecidos" (10%). */
+const RECURRING_AMOUNT_TOLERANCE = 0.1;
+
+/**
+ * Lançamento do mês anterior, mesmo tipo e categoria, com descrição igual (sem acento/maiúsculas) e
+ * valor parecido (±10%) — sinal de despesa/receita fixa (ex.: aluguel). Usado para sugerir "Marcar
+ * como fixo/recorrente" no lançamento rápido. Ignora lançamentos já gerados por uma assinatura
+ * (já são fixos) e entradas sem categoria, descrição ou valor.
+ */
+export function findRecurringCandidate(
+  transactions: readonly Transaction[],
+  type: TransactionType,
+  categoryId: string,
+  description: string,
+  amount: Cents,
+  date: IsoDate,
+): Transaction | null {
+  const wantedDescription = normalizeText(description);
+  if (!categoryId || !wantedDescription || !amount) return null;
+  const previousMonth = addMonths(monthKeyOf(date), -1);
+  const tolerance = amount * RECURRING_AMOUNT_TOLERANCE;
+  return (
+    [...transactions]
+      .sort(sortByDateDesc)
+      .find(
+        (t) =>
+          !t.subscriptionId &&
+          t.type === type &&
+          t.categoryId === categoryId &&
+          monthKeyOf(t.date) === previousMonth &&
+          normalizeText(t.description) === wantedDescription &&
+          Math.abs(t.amount - amount) <= tolerance,
+      ) ?? null
+  );
 }
 
 /** Categoria do lançamento mais recente do tipo com exatamente essa descrição (sem acento/maiúsculas). */

@@ -7,6 +7,22 @@ Categorias: **Adicionado** · **Modificado** · **Corrigido** · **Removido** ·
 
 ---
 
+## [1.9.0] - 31/10/2026 — Lembretes de assinatura, saldo projetado e sugestão de lançamento fixo
+
+### Adicionado
+- **Lembrete de assinatura no Início**: novo alerta ("Cobrança chegando") quando uma assinatura ativa vai descontar nos próximos 3 dias (ex.: "Netflix desconta em 2 dias (R$ 44,90)."), levando a "Assinaturas". `subscriptionsChargingSoon` em `src/domain/subscriptions.ts`; integrado em `buildAlerts` (`src/domain/alerts.ts`, parâmetro opcional `subscriptions`) e exibido tanto no Início (`AlertsSummary`) quanto nas Notificações do cabeçalho.
+- **Saldo projetado até o fim do mês** (`src/modules/dashboard/ProjectedBalanceCard.tsx`): novo cartão no Início, visível apenas no mês atual, com `receitas do mês − despesas já lançadas − assinaturas que ainda vão descontar até o fim do mês` (`projectedMonthEndBalance` em `useDashboard`, reaproveitando `projectedSubscriptionExpenses`).
+- **Sugestão de lançamento fixo/recorrente** no formulário de novo gasto (`TransactionForm`): quando valor e descrição são parecidos (±10%) com um gasto da mesma categoria no mês anterior, aparece "Marcar como fixo" — ao confirmar, cria uma assinatura (`saveSubscription`) com os dados do lançamento, para que os próximos meses sejam gerados automaticamente. Função pura `findRecurringCandidate` em `src/domain/quickEntry.ts`.
+- Testes: `tests/subscriptions.test.ts` (lembretes), `tests/domain.test.ts` (alerta de cobrança chegando) e `tests/quickEntry.test.ts` (`findRecurringCandidate`). Total: 231 testes.
+
+### Técnico
+- `CACHE_VERSION` do service worker: `v1.9.0`. Versão do pacote: 1.8.0 → 1.9.0 (MINOR).
+
+### Documentação
+- `DECISOES_TECNICAS.md`: DT-022 (lembretes, projeção de saldo e sugestão de fixo reaproveitam o modelo de Assinaturas e os alertas existentes). `ESCOPO_PROJETO.md`: seções 10.1, 10.2, 11 (regras 57–59) e acompanhamento v1.9.0.
+
+---
+
 ## [1.8.0] - 31/10/2026 — Navegação em 2 níveis: barra inferior simplificada e hub "Mais"
 
 ### Adicionado

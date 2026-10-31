@@ -6,11 +6,17 @@ import { Sheet } from '@/components/common/Sheet';
 import { useToast } from '@/components/common/Toast';
 import { CategoryPicker } from '@/components/forms/CategoryPicker';
 import { FormStack, MoneyField, TextField } from '@/components/forms/Fields';
-import { categoriesByUsage, descriptionSuggestions, lastCategoryForDescription, type DescriptionSuggestion } from '@/domain/quickEntry';
+import {
+  categoriesByUsage,
+  descriptionSuggestions,
+  findRecurringCandidate,
+  lastCategoryForDescription,
+  type DescriptionSuggestion,
+} from '@/domain/quickEntry';
 import type { IsoDate, Transaction, TransactionType } from '@/models';
 import { useFinanceActions, useFinanceData } from '@/store/FinanceProvider';
-import { todayIso } from '@/utils/dates';
-import { centsToInput } from '@/utils/money';
+import { monthKeyOf, todayIso } from '@/utils/dates';
+import { centsToInput, parseMoney } from '@/utils/money';
 import { validateTransaction, type FieldErrors, type TransactionFormValues } from '@/validations';
 import { MissingCategoriesNotice } from './MissingCategoriesNotice';
 import styles from './TransactionForm.module.css';
@@ -62,13 +68,15 @@ function initialValues(transaction: Transaction | null, preset: TransactionPrese
  */
 export function TransactionFormSheet({ open, transaction, preset, onClose }: TransactionFormSheetProps) {
   const { categories, transactions } = useFinanceData();
-  const { saveTransaction, ensureDefaultCategories } = useFinanceActions();
+  const { saveTransaction, ensureDefaultCategories, saveSubscription } = useFinanceActions();
   const { showToast } = useToast();
   const [values, setValues] = useState(() => initialValues(transaction, preset));
   const [errors, setErrors] = useState<FieldErrors<keyof TransactionFormValues>>({});
   const [saving, setSaving] = useState(false);
   const [creatingCategories, setCreatingCategories] = useState(false);
   const [addedCount, setAddedCount] = useState(0);
+  const [markingFixed, setMarkingFixed] = useState(false);
+  const [markedFixed, setMarkedFixed] = useState(false);
   /** Categoria escolhida pelo usuário: as sugestões de descrição não a substituem. */
   const categoryTouched = useRef(Boolean(transaction || preset?.categoryId));
   const formRef = useRef<HTMLFormElement>(null);
@@ -83,6 +91,38 @@ export function TransactionFormSheet({ open, transaction, preset, onClose }: Tra
     [isEditing, transactions, values.description, values.type],
   );
   const categoryName = (id: string) => categories.find((c) => c.id === id)?.name;
+
+  /** Lançamento parecido com um do mês anterior, mesma categoria: sugere marcar como fixo (regra nova, v1.9.0). */
+  const recurringCandidate = useMemo(() => {
+    if (isEditing || values.type !== 'expense' || markedFixed) return null;
+    const amount = parseMoney(values.amount);
+    if (!amount) return null;
+    return findRecurringCandidate(transactions, values.type, values.categoryId, values.description, amount, values.date);
+  }, [isEditing, markedFixed, transactions, values.type, values.categoryId, values.description, values.amount, values.date]);
+
+  /** Cria uma assinatura a partir do lançamento atual, para que ele e os próximos meses sejam gerados automaticamente. */
+  const markAsFixed = async () => {
+    const amount = parseMoney(values.amount);
+    if (!amount || !values.categoryId) return;
+    const category = categories.find((c) => c.id === values.categoryId);
+    setMarkingFixed(true);
+    try {
+      await saveSubscription({
+        name: values.description.trim(),
+        icon: category?.icon ?? 'subscriptions',
+        amount,
+        billingDay: Number(values.date.slice(8, 10)),
+        categoryId: values.categoryId,
+        active: true,
+        startMonth: monthKeyOf(values.date),
+        endMonth: null,
+      });
+      setMarkedFixed(true);
+      showToast({ message: 'Marcado como fixo: criado em Assinaturas.' });
+    } finally {
+      setMarkingFixed(false);
+    }
+  };
 
   const update = <K extends keyof TransactionFormValues>(field: K, value: TransactionFormValues[K]) => {
     setValues((current) => ({ ...current, [field]: value }));
@@ -207,6 +247,17 @@ export function TransactionFormSheet({ open, transaction, preset, onClose }: Tra
               </ul>
             )}
           </div>
+          {recurringCandidate && (
+            <div className={styles.recurringHint}>
+              <Icon name="autorenew" size={20} />
+              <span className={styles.recurringHintText}>
+                Parece com &ldquo;{recurringCandidate.description}&rdquo; do mês passado. Quer marcar como fixo/recorrente?
+              </span>
+              <Button variant="secondary" size="sm" disabled={markingFixed} onClick={() => void markAsFixed()}>
+                Marcar como fixo
+              </Button>
+            </div>
+          )}
           <TextField label="Data" type="date" value={values.date} onChange={(v) => update('date', v)} error={errors.date} />
           <TextField
             label="Observação (opcional)"

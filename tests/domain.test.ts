@@ -255,6 +255,30 @@ describe('alerts', () => {
   it('sem dados não há alertas', () => {
     expect(buildAlerts({ transactions: [], categories, goals: [], month: '2026-10', today: '2026-10-10' })).toEqual([]);
   });
+
+  it('avisa quando uma assinatura vai descontar nos próximos dias', () => {
+    const subscription = {
+      id: 'sub-1',
+      name: 'Netflix',
+      icon: 'live_tv',
+      amount: 4490,
+      billingDay: 12,
+      categoryId: 'misc',
+      active: true,
+      startMonth: '2026-10',
+      endMonth: null,
+      skippedMonths: [],
+      createdAt: '2026-10-01T00:00:00.000Z',
+      updatedAt: '2026-10-01T00:00:00.000Z',
+    };
+    const alerts = buildAlerts({ transactions: [], categories, goals: [], month: '2026-10', today: '2026-10-10', subscriptions: [subscription] });
+    expect(alerts[0]).toMatchObject({ id: 'subscription-due-sub-1-2026-10-12', tone: 'info', to: '/assinaturas' });
+    expect(alerts[0]?.message).toBe('Netflix desconta em 2 dias (R$ 44,90).');
+  });
+
+  it('sem o parâmetro `subscriptions`, não gera lembretes (compatível com chamadas antigas)', () => {
+    expect(buildAlerts({ transactions: [], categories, goals: [], month: '2026-10', today: '2026-10-10' })).toEqual([]);
+  });
 });
 
 describe('transaction filters', () => {

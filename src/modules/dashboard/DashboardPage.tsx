@@ -17,6 +17,7 @@ import { CategorySpendingCard } from './CategorySpendingCard';
 import styles from './Dashboard.module.css';
 import { GoalsHighlightCard } from './GoalsHighlightCard';
 import { MetricCards } from './MetricCards';
+import { ProjectedBalanceCard } from './ProjectedBalanceCard';
 import { RecentTransactionsCard } from './RecentTransactionsCard';
 import { UpcomingChargesCard } from './UpcomingChargesCard';
 import { useDashboard } from './useDashboard';
@@ -65,6 +66,8 @@ export function DashboardPage() {
             saved={saved}
             savedChange={dashboard.savedChange}
           />
+
+          {dashboard.isCurrentMonth && <ProjectedBalanceCard value={dashboard.projectedMonthEndBalance} />}
 
           <div className={styles.quickActions}>
             <Button icon="add_circle" fullWidth onClick={() => openNew()}>

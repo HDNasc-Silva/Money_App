@@ -16,13 +16,13 @@ import { ThemeToggle } from './ThemeToggle';
 
 export function AppHeader() {
   const { pathname } = useLocation();
-  const { transactions, categories, goals, settings } = useFinanceData();
+  const { transactions, categories, goals, subscriptions, settings } = useFinanceData();
   const { month } = useSelectedMonth();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const alerts = useMemo(
-    () => buildAlerts({ transactions, categories, goals, month, today: todayIso() }),
-    [transactions, categories, goals, month],
+    () => buildAlerts({ transactions, categories, goals, month, today: todayIso(), subscriptions }),
+    [transactions, categories, goals, subscriptions, month],
   );
 
   return (

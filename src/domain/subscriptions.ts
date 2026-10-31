@@ -1,5 +1,5 @@
 import type { Cents, IsoDate, MonthKey, Subscription, Transaction } from '@/models';
-import { addMonths, daysInMonth, monthKeyOf } from '@/utils/dates';
+import { addDays, addMonths, daysBetweenInclusive, daysInMonth, monthKeyOf } from '@/utils/dates';
 
 /**
  * ASSINATURAS (DT-017).
@@ -126,6 +126,48 @@ function isForecast(subscription: Subscription, month: MonthKey, today: IsoDate,
     !keys.has(chargeKey(subscription.id, month)) &&
     chargeDate(subscription, month) > today
   );
+}
+
+export interface UpcomingCharge {
+  subscriptionId: string;
+  name: string;
+  icon: string;
+  amount: Cents;
+  date: IsoDate;
+  /** Dias corridos até a cobrança (0 = hoje). */
+  daysUntil: number;
+}
+
+/**
+ * Cobranças previstas (ainda não lançadas) que caem nos próximos `days` dias a partir de hoje
+ * (inclusive). Usada nos lembretes do Início — independe do mês selecionado na navegação.
+ */
+export function subscriptionsChargingSoon(
+  subscriptions: readonly Subscription[],
+  transactions: readonly Transaction[],
+  today: IsoDate,
+  days: number,
+): UpcomingCharge[] {
+  const keys = launchedKeys(transactions);
+  const until = addDays(today, days);
+  const months = [monthKeyOf(today), addMonths(monthKeyOf(today), 1)];
+  const result: UpcomingCharge[] = [];
+  for (const subscription of subscriptions) {
+    for (const month of months) {
+      if (!isForecast(subscription, month, today, keys)) continue;
+      const date = chargeDate(subscription, month);
+      if (date > until) continue;
+      result.push({
+        subscriptionId: subscription.id,
+        name: subscription.name,
+        icon: subscription.icon,
+        amount: subscription.amount,
+        date,
+        daysUntil: daysBetweenInclusive(today, date) - 1,
+      });
+    }
+  }
+  return result.sort((a, b) => a.date.localeCompare(b.date));
 }
 
 export type ChargeStatus = 'launched' | 'forecast';

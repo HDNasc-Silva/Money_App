@@ -9,7 +9,7 @@ import { cumulativeBalance, percentChange, summarizePeriod } from '@/domain/summ
 import { latestTransactions } from '@/domain/transactions';
 import { useFinanceData } from '@/store/FinanceProvider';
 import { useSelectedMonth } from '@/store/SelectedMonth';
-import { addMonths, lastDayOfMonth, todayIso } from '@/utils/dates';
+import { addMonths, lastDayOfMonth, monthKeyOf, todayIso } from '@/utils/dates';
 
 /** Lançamentos exibidos em "Últimos lançamentos". */
 export const RECENT_LIMIT = 5;
@@ -56,8 +56,13 @@ export function useDashboard() {
       goals: highlightedGoals(goals, HIGHLIGHTED_GOALS_LIMIT),
       weeks: weeklyBreakdown(transactions, month),
       budgets: categoryBudgets(transactions, categories, month),
-      alerts: buildAlerts({ transactions, categories, goals, month, today }),
+      alerts: buildAlerts({ transactions, categories, goals, month, today, subscriptions }),
       indicators: periodIndicators(transactions, monthPeriod(month), today),
+      // Saldo projetado até o fim do mês atual: receitas e despesas já conhecidas menos as
+      // assinaturas que ainda vão descontar até o fim do mês (independe do saldo até hoje acima).
+      isCurrentMonth: month === monthKeyOf(today),
+      projectedMonthEndBalance:
+        summary.income - summary.expense - projectedSubscriptionExpenses(subscriptions, transactions, today, lastDayOfMonth(month)),
     };
   }, [transactions, categories, goals, subscriptions, month, today]);
 }
