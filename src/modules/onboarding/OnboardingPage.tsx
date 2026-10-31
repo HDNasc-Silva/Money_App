@@ -62,7 +62,7 @@ export function OnboardingPage() {
             value={values.monthlyIncome}
             onChange={change('monthlyIncome')}
             error={errors.monthlyIncome}
-            hint="Usada como referência para a sua meta de poupança."
+            hint="Fica no seu perfil e pode ser alterada em Ajustes."
           />
           <Button type="submit" icon="arrow_forward" fullWidth disabled={saving}>
             Começar

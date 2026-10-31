@@ -44,20 +44,20 @@ function isStoredDocument(value: unknown): value is StoredDocument {
 
 const pick = <T>(value: unknown, isValid: (v: unknown) => boolean, fallback: T): T => (isValid(value) ? (value as T) : fallback);
 const isBoolean = (v: unknown) => typeof v === 'boolean';
-const isPercent = (v: unknown) => typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 100;
 const isMonthlyIncome = (v: unknown) => isIntegerCents(v) && (v as number) <= MAX_AMOUNT;
 
 /**
  * Normaliza as preferências salvas: campos ausentes (documentos de versões anteriores) ou inválidos
  * recebem o padrão. Migração da v1.4.0: sem `onboardingCompleted`, o documento é de quem já usava o
  * app e o onboarding é considerado concluído (padrão `true`); `monthlyIncome` ausente vira 0.
+ * Migração da v1.5.0: o antigo `savingsTarget` (meta de poupança em %) é descartado — como o objeto
+ * é montado campo a campo, campos desconhecidos nunca chegam ao estado (DT-016).
  */
 function sanitizeSettings(raw: Record<string, unknown>): Settings {
   const d = DEFAULT_SETTINGS;
   return {
     userName: pick(raw.userName, (v) => typeof v === 'string', d.userName).trim().slice(0, USER_NAME_MAX),
     monthlyIncome: pick(raw.monthlyIncome, isMonthlyIncome, d.monthlyIncome),
-    savingsTarget: pick(raw.savingsTarget, isPercent, d.savingsTarget),
     hideBalances: pick(raw.hideBalances, isBoolean, d.hideBalances),
     isDemoData: pick(raw.isDemoData, isBoolean, d.isDemoData),
     onboardingCompleted: pick(raw.onboardingCompleted, isBoolean, d.onboardingCompleted),

@@ -1,6 +1,7 @@
-import type { Cents, Goal, IsoDate, MonthKey } from '@/models';
-import { addMonths, monthKeyOf, monthsBetween } from '@/utils/dates';
+import type { Cents, Goal, IsoDate, MonthKey, Period } from '@/models';
+import { addMonths, lastDayOfMonth, monthKeyOf, monthsBetween } from '@/utils/dates';
 import { sumCents } from '@/utils/money';
+import { isInPeriod } from './periods';
 
 export interface GoalProgress {
   saved: Cents;
@@ -94,6 +95,98 @@ export function goalsSummary(goals: readonly Goal[]): GoalsSummary {
     completed,
     plannedMonthly,
   };
+}
+
+/* ---------- Aportes e dinheiro guardado (poupança = aportes em metas, ver DT-016) ---------- */
+
+/** Soma dos aportes de todas as metas com data dentro do período (não inclui o valor inicial). */
+export function contributionsInPeriod(goals: readonly Goal[], period: Period): Cents {
+  let total = 0;
+  for (const goal of goals) {
+    for (const c of goal.contributions) if (isInPeriod(c.date, period)) total += c.amount;
+  }
+  return total;
+}
+
+/**
+ * Soma dos aportes de todas as metas com data até `date` (inclusive): dinheiro que saiu do
+ * saldo disponível para as metas. O valor inicial não entra, pois foi guardado antes do app.
+ */
+export function contributionsUntil(goals: readonly Goal[], date: IsoDate): Cents {
+  let total = 0;
+  for (const goal of goals) {
+    for (const c of goal.contributions) if (c.date <= date) total += c.amount;
+  }
+  return total;
+}
+
+export interface MonthContributions {
+  month: MonthKey;
+  total: Cents;
+  /** Aportes do mês por id de meta (só metas com aporte no mês). */
+  byGoal: Record<string, Cents>;
+}
+
+/** Aportes de cada mês da lista, no total e por meta. */
+export function monthlyContributions(goals: readonly Goal[], months: readonly MonthKey[]): MonthContributions[] {
+  const buckets = new Map<MonthKey, MonthContributions>(months.map((month) => [month, { month, total: 0, byGoal: {} }]));
+  for (const goal of goals) {
+    for (const c of goal.contributions) {
+      const bucket = buckets.get(monthKeyOf(c.date));
+      if (!bucket) continue;
+      bucket.total += c.amount;
+      bucket.byGoal[goal.id] = (bucket.byGoal[goal.id] ?? 0) + c.amount;
+    }
+  }
+  return months.map((month) => buckets.get(month) as MonthContributions);
+}
+
+/** Mês de criação da meta, ou `null` quando `createdAt` não é uma data reconhecível. */
+const createdMonth = (goal: Goal): MonthKey | null => (/^\d{4}-\d{2}/.test(goal.createdAt) ? goal.createdAt.slice(0, 7) : null);
+
+/**
+ * Valor guardado na meta ao fim de `date`: valor inicial (a partir do mês de criação da meta) +
+ * aportes com data até `date`. Sem data de criação válida, o valor inicial conta sempre.
+ */
+export function goalSavedAt(goal: Goal, date: IsoDate): Cents {
+  const created = createdMonth(goal);
+  const initial = created === null || created <= monthKeyOf(date) ? goal.initialAmount : 0;
+  return initial + sumCents(goal.contributions.filter((c) => c.date <= date).map((c) => c.amount));
+}
+
+export interface SavedPoint {
+  month: MonthKey;
+  /** Total guardado em todas as metas ao fim do mês. */
+  total: Cents;
+}
+
+/** Evolução do total guardado em metas ao fim de cada mês. */
+export const savedEvolution = (goals: readonly Goal[], months: readonly MonthKey[]): SavedPoint[] =>
+  months.map((month) => {
+    const end = lastDayOfMonth(month);
+    return { month, total: goals.reduce((sum, goal) => sum + goalSavedAt(goal, end), 0) };
+  });
+
+/** Total realmente guardado em todas as metas (sem limitar ao alvo). */
+export const totalSaved = (goals: readonly Goal[]): Cents => goals.reduce((sum, goal) => sum + goalSaved(goal), 0);
+
+export interface GoalShare {
+  goalId: string;
+  name: string;
+  icon: string;
+  saved: Cents;
+  /** Participação no total guardado (0–1). */
+  share: number;
+}
+
+/** Distribuição do dinheiro guardado por meta, da maior para a menor (metas sem saldo ficam de fora). */
+export function savedDistribution(goals: readonly Goal[]): GoalShare[] {
+  const total = totalSaved(goals);
+  return goals
+    .map((goal) => ({ goal, saved: goalSaved(goal) }))
+    .filter(({ saved }) => saved > 0)
+    .map(({ goal, saved }) => ({ goalId: goal.id, name: goal.name, icon: goal.icon, saved, share: total > 0 ? saved / total : 0 }))
+    .sort((a, b) => b.saved - a.saved);
 }
 
 export interface SimulationScenario {

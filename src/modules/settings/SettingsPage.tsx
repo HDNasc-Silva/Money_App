@@ -17,7 +17,6 @@ import { centsToInput } from '@/utils/money';
 import { validateProfileSettings, type FieldErrors, type ProfileSettingsFormValues } from '@/validations';
 import { CategoriesSettings } from './CategoriesSettings';
 import { InstallAppCard } from './InstallAppCard';
-import { SavingsTargetSummary } from './SavingsTargetSummary';
 import styles from './Settings.module.css';
 
 const THEME_OPTIONS = (Object.keys(THEME_LABELS) as ThemeName[]).map((value) => ({ value, label: THEME_LABELS[value] }));
@@ -35,7 +34,6 @@ export function SettingsPage() {
   const [profile, setProfile] = useState<ProfileSettingsFormValues>(() => ({
     name: settings.userName,
     monthlyIncome: settings.monthlyIncome > 0 ? centsToInput(settings.monthlyIncome) : '',
-    savingsTarget: String(settings.savingsTarget),
   }));
   const [profileErrors, setProfileErrors] = useState<FieldErrors<keyof ProfileSettingsFormValues>>({});
   const [pending, setPending] = useState<PendingAction>(null);
@@ -91,33 +89,25 @@ export function SettingsPage() {
   return (
     <Page title="Ajustes" description="Perfil, aparência e gerenciamento dos seus dados.">
       <Card>
-        <CardHeader title="Perfil e meta de poupança" />
+        <CardHeader title="Perfil" subtitle="O que você guarda é acompanhado pelas suas metas." />
         <form onSubmit={saveProfile} noValidate>
           <FormStack>
-            <TextField
-              label="Seu nome"
-              value={profile.name}
-              onChange={changeProfile('name')}
-              error={profileErrors.name}
-              maxLength={USER_NAME_MAX}
-              autoComplete="given-name"
-            />
             <FormRow>
+              <TextField
+                label="Seu nome"
+                value={profile.name}
+                onChange={changeProfile('name')}
+                error={profileErrors.name}
+                maxLength={USER_NAME_MAX}
+                autoComplete="given-name"
+              />
               <MoneyField
                 label="Renda mensal"
                 value={profile.monthlyIncome}
                 onChange={changeProfile('monthlyIncome')}
                 error={profileErrors.monthlyIncome}
               />
-              <TextField
-                label="Meta de poupança (%)"
-                inputMode="numeric"
-                value={profile.savingsTarget}
-                onChange={changeProfile('savingsTarget')}
-                error={profileErrors.savingsTarget}
-              />
             </FormRow>
-            <SavingsTargetSummary monthlyIncome={profile.monthlyIncome} savingsTarget={profile.savingsTarget} />
             <Button type="submit" icon="check">
               Salvar preferências
             </Button>

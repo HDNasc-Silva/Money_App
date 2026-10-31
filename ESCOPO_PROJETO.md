@@ -2,7 +2,7 @@
 
 > Documento oficial de referência. Representa o **estado atual real** do aplicativo e deve ser atualizado a cada alteração do sistema (ver `CHANGELOG.md` e `DECISOES_TECNICAS.md`).
 
-**Versão atual:** 1.4.0 (primeiro acesso vazio com boas-vindas, renda mensal na meta de poupança e app instalável/PWA)
+**Versão atual:** 1.5.0 (Gráficos centrados nas metas; poupança = aportes em metas; saldo disponível desconta aportes; taxa/meta de poupança em % removida)
 **Última atualização:** 30/10/2026
 
 ---
@@ -131,22 +131,22 @@ Money_APP/
 
 | Módulo | Responsabilidade |
 |---|---|
-| **Visão Geral** (`modules/dashboard`) | Saldo do período, receitas, despesas, poupança, alertas do mês, gráfico semanal, gastos por categoria vs. limite, seletor de mês, atalho para novo lançamento |
+| **Visão Geral** (`modules/dashboard`) | Saldo disponível (descontados os aportes em metas), receitas, despesas, poupança (aportes em metas no mês), alertas do mês, gráfico semanal, gastos por categoria vs. limite, seletor de mês, atalho para novo lançamento |
 | **Lançamentos** (`modules/transactions`) | CRUD de receitas/despesas, histórico agrupado por dia, busca, filtros (período, tipo, categoria), duplicar |
 | **Categorias** (`modules/categories`) | CRUD de categorias, limite mensal, gasto atual, % consumido, alertas de limite, teto global, filtro por grupo |
 | **Metas** (`modules/goals`) | CRUD de metas, valor alvo/acumulado, prazo, progresso, aportes, simulador de aporte mensal e cenários |
-| **Relatórios** (`modules/reports`) | Receitas × despesas, evolução do saldo, tendência de 6 meses/ano, distribuição por categoria, comparação com período anterior, indicadores, exportação CSV/PDF |
+| **Relatórios / Gráficos** (`modules/reports`) | Centrado nas metas: total guardado, aportes no período, aportes por mês por meta, evolução acumulada do total guardado, distribuição por meta, progresso e previsão de cada meta, estado vazio com atalho para Metas. Secundário: receitas × despesas por mês, distribuição por categoria, comparação com período anterior (inclui aportes), hábitos de gastos, exportação CSV/PDF |
 | **Boas-vindas** (`modules/onboarding`) | Tela do primeiro acesso ("Como prefere ser chamado?": nome obrigatório e renda mensal opcional) e `OnboardingGate`, que mostra o carregamento e redireciona entre boas-vindas e app conforme `settings.onboardingCompleted` |
-| **Ajustes** (`modules/settings`) | Perfil e meta de poupança (nome, renda mensal, meta % e valor da meta em R$), tema, gerenciamento de categorias (lista, criar, editar, excluir, restaurar padrão), instalar app (PWA), carregar dados de demonstração, apagar dados (recriando as categorias padrão), exportar/importar backup JSON |
+| **Ajustes** (`modules/settings`) | Perfil (nome e renda mensal), tema, gerenciamento de categorias (lista, criar, editar, excluir, restaurar padrão), instalar app (PWA), carregar dados de demonstração, apagar dados (recriando as categorias padrão), exportar/importar backup JSON |
 | Design System (`design-system`, `theme`) | Tokens dos dois temas, alternância e persistência |
 | Persistência (`services`) | Leitura/gravação segura e versionada dos dados |
 
 ## 10. Funcionalidades previstas (detalhe)
 
 ### 10.1 Visão Geral
-- Saldo do mês (receitas − despesas do período) e saldo acumulado total; botão para ocultar valores (preferência persistida).
-- Cartões Receitas, Despesas, Poupança com variação em relação ao mês anterior.
-- Alertas automáticos: categoria acima do limite, categoria acima de 80%, gastos maiores que o mês anterior, meta ≥ 80%, economia maior que o mês anterior.
+- Saldo disponível (receitas − despesas − aportes em metas, acumulados até a data de referência; regra 36); botão para ocultar valores (preferência persistida). O cartão informa quanto foi guardado em metas no mês (ou "Mês negativo" quando as despesas superam as receitas).
+- Cartões Receitas (variação vs mês anterior), Despesas (% das receitas) e Poupança = aportes em metas no mês (variação vs mês anterior; regra 35).
+- Alertas automáticos: categoria acima do limite, categoria acima de 80%, gastos maiores que o mês anterior, meta ≥ 80%, aportes em metas maiores que no mesmo período do mês anterior.
 - Gráfico Receitas vs Despesas por semana do mês (interativo).
 - Gastos por categoria com barra de limite; "Editar tetos" leva a Categorias.
 - Seletor de mês (anterior/próximo) compartilhado com Categorias e Relatórios; permite meses futuros até 60 meses à frente, com indicação "Mês futuro" e saldo previsto (regras 20 e 27).
@@ -175,13 +175,15 @@ Money_APP/
 - Simulador: selecionar meta, aporte mensal (slider + atalhos), meses necessários, data prevista, cenários conservador (60%) / moderado (100%) / foco total (150%), aviso se não cumprir o prazo e aporte mensal necessário para cumpri-lo; botão para adotar o valor simulado como aporte planejado.
 - Resumo geral: total acumulado, total pretendido, % geral.
 
-### 10.5 Relatórios
-- Intervalos: mês atual, últimos 6 meses, ano.
-- Diagnóstico: taxa de poupança, variação vs. período anterior, meta de poupança (configurável, padrão 20%).
-- Evolução mensal guardado × gastos (barras empilhadas) e evolução do saldo acumulado (linha), com tooltip.
-- Distribuição de despesas por categoria (rosca + barras).
-- Comparação entre períodos (receitas, despesas, saldo, variação %).
-- Indicadores: dias sem gastos, maior despesa, média diária de gastos, economia vs. média.
+### 10.5 Relatórios (aba "Gráficos") — centrados nas metas (v1.5.0, DT-016)
+- Intervalos: mês selecionado, 6 meses até o mês selecionado, ano até o mês selecionado.
+- Resumo das metas: total guardado em todas as metas, aportado no período (com variação vs. período anterior), quanto falta para concluir todas, nº de metas concluídas, barra de progresso geral.
+- Aportes por mês (barras empilhadas por meta; até 5 metas + "Outras metas"; janela de 6 meses ou o ano), com média mensal.
+- Evolução acumulada do total guardado (linha) e crescimento no intervalo.
+- Distribuição do dinheiro guardado por meta (rosca + barras).
+- Progresso de cada meta: barra, %, guardado/alvo e previsão de conclusão (aporte mensal planejado), indicando quando passa do prazo.
+- Sem metas: estado vazio com botão "Ir para Metas".
+- Seção secundária "Receitas × despesas": barras mensais de receitas e despesas, comparação entre períodos (receitas, despesas, saldo, aportes em metas, variação %), distribuição de despesas por categoria, hábitos (dias sem gastos, maior despesa, média diária).
 - Exportação CSV (lançamentos do intervalo) e PDF (via impressão do navegador).
 
 ## 11. Regras de negócio
@@ -191,14 +193,14 @@ Money_APP/
 3. Descrição obrigatória (1–80 caracteres). Data obrigatória e válida (futuras permitidas até o limite da regra 27).
 4. Lançamento de despesa só aceita categoria de despesa; receita só categoria de receita.
 5. Saldo do período = Σ receitas − Σ despesas do período. Saldo acumulado = mesma soma até o fim do período.
-6. Poupança do período = max(saldo do período, 0); taxa de poupança = poupança ÷ receitas (0 se não houver receitas).
+6. ~~Poupança do período = max(saldo do período, 0); taxa de poupança = poupança ÷ receitas.~~ Substituída na v1.5.0 (DT-016): não existe mais taxa nem meta de poupança em %; a poupança é definida pela regra 35.
 7. Consumo de categoria = Σ despesas da categoria no mês ÷ limite mensal. Sem limite → sem alerta.
 8. Status do limite: `< 80%` ok · `80% a 100%` atenção · `> 100%` excedido.
 9. Teto global = Σ limites das categorias de despesa; disponível = teto global − despesas do mês em categorias com limite.
 10. Meta: acumulado = valor inicial + Σ aportes; progresso = acumulado ÷ alvo (limitado a 100%); concluída quando acumulado ≥ alvo.
 11. Meses para atingir meta = ⌈restante ÷ aporte mensal⌉; aporte ≤ 0 → "não atinge".
 12. Aporte mensal necessário para o prazo = ⌈restante ÷ meses até o prazo⌉ (mínimo 1 mês).
-13. Aportes em metas **não** geram lançamento automático nesta versão (ver DT-008).
+13. Aportes em metas **não** geram lançamento automático e não contam como despesa (ver DT-008); desde a v1.5.0 eles são a poupança do mês e reduzem o saldo disponível (regras 35–36, DT-016).
 14. Semanas do mês: dias 1–7, 8–14, 15–21, 22–28, 29–fim (a 5ª semana só aparece se existir).
 15. Categoria com lançamentos vinculados não pode ser excluída.
 16. Nomes de categoria únicos (sem diferenciar maiúsculas/minúsculas) por tipo.
@@ -218,8 +220,12 @@ Money_APP/
 30. **Boas-vindas (onboarding)**: aparece enquanto `settings.onboardingCompleted` for `false`; qualquer rota leva a ela e não há cabeçalho nem navegação. Nome obrigatório (espaços extras removidos, 1–40 caracteres); renda mensal opcional (máscara da regra 24; vazio = não informada). "Começar" salva o perfil, marca o onboarding como concluído e abre o Início com "Olá, <nome>". Depois de concluído, a rota de boas-vindas redireciona para o Início.
 31. **Migração (v1.4.0)**: documentos salvos por versões anteriores não têm `onboardingCompleted` e são tratados como onboarding concluído (quem já usava o app não é interrompido); `monthlyIncome` ausente vale 0. Campos de preferências inválidos voltam ao padrão. Importar um backup nunca reabre as boas-vindas.
 32. **Nome do usuário**: não há nome padrão. Sem nome (possível apagando-o em Ajustes), a saudação é apenas "Olá".
-33. **Renda mensal** (`settings.monthlyIncome`, centavos, 0 = não informada): editável no onboarding e em Ajustes, no mesmo card da meta de poupança. O card mostra quanto a meta representa por mês: `round(renda × meta% ÷ 100)` (ex.: 20% de R$ 5.000,00 = R$ 1.000,00). É apenas referência: os cálculos da Visão Geral (taxa de poupança = poupança ÷ receitas lançadas) não mudam.
+33. **Renda mensal** (`settings.monthlyIncome`, centavos, 0 = não informada): editável no onboarding e em Ajustes → card "Perfil". É apenas referência no perfil e não entra em nenhum cálculo. (Até a v1.4.0 o card também tinha a meta de poupança em % e o valor dela em R$; removidos na v1.5.0.)
 34. **Instalação (PWA)**: o app é instalável (manifest + service worker, DT-015). Em Ajustes → "Instalar app": botão nativo quando o navegador oferece a instalação (Chrome/Edge/Android); no iPhone/iPad, instruções (Safari → Compartilhar → Adicionar à Tela de Início); nos demais, instrução pelo menu do navegador; já instalado, informa que está aberto como aplicativo.
+35. **Poupança = aportes em metas** (v1.5.0, DT-016): poupança de um período = Σ aportes de todas as metas com data no período (o valor inicial da meta não entra). No Início, o KPI "Poupança" mostra a do mês selecionado, com variação vs. mês anterior. O alerta "Ótima Notícia" aparece quando os aportes do mês superam os do mesmo intervalo de dias do mês anterior (e este teve aportes).
+36. **Saldo disponível** = Σ receitas − Σ despesas − Σ aportes em metas, todos com data até a data de referência (mês atual: hoje; mês passado/futuro: último dia do mês). O dinheiro aportado sai do saldo disponível, mas não aparece como despesa, no extrato, nos limites de categoria nem no CSV. Valores iniciais das metas não são descontados.
+37. **Gráficos das metas**: total guardado, falta para concluir, concluídas, distribuição e progresso refletem a situação atual; o período escolhido define os aportes do período, a comparação com o período anterior e a janela dos gráficos. Na evolução acumulada, o valor inicial de cada meta conta a partir do mês de criação; os aportes, pela data. O total guardado usa o valor real (sem limitar ao alvo).
+38. **Migração (v1.5.0)**: documentos e backups com `settings.savingsTarget` carregam normalmente; o campo é descartado na leitura e removido do storage no próximo salvamento.
 
 ## 12. Fluxos de navegação
 
@@ -236,7 +242,7 @@ Visão Geral → "Ver todas as transações" / "Histórico" → Lançamentos
 Lançamentos → item → ações (editar / duplicar / excluir)
 Categorias → "Ajustar limite" → formulário · "Ver histórico" → Lançamentos filtrado pela categoria
 Metas → "Aportar" → formulário de aporte · simulador → resultado em tempo real
-Relatórios → exportar CSV / PDF
+Relatórios (Gráficos) → resumo e gráficos das metas · sem metas: "Ir para Metas" → Metas · exportar CSV / PDF
 ```
 
 ## 13. Design Systems
@@ -267,7 +273,7 @@ Os tokens ficam em `src/design-system/` como variáveis CSS com **nomes semânti
 - Repositórios assíncronos (`TransactionRepository`, `CategoryRepository`, `GoalRepository`, `SettingsRepository`) — a UI nunca acessa o storage diretamente.
 - Erros de leitura (JSON corrompido) → dados preservados em chave de backup e app inicia vazio com aviso; erros de gravação (cota) → toast de erro, estado não é perdido em memória.
 - Nenhum dado sensível (senhas, documentos) é armazenado.
-- Preferências (`settings`) são saneadas campo a campo na leitura (`sanitizeSettings` em `FinanceDocument.ts`): ausentes ou inválidos recebem o padrão (migração da v1.4.0, regra 31). O `schemaVersion` continua 1 (mudança apenas aditiva).
+- Preferências (`settings`) são saneadas campo a campo na leitura (`sanitizeSettings` em `FinanceDocument.ts`): ausentes ou inválidos recebem o padrão (migração da v1.4.0, regra 31); campos que não existem mais, como o antigo `savingsTarget`, são descartados (regra 38). O `schemaVersion` continua 1.
 - Service worker (`public/sw.js`, só em produção): guarda o app shell e os arquivos do build no Cache Storage para abrir offline. Os dados financeiros continuam apenas no `localStorage`.
 
 ## 16. Integração entre módulos
@@ -282,17 +288,17 @@ Os tokens ficam em `src/design-system/` como variáveis CSS com **nomes semânti
 | RF-02 | Buscar e filtrar lançamentos por texto, período, tipo e categoria |
 | RF-03 | Cadastrar, editar e excluir categorias com limite mensal |
 | RF-04 | Calcular gasto, % consumido e status de cada categoria no mês |
-| RF-05 | Exibir saldo, receitas, despesas e poupança do mês selecionado |
+| RF-05 | Exibir saldo disponível, receitas, despesas e poupança (aportes em metas) do mês selecionado |
 | RF-06 | Gerar alertas mensais automáticos |
 | RF-07 | Cadastrar, editar e excluir metas; registrar aportes |
 | RF-08 | Simular aporte mensal e calcular prazo/data de conclusão |
-| RF-09 | Exibir relatórios por intervalo com gráficos interativos e comparação de períodos |
+| RF-09 | Exibir relatórios por intervalo centrados nas metas (aportes, total guardado, distribuição, progresso), com receitas × despesas e comparação de períodos |
 | RF-10 | Exportar lançamentos em CSV e relatório em PDF (impressão) |
 | RF-11 | Alternar tema claro/escuro com persistência e respeito ao tema do sistema |
 | RF-12 | Persistir todos os dados localmente entre sessões |
 | RF-13 | Carregar dados de demonstração (a pedido), apagar dados, exportar/importar backup JSON |
 | RF-14 | Tela de boas-vindas no primeiro acesso (nome obrigatório, renda opcional) |
-| RF-15 | Renda mensal no perfil, com o valor da meta de poupança em R$ |
+| RF-15 | Renda mensal no perfil (referência; a meta de poupança em % foi removida na v1.5.0) |
 | RF-16 | Instalar o app no celular/computador (PWA) e abrir offline após o primeiro acesso |
 
 ## 18. Requisitos não funcionais
@@ -378,6 +384,13 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 - ✅ PWA: manifest, ícones PNG 192/512 (any e maskable) e apple-touch-icon 180, metas para iOS/Android, service worker versionado e card "Instalar app" (regra 34, DT-015). Build verificado: `dist/` contém `manifest.webmanifest`, `sw.js` e `icons/`.
 - ✅ 141 testes automatizados (12 de integração em `tests/onboarding.test.tsx` e 9 unitários em `tests/profile.test.ts` novos).
 
+### Concluído (v1.5.0 — testado automaticamente)
+- ✅ Taxa e meta de poupança (%) removidas de todo o app; Ajustes com o card "Perfil" (nome e renda) (regras 6, 33, 38, DT-016).
+- ✅ Poupança = aportes em metas: KPI "Poupança" do Início com variação vs mês anterior; alerta de aportes (regra 35).
+- ✅ Saldo disponível desconta os aportes em metas (regra 36).
+- ✅ Tela de Gráficos centrada nas metas: resumo, aportes por mês empilhados por meta, evolução acumulada, distribuição por meta, progresso com previsão, estado vazio com "Ir para Metas"; receitas × despesas como seção secundária (10.5, regra 37).
+- ✅ 151 testes automatizados (9 unitários em `tests/goalSavings.test.ts` e 3 de integração em `tests/goalReports.test.tsx` novos; testes da meta de poupança substituídos).
+
 ### Em desenvolvimento
 - Nenhum.
 
@@ -389,7 +402,8 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 
 ### Problemas conhecidos / limitações
 - Fontes e ícones vêm do Google Fonts: sem internet, o app funciona, mas os ícones aparecem como texto.
-- Aportes em metas não aparecem no extrato (DT-008).
+- Aportes em metas não aparecem no extrato nem no CSV (DT-008), embora reduzam o saldo disponível (DT-016). Quem registrava aportes também como despesas manuais terá o valor descontado duas vezes e deve remover esses lançamentos.
+- Gráficos das metas (v1.5.0): validados em jsdom; a aparência nos dois temas e em 320–375 px ainda não foi conferida visualmente no navegador. Com mais de 5 metas, as demais aparecem agrupadas em "Outras metas" no gráfico de aportes e na rosca. Metas excluídas levam junto seus aportes (o histórico de poupança daquele dinheiro some).
 - Sem testes E2E em navegador real automatizados; a verificação visual foi manual (375 px e 1366 px, temas claro e escuro).
 - O projeto não está sob controle de versão (Git não instalado no ambiente).
 - Dados ficam apenas no navegador atual (sem sincronização entre dispositivos).

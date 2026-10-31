@@ -246,28 +246,18 @@ export function validateOnboarding(values: OnboardingFormValues): ValidationResu
   return { ok: true, value: { userName: name.value, monthlyIncome: income.value } };
 }
 
-export interface ProfileSettingsFormValues extends OnboardingFormValues {
-  savingsTarget: string;
-}
+/** Os campos do perfil em Ajustes são os mesmos das boas-vindas. */
+export type ProfileSettingsFormValues = OnboardingFormValues;
 
-export type ProfileSettingsDraft = ProfileDraft & Pick<Settings, 'savingsTarget'>;
-type ProfileSettingsField = keyof ProfileSettingsFormValues;
-
-/** Ajustes → Perfil e metas. O nome pode ficar vazio aqui (a saudação passa a ser só "Olá"). */
-export function validateProfileSettings(
-  values: ProfileSettingsFormValues,
-): ValidationResult<ProfileSettingsDraft, ProfileSettingsField> {
-  const errors: FieldErrors<ProfileSettingsField> = {};
+/** Ajustes → Perfil. O nome pode ficar vazio aqui (a saudação passa a ser só "Olá"). */
+export function validateProfileSettings(values: ProfileSettingsFormValues): ValidationResult<ProfileDraft, OnboardingField> {
+  const errors: FieldErrors<OnboardingField> = {};
   const name = validateText(values.name, 'Nome', USER_NAME_MAX, false);
   if (name.error) errors.name = name.error;
   const income = validateMonthlyIncome(values.monthlyIncome);
   if (income.error) errors.monthlyIncome = income.error;
-  const target = Number(values.savingsTarget.replace(',', '.'));
-  if (!values.savingsTarget.trim() || !Number.isFinite(target) || target < 0 || target > 100) {
-    errors.savingsTarget = 'Informe um percentual entre 0 e 100.';
-  }
   if (Object.keys(errors).length > 0) return { ok: false, errors };
-  return { ok: true, value: { userName: name.value, monthlyIncome: income.value, savingsTarget: Math.round(target) } };
+  return { ok: true, value: { userName: name.value, monthlyIncome: income.value } };
 }
 
 /* ---------- Aporte ---------- */

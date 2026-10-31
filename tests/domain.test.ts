@@ -23,22 +23,12 @@ describe('summary', () => {
     tx({ type: 'expense', amount: 335000, date: '2026-10-10' }),
   ];
 
-  it('calcula receitas, despesas, saldo e taxa de poupança', () => {
-    expect(summarize(list)).toEqual({
-      income: 820000,
-      expense: 335000,
-      balance: 485000,
-      savings: 485000,
-      savingsRate: 485000 / 820000,
-      count: 2,
-    });
+  it('calcula receitas, despesas e saldo (sem taxa de poupança)', () => {
+    expect(summarize(list)).toEqual({ income: 820000, expense: 335000, balance: 485000, count: 2 });
   });
 
-  it('poupança não fica negativa e taxa é 0 sem receitas', () => {
-    const result = summarize([tx({ type: 'expense', amount: 1000, date: '2026-10-01' })]);
-    expect(result.balance).toBe(-1000);
-    expect(result.savings).toBe(0);
-    expect(result.savingsRate).toBe(0);
+  it('saldo do período pode ser negativo', () => {
+    expect(summarize([tx({ type: 'expense', amount: 1000, date: '2026-10-01' })]).balance).toBe(-1000);
   });
 
   it('saldo acumulado considera apenas datas até o limite', () => {
@@ -156,10 +146,12 @@ describe('periods & reports', () => {
     expect(weeklyBreakdown([], '2026-02')).toHaveLength(4);
   });
 
-  it('série mensal com saldo acumulado', () => {
+  it('série mensal de receitas e despesas', () => {
     const series = monthlySeries(list, { start: '2026-09-01', end: '2026-10-31' });
-    expect(series.map((p) => p.closingBalance)).toEqual([50_000, 110_000]);
-    expect(series[1]).toMatchObject({ income: 100_000, expense: 40_000, saved: 60_000 });
+    expect(series).toEqual([
+      { month: '2026-09', income: 50_000, expense: 0, balance: 50_000 },
+      { month: '2026-10', income: 100_000, expense: 40_000, balance: 60_000 },
+    ]);
   });
 
   it('distribuição de despesas ordenada por valor', () => {
@@ -220,9 +212,9 @@ describe('periods & reports', () => {
     const period = monthPeriod('2026-12');
     const indicators = periodIndicators([], period, '2026-10-30');
     expect(indicators).toEqual({ days: 0, noSpendDays: 0, daysWithRecords: 0, largestExpense: null, averageDailyExpense: 0 });
-    expect(summarize([]).savingsRate).toBe(0);
+    expect(summarize([])).toEqual({ income: 0, expense: 0, balance: 0, count: 0 });
     expect(expenseDistribution([], categories, period)).toEqual([]);
-    expect(monthlySeries(list, monthsPeriod('2026-12', 3)).map((p) => p.closingBalance)).toEqual([110_000, 110_000, 110_000]);
+    expect(monthlySeries(list, monthsPeriod('2026-12', 3)).map((p) => p.balance)).toEqual([60_000, 0, 0]);
     const alerts = buildAlerts({ transactions: list, categories, goals: [], month: '2026-12', today: '2026-10-30' });
     expect(alerts.filter((a) => a.id === 'spending-up' || a.id === 'savings-up')).toEqual([]);
   });

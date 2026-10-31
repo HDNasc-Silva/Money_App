@@ -1,5 +1,15 @@
 import { useMemo } from 'react';
-import { monthPeriod, monthsPeriod, previousPeriod } from '@/domain/periods';
+import {
+  contributionsInPeriod,
+  goalForecast,
+  goalProgress,
+  goalsSummary,
+  monthlyContributions,
+  savedDistribution,
+  savedEvolution,
+  totalSaved,
+} from '@/domain/goals';
+import { monthPeriod, monthsInPeriod, monthsPeriod, previousPeriod } from '@/domain/periods';
 import { comparePeriods, expenseDistribution, monthlySeries, periodIndicators } from '@/domain/reports';
 import type { MonthKey, Period } from '@/models';
 import { useFinanceData } from '@/store/FinanceProvider';
@@ -24,7 +34,7 @@ export function intervalLabel(interval: ReportInterval, month: MonthKey): string
 }
 
 export function useReport(interval: ReportInterval, month: MonthKey) {
-  const { transactions, categories } = useFinanceData();
+  const { transactions, categories, goals } = useFinanceData();
   const today = todayIso();
 
   return useMemo(() => {
@@ -32,9 +42,22 @@ export function useReport(interval: ReportInterval, month: MonthKey) {
     const previous = previousPeriod(period);
     const months = Number(month.slice(5, 7));
     const trendPeriod = interval === 'year' && months >= TREND_MONTHS ? period : monthsPeriod(month, TREND_MONTHS);
+    const trendMonths = monthsInPeriod(trendPeriod);
     return {
       period,
       previous,
+      /** Metas: estoque atual (guardado, falta, concluídas) e fluxo do período (aportes). */
+      goals: {
+        count: goals.length,
+        summary: goalsSummary(goals),
+        totalSaved: totalSaved(goals),
+        contributed: contributionsInPeriod(goals, period),
+        previousContributed: contributionsInPeriod(goals, previous),
+        monthly: monthlyContributions(goals, trendMonths),
+        evolution: savedEvolution(goals, trendMonths),
+        distribution: savedDistribution(goals),
+        items: goals.map((goal) => ({ goal, progress: goalProgress(goal), forecast: goalForecast(goal, today) })),
+      },
       comparison: comparePeriods(transactions, period, previous),
       series: monthlySeries(transactions, trendPeriod),
       distribution: expenseDistribution(transactions, categories, period),
@@ -43,5 +66,8 @@ export function useReport(interval: ReportInterval, month: MonthKey) {
         .filter((t) => t.date >= period.start && t.date <= period.end)
         .sort((a, b) => a.date.localeCompare(b.date)),
     };
-  }, [transactions, categories, interval, month, today]);
+  }, [transactions, categories, goals, interval, month, today]);
 }
+
+export type Report = ReturnType<typeof useReport>;
+export type GoalsReport = Report['goals'];

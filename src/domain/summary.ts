@@ -4,12 +4,8 @@ import { isInPeriod } from './periods';
 export interface PeriodSummary {
   income: Cents;
   expense: Cents;
-  /** Receitas − despesas (pode ser negativo). */
+  /** Receitas − despesas (pode ser negativo). A poupança são os aportes em metas (DT-016). */
   balance: Cents;
-  /** Parte positiva do saldo. */
-  savings: Cents;
-  /** Poupança ÷ receitas (0 quando não há receitas). */
-  savingsRate: number;
   count: number;
 }
 
@@ -23,16 +19,7 @@ export function summarize(transactions: readonly Transaction[]): PeriodSummary {
     if (t.type === 'income') income += t.amount;
     else expense += t.amount;
   }
-  const balance = income - expense;
-  const savings = Math.max(balance, 0);
-  return {
-    income,
-    expense,
-    balance,
-    savings,
-    savingsRate: income > 0 ? savings / income : 0,
-    count: transactions.length,
-  };
+  return { income, expense, balance: income - expense, count: transactions.length };
 }
 
 export const summarizePeriod = (transactions: readonly Transaction[], period: Period): PeriodSummary =>
@@ -52,14 +39,4 @@ export function cumulativeBalance(transactions: readonly Transaction[], date: Is
 export function percentChange(current: number, previous: number): number | null {
   if (previous === 0) return null;
   return (current - previous) / Math.abs(previous);
-}
-
-/**
- * Valor mensal que a meta de poupança representa sobre a renda informada em Ajustes
- * (ex.: 20% de R$ 5.000,00 = R$ 1.000,00). `null` quando a renda não foi informada.
- */
-export function savingsTargetAmount(monthlyIncome: Cents, targetPercent: number): Cents | null {
-  if (monthlyIncome <= 0) return null;
-  const percent = Math.min(Math.max(targetPercent, 0), 100);
-  return Math.round((monthlyIncome * percent) / 100);
 }

@@ -78,7 +78,7 @@ describe('navegação para meses futuros', () => {
 
     await user.click(screen.getAllByRole('link', { name: /Gráficos|Relatórios/ })[0]!);
     const main = within(await screen.findByRole('main'));
-    await screen.findByRole('heading', { name: 'Tendências & Relatórios' });
+    await screen.findByRole('heading', { name: 'Relatórios das Metas' });
     expect(main.getByText(formatMonthLabel(addMonths(currentMonth(), 1)))).toBeInTheDocument();
     expect(main.getAllByText('Período ainda não iniciado.').length).toBeGreaterThan(0);
     expect(main.queryByText(/NaN|Infinity/)).not.toBeInTheDocument();

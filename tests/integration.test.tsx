@@ -59,7 +59,7 @@ describe('integração entre módulos', () => {
     expect(screen.getByText('Alerta de Compensação')).toBeInTheDocument();
 
     await user.click(screen.getAllByRole('link', { name: /Gráficos|Relatórios/ })[0]!);
-    expect(await screen.findByRole('heading', { name: 'Tendências & Relatórios' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Relatórios das Metas' })).toBeInTheDocument();
     expect(screen.getByRole('img', { name: /Alimentação 100,0%/ })).toBeInTheDocument();
   });
 

@@ -1,8 +1,8 @@
 import type { Category, Cents, IsoDate, MonthKey, Period, Transaction } from '@/models';
-import { daysBetweenInclusive, daysInMonth, lastDayOfMonth, monthKeyOf } from '@/utils/dates';
+import { daysBetweenInclusive, daysInMonth, monthKeyOf } from '@/utils/dates';
 import { spendingByCategory } from './budgets';
 import { monthPeriod, monthsInPeriod } from './periods';
-import { cumulativeBalance, filterByPeriod, summarize } from './summary';
+import { filterByPeriod, summarize } from './summary';
 
 export interface WeekBucket {
   label: string;
@@ -30,23 +30,15 @@ export interface MonthPoint {
   month: MonthKey;
   income: Cents;
   expense: Cents;
-  saved: Cents;
-  savingsRate: number;
-  /** Saldo acumulado ao fim do mês. */
-  closingBalance: Cents;
+  /** Receitas − despesas do mês. */
+  balance: Cents;
 }
 
+/** Receitas e despesas de cada mês do período. */
 export function monthlySeries(transactions: readonly Transaction[], period: Period): MonthPoint[] {
   return monthsInPeriod(period).map((month) => {
-    const summary = summarize(filterByPeriod(transactions, monthPeriod(month)));
-    return {
-      month,
-      income: summary.income,
-      expense: summary.expense,
-      saved: summary.savings,
-      savingsRate: summary.savingsRate,
-      closingBalance: cumulativeBalance(transactions, lastDayOfMonth(month)),
-    };
+    const { income, expense, balance } = summarize(filterByPeriod(transactions, monthPeriod(month)));
+    return { month, income, expense, balance };
   });
 }
 

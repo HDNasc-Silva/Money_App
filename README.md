@@ -4,19 +4,19 @@ Aplicativo web de gerenciamento de finanças pessoais, mobile-first, com tema cl
 
 ## Objetivo
 
-Registrar receitas e despesas, controlar limites de orçamento por categoria, acompanhar metas financeiras com simulador de aportes e analisar a evolução em relatórios — tudo integrado e salvo localmente no navegador.
+Registrar receitas e despesas, controlar limites de orçamento por categoria, guardar dinheiro em metas financeiras (com simulador de aportes) e acompanhar nos gráficos quanto está sendo guardado — tudo integrado e salvo localmente no navegador.
 
 ## Módulos
 
 | Módulo | O que faz |
 |---|---|
-| Visão Geral | Saldo, receitas, despesas, poupança, alertas, gráfico semanal, gastos por categoria |
+| Visão Geral | Saldo disponível (já descontados os aportes em metas), receitas, despesas, poupança (aportes em metas no mês), alertas, gráfico semanal, gastos por categoria |
 | Lançamentos | Cadastro, edição, exclusão, busca e filtros de receitas e despesas |
 | Categorias | Categorias, limites mensais, consumo e alertas |
 | Metas | Metas, aportes, progresso e simulador de economia |
-| Relatórios | Tendências, distribuição de gastos, comparação de períodos, exportação CSV/PDF |
+| Relatórios ("Gráficos") | Centrados nas metas: total guardado, aportes por mês, evolução do total guardado, distribuição por meta e progresso de cada meta; receitas × despesas como seção secundária; exportação CSV/PDF |
 | Boas-vindas | No primeiro acesso, pergunta como prefere ser chamado (e, opcionalmente, a renda mensal) |
-| Ajustes | Nome, renda mensal e meta de poupança, tema, gerenciamento de categorias (com catálogo de ícones pesquisável), instalar app, backup, dados de demonstração |
+| Ajustes | Perfil (nome e renda mensal), tema, gerenciamento de categorias (com catálogo de ícones pesquisável), instalar app, backup, dados de demonstração |
 
 ## Tecnologias
 
@@ -104,7 +104,8 @@ App_Financas_Layout/  layouts de referência (não alterar)
 - Valores monetários são inteiros em **centavos** (`utils/money.ts` converte e formata).
 - Regras de negócio ficam em `src/domain/` como funções puras; componentes não calculam nem acessam o storage.
 - Componentes usam apenas tokens de `src/design-system/` — nunca cores fixas — para funcionar nos dois temas.
-- Os dados ficam no `localStorage` do navegador (chave `money-app:data:v1`). Na primeira execução o app começa **vazio**, apenas com as categorias padrão (`src/store/defaultCategories.ts`), e mostra a tela de boas-vindas. Dados de demonstração só são carregados a pedido, em Ajustes → "Carregar dados de demonstração"; ficam identificados na interface e são removíveis por "Apagar todos os dados" (que mantém nome, renda e as categorias padrão). Documentos salvos por versões anteriores continuam válidos (ver DT-014).
+- Os dados ficam no `localStorage` do navegador (chave `money-app:data:v1`). Na primeira execução o app começa **vazio**, apenas com as categorias padrão (`src/store/defaultCategories.ts`), e mostra a tela de boas-vindas. Dados de demonstração só são carregados a pedido, em Ajustes → "Carregar dados de demonstração"; ficam identificados na interface e são removíveis por "Apagar todos os dados" (que mantém nome, renda e as categorias padrão). Documentos salvos por versões anteriores continuam válidos (ver DT-014; a antiga meta de poupança em % é descartada na leitura, DT-016).
+- **Poupança = aportes em metas** (v1.5.0, DT-016): não há taxa nem meta de poupança em %. Os aportes não viram lançamentos, mas saem do saldo disponível. Funções em `src/domain/goals.ts` (`contributionsInPeriod`, `contributionsUntil`, `monthlyContributions`, `savedEvolution`, `savedDistribution`).
 - Antes de qualquer alteração, consulte `ESCOPO_PROJETO.md` e `CHANGELOG.md`; depois, atualize-os.
 - No Windows, os comandos acima funcionam no PowerShell. Se o Node acabou de ser instalado, abra um terminal novo para que `npm` seja encontrado.
 - Os testes (`tests/`) cobrem utilitários, regras de negócio, validações, persistência, exportação CSV, tema e a integração entre os módulos.

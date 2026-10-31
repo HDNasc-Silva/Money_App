@@ -58,10 +58,8 @@ export interface Goal {
 
 export interface Settings {
   userName: string;
-  /** Renda mensal informada pelo usuário (referência para a meta de poupança); 0 = não informada. */
+  /** Renda mensal informada pelo usuário (apenas referência no perfil); 0 = não informada. */
   monthlyIncome: Cents;
-  /** Meta de taxa de poupança, em pontos percentuais (0–100). */
-  savingsTarget: number;
   hideBalances: boolean;
   isDemoData: boolean;
   /** `false` só num primeiro acesso, até o usuário concluir a tela de boas-vindas (ver DT-014). */
@@ -91,7 +89,6 @@ export const USER_NAME_MAX = 40;
 export const DEFAULT_SETTINGS: Settings = {
   userName: '',
   monthlyIncome: 0,
-  savingsTarget: 20,
   hideBalances: false,
   isDemoData: false,
   onboardingCompleted: true,

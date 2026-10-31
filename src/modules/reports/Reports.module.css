@@ -75,25 +75,24 @@
   color: #ffb2b7;
 }
 
-.diagnosticRate {
+.overviewTotal {
   display: flex;
-  align-items: baseline;
-  gap: var(--space-sm);
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
-.diagnosticRate strong {
-  font-size: 2.25rem;
-  font-weight: 600;
-  letter-spacing: -0.03em;
-}
-
-.diagnosticRate span {
-  color: var(--color-hero-muted);
-}
-
-.diagnosticText {
+.overviewTotal > span:first-child {
   font-size: 0.8125rem;
   color: var(--color-hero-muted);
+}
+
+.overviewValue {
+  overflow-wrap: anywhere;
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
 }
 
 .heroHighlight {
@@ -101,21 +100,108 @@
   font-weight: 600;
 }
 
-.heroWarning {
-  color: #ffb2b7;
-  font-weight: 600;
+.overviewStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
+  gap: var(--space-sm);
+  margin: 0;
 }
 
-.diagnosticFooter {
+.overviewStats > div {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.overviewStats dt {
   font-size: 0.6875rem;
   font-weight: 600;
   color: var(--color-hero-muted);
 }
 
+.overviewStats dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
 .diagnostic [role='progressbar'] {
   background: rgba(255, 255, 255, 0.12);
+}
+
+/* ---------- Seções ---------- */
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+  font-size: 1.125rem;
+}
+
+.ellipsis {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Progresso das metas ---------- */
+.progressList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.progressItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.progressItem + .progressItem {
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-divider);
+}
+
+.progressTop {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
+.progressTop strong {
+  flex: 1;
+  font-weight: 600;
+}
+
+.progressIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-md);
+  background: var(--color-income-bg);
+  color: var(--color-income);
+}
+
+.progressMeta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 2px var(--space-sm);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
 }
 
 /* ---------- Gráficos ---------- */
@@ -132,6 +218,10 @@
 }
 
 /* ---------- Tabela de comparação ---------- */
+.tableWrap {
+  overflow-x: auto;
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -265,7 +355,7 @@
   gap: var(--space-sm);
 }
 
-.insights h2 {
+.insights h3 {
   font-size: 1rem;
 }
 

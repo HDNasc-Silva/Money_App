@@ -78,7 +78,7 @@ Status possíveis: **Aceita** · **Substituída por DT-XXX** · **Obsoleta**
 
 ## DT-008 — Aportes em metas não geram lançamento
 
-- **Data:** 30/10/2026 · **Status:** Aceita
+- **Data:** 30/10/2026 · **Status:** Aceita, **parcialmente substituída por DT-016** (v1.5.0): aportes continuam sem gerar lançamento e sem contar como despesa, mas passaram a ser a "poupança" do mês e a reduzir o saldo disponível.
 - **Contexto:** No layout, "Poupança" do mês = receitas − despesas. Se cada aporte virasse uma despesa, a poupança seria contada como gasto.
 - **Decisão:** Aportes ficam no histórico da meta e alimentam progresso/alertas; não alteram saldo nem despesas.
 - **Alternativas:** criar transferência entre "contas" (exige modelo de contas — possível evolução futura).
@@ -139,7 +139,7 @@ Status possíveis: **Aceita** · **Substituída por DT-XXX** · **Obsoleta**
 
 ## DT-014 — Primeiro acesso vazio, onboarding por flag em Settings e migração aditiva
 
-- **Data:** 30/10/2026 · **Status:** Aceita (substitui o comportamento da v1.0.0 de carregar dados de demonstração na primeira execução)
+- **Data:** 30/10/2026 · **Status:** Aceita (substitui o comportamento da v1.0.0 de carregar dados de demonstração na primeira execução). Os itens sobre a meta de poupança (`savingsTarget`, `savingsTargetAmount`, validação 0–100) foram **substituídos por DT-016** (v1.5.0).
 - **Contexto:** O usuário quer começar com os dados zerados e ver a demonstração só se pedir; e quer que todo primeiro acesso passe por "Como prefere ser chamado?" antes do Início. Quem já usa o app (dados salvos sem os novos campos) não pode perder dados nem ser interrompido.
 - **Decisão:**
   - Primeiro acesso (storage vazio ou corrompido) grava `buildInitialData()` (`store/initialData.ts`): sem lançamentos/metas, com as categorias padrão e `onboardingCompleted: false`. A demonstração vira a ação `loadDemoData()`, chamada só por Ajustes, que **mantém o perfil e as preferências** do usuário (os dados de demonstração não têm mais nome fixo).
@@ -167,3 +167,25 @@ Status possíveis: **Aceita** · **Substituída por DT-XXX** · **Obsoleta**
 - **Vantagens:** zero dependência; funciona no subcaminho do GitHub Pages e em qualquer hospedagem estática; comportamento simples de entender e testar.
 - **Desvantagens:** `CACHE_VERSION` precisa ser atualizado manualmente a cada release; o precache não conhece os nomes com hash (são guardados na primeira visita); sem aviso de "nova versão" (a navegação network-first já entrega a versão nova quando online); fontes/ícones do Google Fonts não ficam garantidos offline; o service worker em si não tem testes automatizados (o store de instalação tem).
 - **Módulos afetados:** `public/`, `index.html`, `main.tsx`, `services/pwa`, `theme/theme.ts`, `modules/settings`.
+
+## DT-016 — Poupança = aportes em metas; saldo disponível desconta aportes; Gráficos centrados nas metas
+
+- **Data:** 30/10/2026 · **Status:** Aceita (substitui parcialmente DT-008 e os itens de meta de poupança da DT-014)
+- **Contexto:** Até a v1.4.0, "poupança" era a sobra do mês (`max(receitas − despesas, 0)`), com taxa de poupança (% das receitas) e uma meta de poupança em % configurável em Ajustes, usada no diagnóstico dos Relatórios e no texto "Planejamento equilibrado com X% guardado". O usuário informou que guarda dinheiro de fato nas **metas** e que a taxa de poupança não faz sentido para ele; quer que a tela de Gráficos mostre a relação com as metas. Pela DT-008, os aportes não afetavam nem o saldo nem os indicadores do mês.
+- **Decisão:**
+  - **Remover o conceito de taxa/meta de poupança (%)**: `Settings.savingsTarget`, `PeriodSummary.savings/savingsRate`, `savingsTargetAmount`, o card "Perfil e meta de poupança"/`SavingsTargetSummary`, o diagnóstico de taxa de poupança dos Relatórios e textos derivados. Ajustes fica com o card **"Perfil"** (nome e renda mensal; a renda segue apenas como referência no perfil).
+  - **Poupança do período = Σ aportes de metas com data no período** (`contributionsInPeriod`). O valor inicial da meta não entra (foi guardado antes do app). No Início, o KPI "Poupança" mostra esse valor e a variação em relação ao mês anterior; o alerta "Ótima Notícia" compara os aportes com o mesmo intervalo de dias do mês anterior (só quando houve aportes no mês anterior).
+  - **Saldo disponível desconta os aportes**: `saldo disponível = Σ receitas − Σ despesas − Σ aportes`, tudo até a mesma data de referência já usada (hoje no mês atual; fim do mês em meses passados e futuros) — `cumulativeBalance(...) − contributionsUntil(goals, data)`. Racional: o dinheiro movido para uma meta não está mais disponível para gastar; mostrar o mesmo saldo antes e depois de aportar daria a falsa impressão de que o dinheiro ainda está livre. Aportes **continuam sem gerar lançamento** e sem entrar em "Despesas", no gráfico semanal, nos limites de categoria e na exportação CSV (DT-008 mantida nesses pontos). O texto "Mês negativo" continua olhando apenas receitas − despesas do mês; quando o mês é positivo, o cartão informa "R$ X guardado em metas neste mês".
+  - **Gráficos (Relatórios) centrados nas metas**: resumo (total guardado, aportado no período com variação, falta para concluir, metas concluídas), aportes por mês empilhados por meta (até 5 metas + "Outras metas"), evolução acumulada do total guardado (linha), distribuição do dinheiro guardado por meta (rosca) e progresso de cada meta com previsão (`goalForecast`). Estado vazio com "Ir para Metas". Receitas × despesas virou seção secundária (barras mensais, comparação com uma linha "Aportes em metas", distribuição de despesas, hábitos de gastos, exportação). O "Evolução do saldo" e o "Guardado × gastos" foram removidos (dependiam da poupança antiga).
+  - **Estoque × fluxo**: total guardado, falta para concluir, concluídas, distribuição e progresso são a situação **atual** das metas; o período selecionado (mês/6 meses/ano e o seletor de mês) define os **fluxos**: aportado no período, comparação com o período anterior e a janela dos gráficos (6 meses até o mês selecionado, ou o ano). A evolução histórica fica na linha acumulada.
+  - **Evolução acumulada** (`goalSavedAt`/`savedEvolution`): valor inicial conta a partir do mês de criação da meta (`createdAt`); sem `createdAt` reconhecível, conta sempre. Aportes contam pela data. Totais usam o valor realmente guardado (sem limitar ao alvo), enquanto o "falta para concluir" e a barra geral usam `goalsSummary` (limitado ao alvo por meta).
+  - **Migração**: `sanitizeSettings` monta as preferências campo a campo, então `savingsTarget` de documentos/backups antigos é simplesmente descartado na leitura e some do storage no próximo salvamento. `schemaVersion` continua 1. Backups da v1.5.0 importados numa versão antiga recebem a meta padrão (20%) por saneamento.
+- **Alternativas consideradas:**
+  - *Manter o saldo sem descontar aportes* (DT-008 integral): menos mudança, mas o saldo "disponível" incluiria dinheiro já reservado em metas, contradizendo o novo significado de poupança. Rejeitada.
+  - *Gerar um lançamento de despesa a cada aporte*: o saldo cairia automaticamente, mas inflaria "Despesas", distorceria limites de categoria e o CSV, e exigiria uma categoria artificial. Rejeitada (mesmo motivo da DT-008).
+  - *Modelo de contas/transferências*: o mais correto contabilmente, porém grande demais para esta versão; continua como evolução futura.
+  - *Descontar também o valor inicial das metas*: rejeitada, pois esse dinheiro não veio de lançamentos registrados e deixaria o saldo negativo para quem acabou de cadastrar uma meta.
+  - *Estoque "na data do fim do período"* (total guardado em um mês passado): mais fiel ao período, mas misturaria na mesma tela previsões atuais com valores históricos; a linha acumulada já cobre o histórico.
+- **Vantagens:** os números refletem onde o dinheiro está; um único conceito de poupança no app; nenhuma mudança de modelo de dados (aportes já tinham data); funções puras testadas.
+- **Desvantagens e consequências:** o saldo exibido muda para quem já tinha aportes registrados (fica menor). Quem registrava manualmente um "lançamento de despesa" para cada aporte passa a ter o valor descontado duas vezes e deve remover esses lançamentos. Aportes com data futura reduzem o saldo previsto do mês correspondente. Sem lançamentos e com aportes, o saldo disponível pode ficar negativo. A renda mensal do perfil deixou de ter uso nos cálculos (é só referência).
+- **Módulos afetados:** `models`, `domain/summary`, `domain/goals`, `domain/reports`, `domain/alerts`, `validations`, `services/storage/FinanceDocument`, `store/demoData`, `modules/dashboard`, `modules/reports`, `modules/settings`, `modules/onboarding` (texto de ajuda).

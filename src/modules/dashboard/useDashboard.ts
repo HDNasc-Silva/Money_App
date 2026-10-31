@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { buildAlerts } from '@/domain/alerts';
 import { categoryBudgets } from '@/domain/budgets';
+import { contributionsInPeriod, contributionsUntil } from '@/domain/goals';
 import { isFutureMonth, monthPeriod } from '@/domain/periods';
 import { periodIndicators, weeklyBreakdown } from '@/domain/reports';
 import { cumulativeBalance, percentChange, summarizePeriod } from '@/domain/summary';
@@ -15,8 +16,12 @@ export function useDashboard() {
   const today = todayIso();
 
   return useMemo(() => {
+    const previousMonth = addMonths(month, -1);
     const summary = summarizePeriod(transactions, monthPeriod(month));
-    const previous = summarizePeriod(transactions, monthPeriod(addMonths(month, -1)));
+    const previous = summarizePeriod(transactions, monthPeriod(previousMonth));
+    // Poupança do mês = aportes em metas com data no mês (DT-016).
+    const saved = contributionsInPeriod(goals, monthPeriod(month));
+    const previousSaved = contributionsInPeriod(goals, monthPeriod(previousMonth));
     const isFuture = isFutureMonth(month, today);
     // Mês passado: saldo ao fim do mês. Mês atual: saldo até hoje.
     // Mês futuro: saldo previsto ao fim do mês, incluindo lançamentos planejados.
@@ -25,8 +30,11 @@ export function useDashboard() {
       month,
       isFuture,
       summary,
+      saved,
+      savedChange: percentChange(saved, previousSaved),
       incomeChange: percentChange(summary.income, previous.income),
-      balance: cumulativeBalance(transactions, balanceDate),
+      // Saldo disponível: o dinheiro aportado em metas já não está disponível (DT-016).
+      balance: cumulativeBalance(transactions, balanceDate) - contributionsUntil(goals, balanceDate),
       weeks: weeklyBreakdown(transactions, month),
       budgets: categoryBudgets(transactions, categories, month),
       alerts: buildAlerts({ transactions, categories, goals, month, today }),

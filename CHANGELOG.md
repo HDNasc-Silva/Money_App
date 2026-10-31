@@ -7,6 +7,38 @@ Categorias: **Adicionado** · **Modificado** · **Corrigido** · **Removido** ·
 
 ---
 
+## [1.5.0] - 30/10/2026 — Gráficos centrados nas metas; poupança = aportes em metas
+
+### Adicionado
+- **Gráficos (Relatórios) centrados nas metas** (`src/modules/reports/GoalReportCards.tsx`): resumo "Metas" (total guardado em todas as metas, aportado no período com variação vs período anterior, falta para concluir, metas concluídas e barra de progresso geral); **Aportes por mês** (barras empilhadas por meta, até 5 metas + "Outras metas", com legenda e média mensal); **Evolução do total guardado** (linha acumulada, com o crescimento no intervalo); **Onde está o dinheiro guardado** (rosca por meta + detalhamento); **Progresso das metas** (barra, %, guardado/alvo e previsão de conclusão via `goalForecast`, com aviso "após o prazo"). Estado vazio "Você ainda não tem metas" com botão **"Ir para Metas"**.
+- Seção secundária **"Receitas × despesas"**: barras mensais de receitas e despesas (com o saldo do mês no detalhe), comparação entre períodos (nova linha **"Aportes em metas"**), distribuição de despesas, hábitos de gastos e exportação.
+- Funções puras em `src/domain/goals.ts`: `contributionsInPeriod`, `contributionsUntil`, `monthlyContributions`, `goalSavedAt`, `savedEvolution`, `totalSaved`, `savedDistribution`.
+- Componente `ShareBreakdown` (rosca + legenda + barras) reutilizado pelas distribuições de despesas e de metas; `chartSlices.ts` (paleta e agrupamento "Outras").
+- Testes: `tests/goalSavings.test.ts` (9 unitários: aportes por período/até a data/por mês, valor guardado na data, evolução, total e distribuição, alerta de aportes, demonstração) e `tests/goalReports.test.tsx` (3 de integração: tela de Gráficos com metas, estado vazio levando a Metas, KPI "Poupança" e saldo disponível no Início antes/depois de um aporte). Total: 151 testes.
+
+### Modificado
+- **"Poupança" do mês = total aportado em metas no mês** (soma dos aportes com data no mês). No Início, o KPI "Poupança" mostra esse valor com a variação em relação ao mês anterior.
+- **Saldo disponível desconta os aportes em metas** (até a mesma data de referência do saldo: hoje, fim do mês passado ou fim do mês futuro). Aportes continuam sem gerar lançamento e sem contar como despesa (DT-016).
+- Cartão de saldo: "Planejamento equilibrado com X% guardado" passou a "R$ X guardado em metas neste mês" (ou "Nenhum aporte em metas neste mês").
+- Alerta "Ótima Notícia": compara os aportes em metas com o mesmo intervalo de dias do mês anterior (antes: sobra de receitas − despesas).
+- Ajustes: card "Perfil e meta de poupança" passou a **"Perfil"** (nome e renda mensal). Texto de ajuda da renda na tela de boas-vindas atualizado.
+- Título da tela de Relatórios: "Tendências & Relatórios" → **"Relatórios das Metas"**.
+- `monthlySeries` passou a retornar `{ month, income, expense, balance }`.
+- Dados de demonstração: aportes distribuídos pelos últimos 6 meses (ids únicos por meta; o aporte do mês atual só entra após o dia 6), para os gráficos de metas terem conteúdo.
+
+### Removido
+- Conceito de **taxa e meta de poupança (%)**: `Settings.savingsTarget`, `PeriodSummary.savings` e `savingsRate`, `savingsTargetAmount`, `SavingsTargetSummary`, campo "Meta de poupança (%)" e sua validação, diagnóstico de taxa de poupança, "Média de poupança no intervalo", insight "Ritmo de poupança".
+- Gráficos "Evolução líquida" (guardado × gastos) e "Evolução do saldo" dos Relatórios (dependiam da poupança antiga).
+
+### Técnico
+- Migração sem mudar `schemaVersion`: `savingsTarget` de documentos e backups antigos é descartado na leitura (`sanitizeSettings`) e some do storage no próximo salvamento.
+- `CACHE_VERSION` do service worker: `v1.5.0`. Versão do pacote: 1.4.0 → 1.5.0 (MINOR).
+
+### Documentação
+- `DECISOES_TECNICAS.md`: DT-016 (com o racional do saldo disponível); DT-008 e DT-014 marcadas como parcialmente substituídas. `ESCOPO_PROJETO.md`: módulos, funcionalidades 10.1/10.5, regras 6, 13, 33 e novas 35–38, fluxos, RF-05/RF-09/RF-15, acompanhamento v1.5.0 e limitações. `README.md`: módulos e notas para desenvolvedores.
+
+---
+
 ## [1.4.0] - 30/10/2026 — Primeiro acesso vazio, boas-vindas, renda mensal e app instalável (PWA)
 
 ### Adicionado

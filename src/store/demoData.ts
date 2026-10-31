@@ -116,22 +116,22 @@ export function buildDemoData(today: IsoDate): FinanceData {
   }
 
   const year = Number(currentMonth.slice(0, 4));
-  const contribution = (monthsAgo: number, amount: number) => ({
-    id: `demo-contrib-${monthsAgo}-${amount}`,
-    amount: fromReais(amount),
-    date: `${addMonths(currentMonth, -monthsAgo)}-06`,
-  });
+  /** Aportes no dia 6 dos meses indicados (meses atrás); o do mês atual só entra se o dia 6 já passou. */
+  const contributions = (goalKey: string, amount: number, monthsAgo: readonly number[]): Goal['contributions'] =>
+    monthsAgo
+      .filter((ago) => ago > 0 || todayDay >= 6)
+      .map((ago) => ({ id: `demo-contrib-${goalKey}-${ago}`, amount: fromReais(amount), date: `${addMonths(currentMonth, -ago)}-06` }));
 
   return {
     transactions,
     categories: DEMO_CATEGORIES,
     goals: [
-      goal('goal-emergency', 'Reserva de Emergência', 'Segurança Financeira', 'shield', 10000, 7000, 500, `${year + 1}-06-30`, [contribution(2, 500), contribution(1, 500)]),
-      goal('goal-trip', 'Viagem de Férias', 'Lazer & Descanso', 'flight_takeoff', 6000, 3000, 400, `${year + 1}-07-31`, [contribution(1, 800)]),
-      goal('goal-notebook', 'Upgrade Notebook', 'Trabalho & Produção', 'laptop_mac', 5000, 2400, 300, `${year + 1}-10-31`, []),
+      goal('goal-emergency', 'Reserva de Emergência', 'Segurança Financeira', 'shield', 10000, 4500, 500, `${year + 1}-06-30`, contributions('emergency', 500, [5, 4, 3, 2, 1, 0])),
+      goal('goal-trip', 'Viagem de Férias', 'Lazer & Descanso', 'flight_takeoff', 6000, 2000, 400, `${year + 1}-07-31`, contributions('trip', 400, [4, 3, 2, 1])),
+      goal('goal-notebook', 'Upgrade Notebook', 'Trabalho & Produção', 'laptop_mac', 5000, 2400, 300, `${year + 1}-10-31`, contributions('notebook', 300, [2, 1])),
       goal('goal-room', 'Reforma do Quarto', 'Moradia & Bem-estar', 'format_paint', 5000, 600, 250, `${year + 1}-12-31`, []),
     ],
     // Sem nome fixo: ao carregar a demonstração, o FinanceProvider mantém o perfil do usuário.
-    settings: { ...DEFAULT_SETTINGS, savingsTarget: 50, isDemoData: true },
+    settings: { ...DEFAULT_SETTINGS, isDemoData: true },
   };
 }

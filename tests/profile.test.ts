@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from 'vitest';
-import { savingsTargetAmount } from '@/domain/summary';
 import { DEFAULT_SETTINGS, EMPTY_DATA } from '@/models';
 import { parseFinanceData } from '@/services/storage/FinanceDocument';
 import { canPromptInstall, listenForInstallPrompt, promptInstall, subscribeInstallPrompt } from '@/services/pwa/installPrompt';
@@ -22,34 +21,16 @@ describe('validateOnboarding', () => {
 });
 
 describe('validateProfileSettings', () => {
-  it('nome opcional, renda opcional e meta entre 0 e 100', () => {
-    expect(validateProfileSettings({ name: '', monthlyIncome: '', savingsTarget: '20' })).toEqual({
+  it('nome e renda opcionais; sem meta de poupança em %', () => {
+    expect(validateProfileSettings({ name: '', monthlyIncome: '' })).toEqual({ ok: true, value: { userName: '', monthlyIncome: 0 } });
+    expect(validateProfileSettings({ name: ' Ana ', monthlyIncome: '1.234,56' })).toEqual({
       ok: true,
-      value: { userName: '', monthlyIncome: 0, savingsTarget: 20 },
+      value: { userName: 'Ana', monthlyIncome: 123_456 },
     });
-    expect(validateProfileSettings({ name: 'Ana', monthlyIncome: '1.234,56', savingsTarget: '12,6' })).toEqual({
-      ok: true,
-      value: { userName: 'Ana', monthlyIncome: 123_456, savingsTarget: 13 },
+    expect(validateProfileSettings({ name: 'a'.repeat(41), monthlyIncome: 'abc' })).toMatchObject({
+      ok: false,
+      errors: { name: expect.stringContaining('40'), monthlyIncome: 'Informe um valor válido.' },
     });
-    for (const savingsTarget of ['', '-1', '101', 'x']) {
-      expect(validateProfileSettings({ name: 'Ana', monthlyIncome: '', savingsTarget })).toMatchObject({
-        ok: false,
-        errors: { savingsTarget: 'Informe um percentual entre 0 e 100.' },
-      });
-    }
-  });
-});
-
-describe('savingsTargetAmount', () => {
-  it('calcula o valor mensal da meta sobre a renda', () => {
-    expect(savingsTargetAmount(500_000, 20)).toBe(100_000);
-    expect(savingsTargetAmount(333_333, 33)).toBe(110_000);
-    expect(savingsTargetAmount(500_000, 0)).toBe(0);
-    expect(savingsTargetAmount(500_000, 150)).toBe(500_000);
-  });
-
-  it('retorna null sem renda informada', () => {
-    expect(savingsTargetAmount(0, 20)).toBeNull();
   });
 });
 
@@ -67,8 +48,11 @@ describe('dados iniciais e migração das preferências', () => {
   });
 
   it('documentos antigos: onboarding concluído e renda 0; campos inválidos voltam ao padrão', () => {
+    // Documento anterior à v1.5.0 com a antiga meta de poupança (%): carrega normalmente e o campo é descartado.
     const legacy = JSON.stringify({ ...EMPTY_DATA, schemaVersion: 1, settings: { userName: 'Ana', savingsTarget: 30 } });
-    expect(parseFinanceData(legacy)?.settings).toEqual({ ...DEFAULT_SETTINGS, userName: 'Ana', savingsTarget: 30, onboardingCompleted: true, monthlyIncome: 0 });
+    const settings = parseFinanceData(legacy)?.settings;
+    expect(settings).toEqual({ ...DEFAULT_SETTINGS, userName: 'Ana', onboardingCompleted: true, monthlyIncome: 0 });
+    expect(settings).not.toHaveProperty('savingsTarget');
 
     const invalid = JSON.stringify({
       ...EMPTY_DATA,

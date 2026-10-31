@@ -126,7 +126,9 @@ describe('usuários que já tinham dados salvos', () => {
     expect(screen.getByTestId('balance-value')).toHaveTextContent('3.000,00');
 
     const parsed = parseFinanceData(adapter.read(DATA_KEY) ?? '');
-    expect(parsed?.settings).toMatchObject({ userName: 'Ana', savingsTarget: 30, monthlyIncome: 0, onboardingCompleted: true });
+    expect(parsed?.settings).toMatchObject({ userName: 'Ana', monthlyIncome: 0, onboardingCompleted: true });
+    // A antiga meta de poupança (%) é descartada na leitura (v1.5.0).
+    expect(parsed?.settings).not.toHaveProperty('savingsTarget');
     expect(parsed?.transactions).toHaveLength(1);
   });
 
@@ -159,7 +161,8 @@ describe('Ajustes: demonstração e renda mensal', () => {
     const stored = readStored(adapter);
     expect(stored.transactions.length).toBeGreaterThan(10);
     expect(stored.goals.length).toBeGreaterThan(0);
-    expect(stored.settings).toMatchObject({ userName: 'Ana', savingsTarget: 30, onboardingCompleted: true });
+    expect(stored.settings).toMatchObject({ userName: 'Ana', onboardingCompleted: true });
+    expect(stored.settings).not.toHaveProperty('savingsTarget');
     expect(stored.settings.userName).not.toBe('Gabriel');
 
     // Fora de Ajustes, o aviso de demonstração aparece com o atalho para começar do zero.
@@ -186,32 +189,31 @@ describe('Ajustes: demonstração e renda mensal', () => {
     expect(readStored(adapter).settings.isDemoData).toBe(false);
   });
 
-  it('salva a renda mensal no card da meta de poupança e mostra o valor da meta em reais', async () => {
+  it('card "Perfil" salva nome e renda mensal, sem meta de poupança (%)', async () => {
     const adapter = legacyStorage();
     const user = renderApp(adapter, '/ajustes');
 
-    const summary = await screen.findByTestId('savings-target-summary');
-    expect(summary).toHaveTextContent('Informe a renda mensal e a meta');
+    expect(await screen.findByRole('heading', { name: 'Perfil' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: /meta de poupança/i })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/Meta de poupança/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/poupança/i)).not.toBeInTheDocument();
 
     await user.type(screen.getByLabelText('Renda mensal'), '500000');
-    const target = screen.getByLabelText('Meta de poupança (%)');
-    await user.clear(target);
-    await user.type(target, '20');
-    expect(summary).toHaveTextContent('Meta de 20% de R$ 5.000,00 = R$ 1.000,00 por mês.');
-
     await user.click(screen.getByRole('button', { name: /Salvar preferências/ }));
     await waitFor(() => expect(readStored(adapter).settings.monthlyIncome).toBe(500_000));
-    expect(readStored(adapter).settings.savingsTarget).toBe(20);
+    // Ao salvar, o documento antigo deixa de ter o campo descartado.
+    expect(readStored(adapter).settings).not.toHaveProperty('savingsTarget');
+    expect(readStored(adapter).settings.userName).toBe('Ana');
   });
 
-  it('valida a meta de poupança', async () => {
+  it('salva só o nome, mantendo a renda não informada', async () => {
     const adapter = legacyStorage();
     const user = renderApp(adapter, '/ajustes');
-    const target = await screen.findByLabelText('Meta de poupança (%)');
-    await user.clear(target);
-    await user.type(target, '150');
+    const name = await screen.findByLabelText('Seu nome');
+    await user.clear(name);
+    await user.type(name, 'Bia');
     await user.click(screen.getByRole('button', { name: /Salvar preferências/ }));
-    expect(screen.getByText('Informe um percentual entre 0 e 100.')).toBeInTheDocument();
-    expect(readStored(adapter).settings.savingsTarget).toBe(30);
+    await waitFor(() => expect(readStored(adapter).settings.userName).toBe('Bia'));
+    expect(readStored(adapter).settings.monthlyIncome).toBe(0);
   });
 });

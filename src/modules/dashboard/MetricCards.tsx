@@ -1,15 +1,19 @@
 import { Icon } from '@/components/common/Icon';
 import { Money } from '@/components/common/Money';
 import type { PeriodSummary } from '@/domain/summary';
+import type { Cents } from '@/models';
 import { formatPercent, formatSignedPercent } from '@/utils/format';
 import styles from './Dashboard.module.css';
 
 interface MetricCardsProps {
   summary: PeriodSummary;
   incomeChange: number | null;
+  /** Total aportado em metas no mês (a "poupança" do mês). */
+  saved: Cents;
+  savedChange: number | null;
 }
 
-export function MetricCards({ summary, incomeChange }: MetricCardsProps) {
+export function MetricCards({ summary, incomeChange, saved, savedChange }: MetricCardsProps) {
   const expenseShare = summary.income > 0 ? summary.expense / summary.income : null;
   return (
     <section className={styles.metrics} aria-label="Resumo do mês">
@@ -48,12 +52,16 @@ export function MetricCards({ summary, incomeChange }: MetricCardsProps) {
           <span className={styles.metricIcon}>
             <Icon name="savings" size={16} />
           </span>
-          <span className={styles.positive} title="Taxa de poupança">
-            {formatPercent(summary.savingsRate)}
-          </span>
+          {savedChange !== null && (
+            <span className={savedChange >= 0 ? styles.positive : styles.negative} title="Variação dos aportes em metas em relação ao mês anterior">
+              {formatSignedPercent(savedChange)}
+            </span>
+          )}
         </div>
-        <span className={styles.metricLabel}>Poupança</span>
-        <Money value={summary.savings} compact className={[styles.metricValue, styles.positive].join(' ')} />
+        <span className={styles.metricLabel} title="Total aportado em metas no mês">
+          Poupança
+        </span>
+        <Money value={saved} compact className={[styles.metricValue, styles.positive].join(' ')} />
       </div>
     </section>
   );
