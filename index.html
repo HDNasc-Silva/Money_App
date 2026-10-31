@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <!-- Cores iguais a THEME_COLORS (src/theme/theme.ts); applyTheme as sincroniza com o tema escolhido. -->
+    <!-- Cores da paleta padrão (Esmeralda, src/theme/palettes.ts); o script abaixo e applyTheme as sincronizam com o tema escolhido. -->
     <meta name="theme-color" content="#f8f9ff" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0b0f17" media="(prefers-color-scheme: dark)" />
     <meta name="description" content="Money_App — gerenciamento de finanças pessoais" />
@@ -17,18 +17,39 @@
     <meta name="apple-mobile-web-app-title" content="Money App" />
     <title>Money App</title>
     <script>
-      // Aplica o tema antes da renderização para evitar flash (mesma regra de src/theme/theme.ts).
+      // Aplica modo, paleta e tamanho do texto antes da renderização para evitar flash
+      // (mesmas regras de src/theme/theme.ts e cores de src/theme/palettes.ts — DT-019).
       (function () {
-        var theme;
+        var colors = {
+          esmeralda: ['#f8f9ff', '#0b0f17'],
+          oceano: ['#f5f9ff', '#09101a'],
+          ametista: ['#faf8ff', '#0d0b16'],
+          'por-do-sol': ['#fffaf5', '#100d0a'],
+          grafite: ['#f7f8fa', '#0d0e10']
+        };
+        var prefs = {};
+        var legacy = null;
         try {
-          theme = localStorage.getItem('money-app:theme');
+          var raw = localStorage.getItem('money-app:theme:v2');
+          if (raw) prefs = JSON.parse(raw) || {};
+          legacy = localStorage.getItem('money-app:theme');
         } catch (e) {}
-        if (theme !== 'light' && theme !== 'dark') {
+        var mode = prefs.mode;
+        if (mode !== 'light' && mode !== 'dark' && mode !== 'system') {
+          mode = legacy === 'light' || legacy === 'dark' ? legacy : 'system';
+        }
+        var palette = Object.prototype.hasOwnProperty.call(colors, prefs.palette) ? prefs.palette : 'esmeralda';
+        var textSize = prefs.textSize === 'large' ? 'large' : 'normal';
+        var theme = mode;
+        if (mode === 'system') {
           theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         }
-        document.documentElement.dataset.theme = theme;
-        document.documentElement.style.colorScheme = theme;
-        var color = theme === 'dark' ? '#0b0f17' : '#f8f9ff';
+        var root = document.documentElement;
+        root.dataset.theme = theme;
+        root.dataset.palette = palette;
+        root.dataset.textSize = textSize;
+        root.style.colorScheme = theme;
+        var color = colors[palette][theme === 'dark' ? 1 : 0];
         var metas = document.querySelectorAll('meta[name="theme-color"]');
         for (var i = 0; i < metas.length; i++) metas[i].setAttribute('content', color);
       })();

@@ -21,6 +21,17 @@ export function goalProgress(goal: Goal): GoalProgress {
   return { saved, remaining, ratio, completed: remaining === 0 };
 }
 
+/**
+ * Metas em destaque no Início: as em andamento, das mais próximas de concluir para as mais distantes,
+ * seguidas das concluídas; no máximo `limit`.
+ */
+export function highlightedGoals(goals: readonly Goal[], limit: number): { goal: Goal; progress: GoalProgress }[] {
+  return goals
+    .map((goal) => ({ goal, progress: goalProgress(goal) }))
+    .sort((a, b) => Number(a.progress.completed) - Number(b.progress.completed) || b.progress.ratio - a.progress.ratio)
+    .slice(0, limit);
+}
+
 /** Meses necessários para juntar `remaining` com aportes mensais; `null` se nunca atinge. */
 export function monthsToReach(remaining: Cents, monthly: Cents): number | null {
   if (remaining <= 0) return 0;

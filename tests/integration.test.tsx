@@ -44,7 +44,7 @@ describe('integração entre módulos', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Novo lançamento' });
     await user.type(within(dialog).getByLabelText('Valor'), '150000');
     await user.type(within(dialog).getByLabelText('Descrição'), 'Mercado do mês');
-    await user.selectOptions(within(dialog).getByLabelText('Categoria'), 'food');
+    await user.click(within(dialog).getByRole('radio', { name: 'Alimentação' }));
     await user.click(within(dialog).getByRole('button', { name: /Adicionar lançamento/ }));
 
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
@@ -102,7 +102,7 @@ describe('integração entre módulos', () => {
     expect(amount).toHaveValue('1.234,56');
 
     await user.type(within(dialog).getByLabelText('Descrição'), 'Lazer');
-    await user.selectOptions(within(dialog).getByLabelText('Categoria'), 'fun');
+    await user.click(within(dialog).getByRole('radio', { name: 'Lazer' }));
     await user.click(within(dialog).getByRole('button', { name: /Adicionar lançamento/ }));
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     const stored = JSON.parse(adapter.read(DATA_KEY) ?? '{}') as FinanceData;
@@ -132,7 +132,8 @@ describe('integração entre módulos', () => {
     await user.click(screen.getByRole('button', { name: 'Ações do lançamento Salário' }));
     await user.click(await screen.findByRole('button', { name: /Excluir lançamento/ }));
     await user.click(await screen.findByRole('button', { name: 'Excluir' }));
-    await waitFor(() => expect(screen.getByText('Nenhum lançamento encontrado')).toBeInTheDocument());
+    // Sem filtros ativos, o extrato vazio mostra o convite para registrar o primeiro lançamento.
+    await waitFor(() => expect(screen.getByText('Seu extrato começa aqui')).toBeInTheDocument());
     const stored = JSON.parse(adapter.read(DATA_KEY) ?? '{}') as FinanceData;
     expect(stored.transactions).toHaveLength(0);
   });

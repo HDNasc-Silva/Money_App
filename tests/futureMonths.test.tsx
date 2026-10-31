@@ -94,7 +94,7 @@ describe('navegação para meses futuros', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Novo lançamento' });
     await user.type(within(dialog).getByLabelText('Valor'), '100000');
     await user.type(within(dialog).getByLabelText('Descrição'), 'Viagem planejada');
-    await user.selectOptions(within(dialog).getByLabelText('Categoria'), 'fun');
+    await user.click(within(dialog).getByRole('radio', { name: 'Lazer' }));
     fireEvent.change(within(dialog).getByLabelText('Data'), { target: { value: futureDate } });
     await user.click(within(dialog).getByRole('button', { name: /Adicionar lançamento/ }));
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
@@ -117,7 +117,7 @@ describe('navegação para meses futuros', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Novo lançamento' });
     await user.type(within(dialog).getByLabelText('Valor'), '1000');
     await user.type(within(dialog).getByLabelText('Descrição'), 'Muito longe');
-    await user.selectOptions(within(dialog).getByLabelText('Categoria'), 'fun');
+    await user.click(within(dialog).getByRole('radio', { name: 'Lazer' }));
     fireEvent.change(within(dialog).getByLabelText('Data'), {
       target: { value: `${addMonths(currentMonth(), MAX_FUTURE_MONTHS + 1)}-01` },
     });

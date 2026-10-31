@@ -9,7 +9,10 @@
 
 .segmented .option {
   flex: 1;
-  min-height: 2.25rem;
+  min-height: 2.5rem;
+  transition:
+    background-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
   padding: 0 0.75rem;
   border: 0;
   border-radius: var(--radius-sm);
@@ -45,14 +48,22 @@
 
 .pills .option {
   flex-shrink: 0;
-  min-height: 2.25rem;
+  min-height: var(--touch-target);
   padding: 0 1rem;
+  transition:
+    background-color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-full);
   background: var(--color-surface);
   color: var(--color-text-muted);
   font-size: 0.8125rem;
   font-weight: 500;
+}
+
+.pills .option:focus-visible {
+  outline-offset: -2px;
 }
 
 .pills .selected {

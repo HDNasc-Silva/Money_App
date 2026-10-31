@@ -2,8 +2,8 @@
 
 > Documento oficial de referência. Representa o **estado atual real** do aplicativo e deve ser atualizado a cada alteração do sistema (ver `CHANGELOG.md` e `DECISOES_TECNICAS.md`).
 
-**Versão atual:** 1.6.0 (Assinaturas mensais com lançamentos automáticos, bloco em Gastos e selo no Extrato)
-**Última atualização:** 31/10/2026
+**Versão atual:** 1.7.0 (Temas escolhíveis, lançamento rápido, Início reorganizado, Extrato com cara de planilha e importação/exportação CSV)
+**Última atualização:** 31/10/2026 (v1.7.0)
 
 ---
 
@@ -17,7 +17,7 @@
 
 ## 2. Objetivo
 
-Permitir que uma pessoa registre receitas e despesas, controle limites de orçamento por categoria, acompanhe metas financeiras e analise sua evolução em relatórios, tudo em uma interface moderna, responsiva e com tema claro/escuro.
+Permitir que uma pessoa registre receitas e despesas, controle limites de orçamento por categoria, acompanhe metas financeiras e analise sua evolução em relatórios, tudo em uma interface moderna, responsiva e personalizável (5 temas de cores, modo claro/escuro/automático). Desde a v1.7.0, o objetivo explícito é que o app **substitua a planilha de controle** do usuário: lançar em poucos toques, ver o extrato como numa planilha e levar/trazer os dados por CSV.
 
 ## 3. Problema que resolve
 
@@ -113,11 +113,11 @@ Money_APP/
 │   ├── modules/
 │   │   ├── dashboard/  transactions/  categories/  subscriptions/  goals/  reports/  settings/  onboarding/
 │   ├── domain/               # regras de negócio puras
-│   ├── services/             # storage, repositórios, exportação, pwa (service worker, instalação)
+│   ├── services/             # storage, repositórios, exportação, importação de planilha (CSV), pwa (service worker, instalação)
 │   ├── store/                # estado global financeiro, dados iniciais e de demonstração
 │   ├── hooks/                # hooks de leitura derivada
-│   ├── theme/                # contexto e persistência do tema
-│   ├── design-system/        # tokens slate-flow (claro) e obsidian-capital (escuro)
+│   ├── theme/                # modo, paletas, tamanho do texto: contexto e persistência (DT-019)
+│   ├── design-system/        # foundation (escalas), tokens slate-flow (claro), obsidian-capital (escuro), palettes.css (temas de cores)
 │   ├── models/               # tipos e contratos
 │   ├── utils/                # formatação, datas, ids
 │   ├── validations/          # validação de formulários
@@ -131,23 +131,27 @@ Money_APP/
 
 | Módulo | Responsabilidade |
 |---|---|
-| **Visão Geral** (`modules/dashboard`) | Saldo disponível (descontados os aportes em metas), receitas, despesas, poupança (aportes em metas no mês), alertas do mês, gráfico semanal, gastos por categoria vs. limite, seletor de mês, atalho para novo lançamento |
-| **Lançamentos** (`modules/transactions`) | CRUD de receitas/despesas, histórico agrupado por dia, busca, filtros (período, tipo, categoria), duplicar, selo "Assinatura" nos lançamentos gerados |
+| **Visão Geral** (`modules/dashboard`) | Saldo disponível (descontados os aportes em metas), resumo do mês (receitas, despesas, poupança com variação vs mês anterior), atalho para novo lançamento, próximas cobranças, últimos lançamentos, metas em destaque, alertas compactos, gráfico semanal, gastos por categoria vs. limite, seletor de mês |
+| **Lançamentos** (`modules/transactions`) | Lançamento rápido (chips de categoria por uso, sugestões de descrição, "Salvar e adicionar outro"), CRUD de receitas/despesas, extrato agrupado por dia com total do dia, resumo do filtro, busca, filtros em chips (período, tipo, categoria), colunas no desktop, exportação CSV do filtro, duplicar, selo "Assinatura" nos lançamentos gerados |
 | **Categorias / Gastos** (`modules/categories`) | CRUD de categorias, limite mensal, gasto atual, % consumido, alertas de limite, teto global, filtro por grupo, bloco "Assinaturas do mês" |
 | **Assinaturas** (`modules/subscriptions`) | CRUD de assinaturas mensais (nome, ícone, valor, dia de cobrança, categoria, primeiro/último mês, ativa/pausada, observação), sugestões rápidas, total mensal e estimativa anual, próxima cobrança, pausar/retomar, excluir mantendo ou não os lançamentos; componente do bloco "Assinaturas do mês" usado em Gastos |
-| **Metas** (`modules/goals`) | CRUD de metas, valor alvo/acumulado, prazo, progresso, aportes, simulador de aporte mensal e cenários |
+| **Metas** (`modules/goals`) | CRUD de metas, valor alvo/acumulado, prazo, progresso, aportes; lista primeiro e, depois, simulador de aporte mensal e cenários |
 | **Relatórios / Gráficos** (`modules/reports`) | Centrado nas metas: total guardado, aportes no período, aportes por mês por meta, evolução acumulada do total guardado, distribuição por meta, progresso e previsão de cada meta, estado vazio com atalho para Metas. Secundário: receitas × despesas por mês, distribuição por categoria, comparação com período anterior (inclui aportes), hábitos de gastos, exportação CSV/PDF |
 | **Boas-vindas** (`modules/onboarding`) | Tela do primeiro acesso ("Como prefere ser chamado?": nome obrigatório e renda mensal opcional) e `OnboardingGate`, que mostra o carregamento e redireciona entre boas-vindas e app conforme `settings.onboardingCompleted` |
-| **Ajustes** (`modules/settings`) | Perfil (nome e renda mensal), tema, gerenciamento de categorias (lista, criar, editar, excluir, restaurar padrão), instalar app (PWA), carregar dados de demonstração, apagar dados (recriando as categorias padrão), exportar/importar backup JSON |
-| Design System (`design-system`, `theme`) | Tokens dos dois temas, alternância e persistência |
-| Persistência (`services`) | Leitura/gravação segura e versionada dos dados |
+| **Ajustes** (`modules/settings`) | Perfil (nome e renda mensal), Aparência (tema de cores com prévia, modo claro/escuro/automático, tamanho do texto, ocultar valores), gerenciamento de categorias (lista, criar, editar, excluir, restaurar padrão), instalar app (PWA), planilha (exportar CSV e importar CSV com prévia), carregar dados de demonstração, apagar dados (recriando as categorias padrão), exportar/importar backup JSON |
+| Design System (`design-system`, `theme`) | Tokens dos modos claro/escuro, paletas (`palettes.css`), escala tipográfica; modo, paleta e tamanho do texto com persistência (DT-019) |
+| Persistência (`services`) | Leitura/gravação segura e versionada dos dados; importação de planilha CSV (`services/import`, DT-020) |
 
 ## 10. Funcionalidades previstas (detalhe)
 
 ### 10.1 Visão Geral
 - Saldo disponível (receitas − despesas − aportes em metas, acumulados até a data de referência; regra 36); botão para ocultar valores (preferência persistida). O cartão informa quanto foi guardado em metas no mês (ou "Mês negativo" quando as despesas superam as receitas).
-- Cartões Receitas (variação vs mês anterior), Despesas (% das receitas) e Poupança = aportes em metas no mês (variação vs mês anterior; regra 35).
-- Alertas automáticos: categoria acima do limite, categoria acima de 80%, gastos maiores que o mês anterior, meta ≥ 80%, aportes em metas maiores que no mesmo período do mês anterior.
+- Resumo do mês (um cartão com três colunas): Receitas, Despesas e Poupança = aportes em metas no mês (regra 35), cada um com a variação vs mês anterior em formato discreto (regra 50). Até a v1.6.0, Despesas mostrava o % das receitas.
+- Ordem da tela (v1.7.0, regra 49): saudação e mês → saldo → resumo → "Novo Lançamento" → **Próximas cobranças** → **Últimos lançamentos** → **Suas metas** → **Alertas do mês** → gráfico semanal → gastos por categoria → consistência. No desktop (≥ 1280 px), metas, alertas e análises ficam na segunda coluna.
+- **Próximas cobranças**: assinaturas previstas do mês selecionado (no mês atual, as que ainda vão acontecer; regra 45) com data, valor e "Total previsto"; sem assinaturas cadastradas, convite "Cadastre suas assinaturas"; oculto em meses passados.
+- **Últimos lançamentos**: os 5 mais recentes do mês selecionado; tocar abre a edição; link "Ver extrato"; vazio → "Registrar lançamento".
+- **Suas metas**: até 3 metas (em andamento mais próximas de concluir primeiro, depois concluídas) com barra e "R$ X de R$ Y"; sem metas → "Crie sua primeira meta".
+- Alertas automáticos: categoria acima do limite, categoria acima de 80%, gastos maiores que o mês anterior, meta ≥ 80%, aportes em metas maiores que no mesmo período do mês anterior. No Início aparecem compactos: no máximo 2 e o restante em "Ver todos (+N)" (regra 51); a lista completa continua nas Notificações do cabeçalho.
 - Gráfico Receitas vs Despesas por semana do mês (interativo).
 - Gastos por categoria com barra de limite; "Editar tetos" leva a Categorias.
 - Seletor de mês (anterior/próximo) compartilhado com Categorias e Relatórios; permite meses futuros até 60 meses à frente, com indicação "Mês futuro" e saldo previsto (regras 20 e 27).
@@ -155,9 +159,12 @@ Money_APP/
 
 ### 10.2 Lançamentos
 - Criar, editar, duplicar e excluir (com confirmação) receitas e despesas.
-- Campos: tipo, descrição, valor, data, categoria, observação opcional.
-- Histórico agrupado por dia com total diário; resumo de entradas/saídas do período.
-- Busca por descrição/categoria; filtros de período (este mês, 7 dias, mês anterior, todos), tipo e categoria; estado vazio com "limpar filtros".
+- Campos: tipo, valor, categoria, descrição, data, observação opcional (nesta ordem desde a v1.7.0).
+- **Lançamento rápido** (v1.7.0, regras 52–54): o valor recebe o foco ao abrir (teclado numérico); categorias em **chips com ícone**, das mais usadas para as menos usadas (até 8 visíveis + "Mais N"); a descrição mostra até 4 **sugestões** de descrições anteriores com a categoria usada da última vez; **"Salvar e adicionar outro"** grava, mantém tipo e data, limpa os demais campos e volta ao valor. As validações são as mesmas (regras 2–4, 27).
+- Extrato agrupado por dia com a contagem de itens e o total do dia; **resumo do filtro** com entradas, saídas e saldo do que está filtrado (regra 55).
+- Busca por descrição/categoria/observação; filtros em **chips**: período (este mês, 7 dias, mês anterior, todos), tipo e categoria (ao escolher um tipo, só aparecem as categorias desse tipo); "Limpar filtros"; estado vazio com "limpar filtros" ou, sem filtros, o convite "Seu extrato começa aqui" com "Novo lançamento".
+- Desktop (≥ 1024 px): linhas em colunas Descrição | Categoria | Valor, com cabeçalho, como numa planilha.
+- "Exportar CSV" exporta exatamente os lançamentos filtrados.
 - Sem categoria do tipo selecionado, o formulário mostra um aviso com "Criar categorias padrão" (adiciona só as que faltam) e "Criar categoria personalizada" (fecha o formulário e abre Categorias).
 
 ### 10.3 Categorias
@@ -176,6 +183,7 @@ Money_APP/
 - Previsão de conclusão com base no aporte mensal planejado da meta; status Em ritmo / Quase lá! / Atrasada / Sem aporte / Concluída.
 - Simulador: selecionar meta, aporte mensal (slider + atalhos), meses necessários, data prevista, cenários conservador (60%) / moderado (100%) / foco total (150%), aviso se não cumprir o prazo e aporte mensal necessário para cumpri-lo; botão para adotar o valor simulado como aporte planejado.
 - Resumo geral: total acumulado, total pretendido, % geral.
+- Ordem da tela (v1.7.0): resumo → lista de metas → "Criar Nova Meta" → simulador (no desktop, o simulador fica na segunda coluna).
 
 ### 10.5 Relatórios (aba "Gráficos") — centrados nas metas (v1.5.0, DT-016)
 - Intervalos: mês selecionado, 6 meses até o mês selecionado, ano até o mês selecionado.
@@ -196,6 +204,11 @@ Money_APP/
 - Excluir com confirmação; opção de excluir também os lançamentos já gerados (padrão: manter).
 - Cobranças lançadas automaticamente como despesas reais no dia de cobrança (regras 39–47); meses futuros aparecem como previstos.
 - Estado vazio com "Adicionar assinatura".
+
+### 10.7 Aparência e planilha (v1.7.0, DT-019 e DT-020)
+- **Ajustes → Aparência**: 5 temas de cores com prévia (Esmeralda, Oceano, Ametista, Pôr do sol, Grafite), modo Claro / Escuro / Automático, tamanho do texto Normal / Grande, "Ocultar valores".
+- O botão sol/lua do cabeçalho continua alternando claro/escuro, mantendo a paleta.
+- **Ajustes → Seus dados → Planilha (CSV)**: "Exportar para planilha" (todos os lançamentos, do mais recente ao mais antigo) e "Importar de planilha" (instruções, escolha do arquivo, prévia com contadores, linhas inválidas com motivo, "Importar N lançamentos"). Backup completo (JSON) em grupo próprio.
 
 ## 11. Regras de negócio
 
@@ -247,12 +260,26 @@ Money_APP/
 46. **Status e totais**: Encerrada quando o último mês já passou (ou a última cobrança já aconteceu); Pausada quando inativa; senão Ativa. Total mensal = Σ valores das ativas; estimativa anual = total mensal × 12. Próxima cobrança = primeira data de cobrança depois de hoje (nenhuma se pausada ou encerrada).
 47. **Excluir assinatura**: deixa de gerar cobranças; os lançamentos já gerados são mantidos por padrão (podem ser excluídos juntos marcando a opção). Categorias usadas por assinaturas não podem ser excluídas nem mudar de tipo. Sem a categoria "Assinaturas", o formulário oferece "Assinaturas (nova categoria)", criada ao salvar conforme a regra 23.
 
+48. **Temas** (v1.7.0, DT-019): a aparência tem três preferências independentes — modo (Claro, Escuro, Automático = segue o sistema; padrão Automático), tema de cores (Esmeralda, Oceano, Ametista, Pôr do sol, Grafite; padrão Esmeralda) e tamanho do texto (Normal, Grande = 112,5%). Ficam em `localStorage` (`money-app:theme:v2`), valem só neste dispositivo e não entram no backup. A preferência antiga (`money-app:theme` = claro/escuro) vira o modo correspondente com o tema Esmeralda. Receitas são sempre verdes e despesas sempre vermelhas, em qualquer tema.
+49. **Ordem do Início** (v1.7.0): da informação mais importante para a de análise (seção 10.1). O aviso de demonstração ocupa uma linha.
+50. **Variação dos KPIs**: percentual vs o mês anterior completo (como antes); seta para cima/baixo colorida pelo significado (receitas e poupança: subir é verde; despesas: subir é vermelho); sem valor no mês anterior, mostra "—".
+51. **Alertas compactos**: no Início, no máximo 2 alertas visíveis (na ordem de `buildAlerts`: orçamento, gastos, metas, aportes); "Ver todos (+N)" mostra o restante e "Mostrar menos" recolhe.
+52. **Ordem das categorias no formulário**: por quantidade de lançamentos do mesmo tipo (desc.), desempate pelo uso mais recente e depois pela ordem do cadastro; categorias nunca usadas ficam no fim. Até 8 chips visíveis; com 2 ou mais a mais, "Mais N" mostra todas (a selecionada sempre aparece).
+53. **Sugestões de descrição**: até 4 descrições já usadas no mesmo tipo que contêm o texto digitado (sem acento/maiúsculas), sem repetição — primeiro as que começam com o texto, das mais recentes para as mais antigas. Escolher uma sugestão preenche a descrição e a categoria do lançamento mais recente com essa descrição; digitar exatamente uma descrição já usada também seleciona essa categoria. Nenhuma das duas substitui uma categoria escolhida manualmente. Na edição não há sugestões.
+54. **"Salvar e adicionar outro"** (só em novos lançamentos): valida como o botão principal; ao salvar, mantém tipo e data, limpa valor, categoria, descrição e observação e volta o foco ao valor; o subtítulo conta os lançamentos adicionados na sequência.
+55. **Resumo do Extrato**: entradas, saídas e saldo (entradas − saídas) dos lançamentos que passam por todos os filtros (período, tipo, categoria e busca). Até a v1.6.0 o resumo ignorava tipo e busca.
+56. **Importação de planilha (CSV)** (DT-020): cabeçalho obrigatório com Data, Descrição e Valor (Categoria, Tipo e Observação opcionais); datas `DD/MM/AAAA`, `DD/MM/AA` ou `AAAA-MM-DD`; sem coluna Tipo, valor negativo = despesa e positivo = receita (valor zero é inválido); categoria pelo nome no mesmo tipo, senão "Outros" (ou a primeira do tipo), indicada na prévia; cada linha segue as regras 2–4 e 27; linhas inválidas são ignoradas com o motivo; uma linha igual (data, descrição sem acento/maiúsculas, valor e tipo) a um lançamento já existente é ignorada, mas repetições dentro do arquivo são importadas; máximo 2 MB e 5.000 linhas. Nada é gravado antes de "Importar N lançamentos". A exportação usa o mesmo formato (ida e volta sem perdas).
+
 ## 12. Fluxos de navegação
 
 ```
 Abrir app → (primeira vez) dados vazios + categorias padrão → Boas-vindas ("Como prefere ser chamado?": nome, renda opcional) → "Começar" → Visão Geral ("Olá, <nome>")
 Abrir app → (já usa o app) → Visão Geral
-Ajustes → "Carregar dados de demonstração" → confirmação → demonstração (aviso "Começar do zero" nas demais telas → Ajustes → "Apagar todos os dados")
+Ajustes → "Carregar dados de demonstração" → confirmação → demonstração (aviso de uma linha nas demais telas → "Sair da demonstração" → confirmação → dados apagados, categorias padrão recriadas)
+Ajustes → Aparência → tema de cores / modo / tamanho do texto (aplicado na hora e salvo no dispositivo)
+Ajustes → Planilha (CSV) → "Exportar para planilha" (download) · "Importar de planilha" → escolher CSV → prévia → "Importar N lançamentos"
+Novo lançamento → valor → chip de categoria → descrição (sugestões) → "Adicionar lançamento" ou "Salvar e adicionar outro" (repete)
+Início → "Últimos lançamentos" → tocar → edição · "Ver extrato" → Lançamentos · "Próximas cobranças" → Assinaturas · "Suas metas" → Metas
 Ajustes → "Instalar app" → diálogo do navegador (ou instruções no iPhone)
 Navegação: Visão Geral ⇄ Lançamentos (Extrato) ⇄ Categorias (Gastos) ⇄ Assinaturas ⇄ Metas ⇄ Relatórios (Gráficos) (barra inferior / lateral)
 Abrir app / voltar para ele → cobranças de assinaturas vencidas são lançadas como despesas
@@ -279,15 +306,27 @@ Comum aos dois: raios 8/12/16/24 px, grade de 4/8 px, margem 16 px no mobile e 2
 
 Os tokens ficam em `src/design-system/` como variáveis CSS com **nomes semânticos idênticos** nos dois temas (ex.: `--color-surface`, `--color-income`, `--font-money`); componentes só usam os tokens.
 
+**Temas de cores (v1.7.0, DT-019)** — `src/design-system/palettes.css` sobrescreve só primária, foco, cartão de saldo, gráficos e fundo (e superfícies em Pôr do sol/Grafite):
+
+| Tema | Destaque claro | Destaque escuro | `theme-color` claro / escuro |
+|---|---|---|---|
+| Esmeralda (original) | preto `#000000` + verde `#4edea3` no cartão | `#4edea3` | `#f8f9ff` / `#0b0f17` |
+| Oceano | `#0b5cad` | `#38bdf8` | `#f5f9ff` / `#09101a` |
+| Ametista | `#6d28d9` | `#a78bfa` | `#faf8ff` / `#0d0b16` |
+| Pôr do sol | `#b45309` | `#fbbf24` | `#fffaf5` / `#100d0a` |
+| Grafite | `#334155` | `#e2e8f0` | `#f7f8fa` / `#0d0e10` |
+
+Escala tipográfica `--text-2xs` (11 px) a `--text-2xl` (24 px), espaçamentos `--space-*`, números com `font-variant-numeric: tabular-nums` (classe `money`), alvos de toque `--touch-target` (44 px).
+
 ## 14. Regras de alternância de tema
 
-1. Botão no cabeçalho: ícone **sol** no tema claro, **lua** no escuro; `aria-label` descritivo.
-2. Troca global e imediata via atributo `data-theme` no `<html>`; transição suave de cores (200 ms), desativada com `prefers-reduced-motion`.
-3. Preferência salva em `localStorage` (`money-app:theme`).
-4. Sem preferência salva → segue `prefers-color-scheme` do sistema.
-5. Tema aplicado antes da renderização (script inline no `index.html`) para evitar flash.
+1. Botão no cabeçalho: ícone **sol** no modo claro, **lua** no escuro; `aria-label` descritivo. Alterna claro/escuro (fixa o modo) mantendo o tema de cores.
+2. Troca global e imediata via atributos `data-theme` (modo efetivo), `data-palette` e `data-text-size` no `<html>`; transição suave de cores (200 ms), desativada com `prefers-reduced-motion`.
+3. Preferências salvas em `localStorage` (`money-app:theme:v2`, JSON `{ mode, palette, textSize }`); a chave antiga `money-app:theme` é migrada (regra 48).
+4. Modo Automático (padrão, também quando não há nada salvo) → segue `prefers-color-scheme` do sistema, inclusive se ele mudar com o app aberto.
+5. Modo, paleta e tamanho aplicados antes da renderização (script inline no `index.html`) para evitar flash; metas `theme-color` atualizadas para a cor da paleta no modo.
 6. Gráficos, formulários, menus, cartões e sheets usam os mesmos tokens → acompanham a troca.
-7. Uma única aplicação; nenhum componente duplicado por tema.
+7. Uma única aplicação; nenhum componente duplicado por tema. Ajustes → Aparência mostra prévias renderizadas com os tokens reais de cada tema.
 
 ## 15. Armazenamento e persistência
 
@@ -326,6 +365,10 @@ Os tokens ficam em `src/design-system/` como variáveis CSS com **nomes semânti
 | RF-16 | Instalar o app no celular/computador (PWA) e abrir offline após o primeiro acesso |
 | RF-17 | Cadastrar, editar, pausar/retomar e excluir assinaturas mensais, com lançamento automático das cobranças vencidas |
 | RF-18 | Exibir as assinaturas do mês (lançadas e previstas) na aba Gastos e identificar os lançamentos gerados no Extrato |
+| RF-19 | Escolher tema de cores (5 opções), modo claro/escuro/automático e tamanho do texto, com prévia e persistência |
+| RF-20 | Lançamento rápido: categorias por uso em chips, sugestões de descrição com categoria, "Salvar e adicionar outro" |
+| RF-21 | Início com próximas cobranças, últimos lançamentos, metas em destaque e alertas compactos |
+| RF-22 | Exportar lançamentos para CSV (Ajustes e Extrato filtrado) e importar CSV de planilha com prévia |
 
 ## 18. Requisitos não funcionais
 
@@ -426,6 +469,16 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 - ✅ Navegação com 6 itens (DT-018).
 - ✅ 185 testes automatizados (28 unitários em `tests/subscriptions.test.ts` e 6 de integração em `tests/subscriptionsFlow.test.tsx` novos).
 
+### Concluído (v1.7.0 — testado automaticamente)
+- ✅ Temas escolhíveis (10.7, regra 48, DT-019): 5 paletas em claro/escuro, modo automático, tamanho do texto, Ajustes → Aparência com prévias, migração da preferência antiga, aplicação sem flash e `theme-color` por paleta.
+- ✅ Lançamento rápido (regras 52–54): foco no valor, chips de categoria por uso, sugestões de descrição com categoria, "Salvar e adicionar outro".
+- ✅ Início reorganizado (10.1, regras 49–51): KPIs limpos com variação discreta, próximas cobranças, últimos lançamentos, metas em destaque, alertas compactos, aviso de demonstração em uma linha com "Sair da demonstração".
+- ✅ Extrato com cara de planilha (10.2, regra 55): resumo do filtro (entradas, saídas, saldo), filtros em chips, total por dia, colunas no desktop, exportação CSV do filtro.
+- ✅ Metas: lista antes do simulador.
+- ✅ Planilha (CSV) em Ajustes: exportação e importação com prévia (regra 56, DT-020).
+- ✅ Barra inferior sem transbordo do rótulo ativo (revisão da DT-018); alvos de toque maiores, foco visível, esqueleto de carregamento, microanimações respeitando `prefers-reduced-motion`.
+- ✅ 218 testes automatizados (33 novos/reescritos: tema 13, lançamento rápido 7 + 5, Início 4, CSV 6 + 2).
+
 ### Em desenvolvimento
 - Nenhum.
 
@@ -440,7 +493,7 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 - Aportes em metas não aparecem no extrato nem no CSV (DT-008), embora reduzam o saldo disponível (DT-016). Quem registrava aportes também como despesas manuais terá o valor descontado duas vezes e deve remover esses lançamentos.
 - Gráficos das metas (v1.5.0): validados em jsdom; a aparência nos dois temas e em 320–375 px ainda não foi conferida visualmente no navegador. Com mais de 5 metas, as demais aparecem agrupadas em "Outras metas" no gráfico de aportes e na rosca. Metas excluídas levam junto seus aportes (o histórico de poupança daquele dinheiro some).
 - Sem testes E2E em navegador real automatizados; a verificação visual foi manual (375 px e 1366 px, temas claro e escuro).
-- O projeto não está sob controle de versão (Git não instalado no ambiente).
+- O projeto está sob Git (há commits por versão); a limitação "sem controle de versão", registrada na v1.0.0, não vale mais.
 - Dados ficam apenas no navegador atual (sem sincronização entre dispositivos).
 - O aviso de categorias ausentes no formulário (v1.0.1) foi validado por testes automatizados (jsdom); falta verificação visual manual no navegador nos dois temas.
 - A máscara de valores (v1.1.0) foi validada em jsdom; falta testar manualmente em teclados de celulares reais (Android/iOS) e com edição no meio do texto (o cursor sempre volta ao fim, por decisão de design).
@@ -453,10 +506,15 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 
 - Assinaturas (v1.6.0): validadas em jsdom; a aparência da aba, do bloco em Gastos, do selo no Extrato e da barra inferior com 6 itens (rótulo "Assinaturas" em 320–375 px) **não foi conferida visualmente** no navegador nos dois temas (DT-018). Os novos ícones (`live_tv`, `smart_toy`, `library_music`...) não foram conferidos na fonte real. A geração depende de o app ser aberto: ao abrir depois de muito tempo, todos os meses pendentes são lançados de uma vez. Quem já lançava a assinatura manualmente terá o valor em dobro nos meses em comum (excluir um dos dois). Em meses futuros, "Despesas" não inclui as previsões (só o saldo previsto). Alertas e limites de categoria só consideram cobranças já lançadas.
 
+- Interface v1.7.0 (temas, Início, Extrato, formulário, Aparência, importação CSV): validada em jsdom e por build; **não foi conferida visualmente no navegador** nesta entrega (320/375/430 px e 1366 px, 5 temas × 2 modos). Os contrastes AA das paletas foram calculados pela luminância relativa, não medidos em tela. A ausência de scroll horizontal e o rótulo "Assinaturas" em 320 px dependem de CSS que o jsdom não mede.
+- Botões pequenos (`size="sm"`) e opções do controle segmentado têm 40 px de altura (os demais alvos têm ≥ 44 px).
+- Importação CSV: sem mapeamento manual de colunas/categorias; planilhas só com valores positivos e sem coluna Tipo viram receitas; arquivos em ANSI (Excel antigo) podem trazer acentos trocados.
+- As preferências de aparência não fazem parte do backup JSON (são do dispositivo).
+
 ### Próximas etapas (sugestões)
-1. Inicializar repositório Git.
-2. Fontes e ícones locais (hoje do Google Fonts) para uso offline completo do PWA; aviso de "nova versão disponível".
-3. Lançamentos recorrentes genéricos (receitas fixas, contas) e parcelados — as assinaturas (v1.6.0) já cobrem despesas mensais recorrentes; avaliar generalizar `domain/subscriptions`.
-4. Conferir visualmente a aba Assinaturas e a barra inferior de 6 itens em 320/375 px nos dois temas.
-5. Testes E2E com Playwright.
+1. Conferir visualmente a v1.7.0 no navegador (5 temas × claro/escuro, 320–430 px e 1366 px) e medir os contrastes com uma ferramenta (axe/Lighthouse).
+2. Importação CSV: escolher o tipo padrão (despesa) para planilhas só com valores positivos e mapear categorias desconhecidas na prévia.
+3. Fontes e ícones locais (hoje do Google Fonts) para uso offline completo do PWA; aviso de "nova versão disponível".
+4. Lançamentos recorrentes genéricos (receitas fixas, contas) e parcelados — as assinaturas (v1.6.0) já cobrem despesas mensais recorrentes; avaliar generalizar `domain/subscriptions`.
+5. Testes E2E com Playwright (incluindo verificação de layout sem scroll horizontal em 320 px).
 6. Backend e sincronização (trocar os repositórios por implementações HTTP).

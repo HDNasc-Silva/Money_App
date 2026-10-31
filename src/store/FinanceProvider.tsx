@@ -45,6 +45,8 @@ export class DomainError extends Error {
 
 export interface FinanceActions {
   saveTransaction(draft: TransactionDraft, id?: string): Promise<Transaction>;
+  /** Adiciona vários lançamentos já validados de uma vez (importação de planilha CSV); retorna quantos entraram. */
+  importTransactions(drafts: readonly TransactionDraft[]): Promise<number>;
   duplicateTransaction(id: string): Promise<Transaction>;
   deleteTransaction(id: string): Promise<void>;
   saveCategory(draft: CategoryDraft, id?: string): Promise<Category>;
@@ -196,6 +198,19 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
         dispatch({ type: 'transaction/saved', transaction });
         await persist(() => repos.transactions.upsert(transaction));
         return transaction;
+      },
+
+      async importTransactions(drafts) {
+        if (drafts.length === 0) return 0;
+        const timestamp = now();
+        const imported: Transaction[] = drafts.map((draft) => {
+          const transaction: Transaction = { ...draft, id: createId(), createdAt: timestamp, updatedAt: timestamp };
+          if (!transaction.note) delete transaction.note;
+          return transaction;
+        });
+        const current = data();
+        await replaceData({ ...current, transactions: [...current.transactions, ...imported] });
+        return imported.length;
       },
 
       async duplicateTransaction(id) {

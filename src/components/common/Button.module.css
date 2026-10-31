@@ -29,7 +29,7 @@
 }
 
 .sm {
-  min-height: 2.25rem;
+  min-height: 2.5rem;
   padding: 0 0.75rem;
   font-size: 0.75rem;
   border-radius: var(--radius-sm);
@@ -60,6 +60,12 @@
 
 .secondary:hover:not(:disabled) {
   background: var(--color-surface-high);
+}
+
+.button:focus-visible,
+.iconButton:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
 }
 
 .ghost {

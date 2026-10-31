@@ -20,7 +20,7 @@
   width: 10rem;
   height: 10rem;
   border-radius: var(--radius-full);
-  background: rgba(78, 222, 163, 0.18);
+  background: var(--color-hero-glow);
   filter: blur(32px);
   pointer-events: none;
 }
@@ -48,7 +48,7 @@
   width: 0.5rem;
   height: 0.5rem;
   border-radius: var(--radius-full);
-  background: #4edea3;
+  background: var(--color-hero-accent);
 }
 
 .heroToggle {
@@ -92,71 +92,311 @@
 }
 
 .heroInsight > :first-child {
-  color: #4edea3;
+  color: var(--color-hero-accent);
 }
 
 /* ---------- Métricas ---------- */
+.metricsBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .metrics {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-sm);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
 }
 
 .metric {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   min-width: 0;
   padding: var(--space-md);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-card);
 }
 
-.metricTop {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 4px;
-  margin-bottom: var(--space-sm);
-  font-family: var(--font-heading);
-  font-size: 0.6875rem;
-  font-weight: 600;
-}
-
-.metricIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  border-radius: var(--radius-sm);
-  background: var(--color-surface-container);
-}
-
-.metricIncome {
-  background: var(--color-income-bg);
-  color: var(--color-income);
-}
-
-.metricExpense {
-  background: var(--color-expense-bg);
-  color: var(--color-expense-text);
+.metric + .metric {
+  border-left: 1px solid var(--color-divider);
 }
 
 .metricLabel {
-  font-size: 0.6875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-heading);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
   color: var(--color-text-muted);
+}
+
+.metricDot {
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: var(--radius-full);
+}
+
+.dotIncome {
+  background: var(--color-income);
+}
+
+.dotExpense {
+  background: var(--color-expense);
+}
+
+.dotSaved {
+  background: var(--color-primary);
 }
 
 .metricValue {
   overflow: hidden;
-  font-size: 1.0625rem;
+  font-size: var(--text-lg);
   font-weight: 600;
   letter-spacing: -0.02em;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: var(--text-2xs);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-subtle);
+  white-space: nowrap;
+}
+
+.metricsNote {
+  padding: 0 4px;
+  font-size: var(--text-2xs);
+  color: var(--color-text-subtle);
+  text-align: right;
+}
+
+/* ---------- Listas compactas (cobranças, últimos lançamentos) ---------- */
+.rows {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rows > li + li {
+  border-top: 1px solid var(--color-divider);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  width: 100%;
+  min-height: 3.25rem;
+  padding: var(--space-xs) 0;
+}
+
+.rowButton {
+  margin: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  transition: background-color var(--duration-fast) ease;
+}
+
+.rowButton:hover {
+  background: var(--color-surface-low);
+}
+
+.rowIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-container);
+  color: var(--color-text);
+}
+
+.rowIconIncome {
+  background: var(--color-income-bg);
+  color: var(--color-income);
+}
+
+.rowText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.rowTitle {
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowMeta {
+  overflow: hidden;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowAmount {
+  flex-shrink: 0;
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+.rowsTotal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-divider);
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.rowsTotalValue {
+  font-size: var(--text-lg);
+}
+
+.blockEmpty {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.blockEmptyAction {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-md);
+}
+
+/* Convite (estado vazio com ação). */
+.invite {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  min-height: var(--touch-target);
+  padding: var(--space-md);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  transition: background-color var(--duration-fast) ease;
+}
+
+.invite:hover {
+  background: var(--color-surface-low);
+}
+
+.invite > :first-child {
+  flex-shrink: 0;
+  color: var(--color-primary);
+}
+
+.invite > :last-child {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+.invite span {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.invite strong {
+  font-family: var(--font-heading);
+  font-size: var(--text-md);
+}
+
+.invite small {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+/* ---------- Metas em destaque ---------- */
+.goalRows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.goalRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.goalRowTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.goalRowName {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 0;
+  font-family: var(--font-heading);
+  font-weight: 500;
+}
+
+.goalRowName > :first-child {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+.goalRowPercent {
+  flex-shrink: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.moreButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  align-self: center;
+  min-height: var(--touch-target);
+  padding: 0 var(--space-md);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.moreButton:hover {
+  background: var(--color-surface-container);
+  color: var(--color-text);
 }
 
 .positive {
@@ -281,14 +521,14 @@
 }
 
 .textLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
   font-family: var(--font-heading);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--color-text);
-}
-
-[data-theme='dark'] .textLink {
+  font-size: var(--text-sm);
+  font-weight: 600;
   color: var(--color-primary);
+  white-space: nowrap;
 }
 
 .textLink:hover {

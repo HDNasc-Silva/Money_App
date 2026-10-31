@@ -26,6 +26,12 @@
   --color-hero-text: #f8fafc;
   --color-hero-muted: #94a3b8;
   --color-hero-chip: rgba(148, 163, 184, 0.15);
+  /* Destaques sobre o cartão de saldo e realces suaves (sobrescritos pelas paletas, DT-019). */
+  --color-hero-accent: #4edea3;
+  --color-hero-glow: rgba(78, 222, 163, 0.18);
+  --color-primary-soft: rgba(78, 222, 163, 0.12);
+  --color-brand: #4edea3;
+  --color-sheet-bg: #1a2130;
 
   --color-income: #34d399;
   --color-income-strong: #4edea3;

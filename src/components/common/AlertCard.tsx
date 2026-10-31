@@ -11,12 +11,14 @@ interface AlertCardProps {
   children: ReactNode;
   to?: string;
   aside?: ReactNode;
+  /** Versão compacta (Início): menos espaço e mensagem limitada a duas linhas. */
+  compact?: boolean;
 }
 
-export function AlertCard({ tone, icon, title, children, to, aside }: AlertCardProps) {
+export function AlertCard({ tone, icon, title, children, to, aside, compact = false }: AlertCardProps) {
   const content = (
     <>
-      <Icon name={icon} size={20} className={styles.icon} />
+      <Icon name={icon} size={compact ? 18 : 20} className={styles.icon} />
       <div className={styles.text}>
         <div className={styles.titleRow}>
           <span className={styles.title}>{title}</span>
@@ -26,7 +28,7 @@ export function AlertCard({ tone, icon, title, children, to, aside }: AlertCardP
       </div>
     </>
   );
-  const className = [styles.alert, styles[tone]].join(' ');
+  const className = [styles.alert, styles[tone], compact && styles.compact].filter(Boolean).join(' ');
   return to ? (
     <Link to={to} className={[className, styles.link].join(' ')}>
       {content}

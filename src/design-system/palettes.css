@@ -1,0 +1,236 @@
+/*
+ * Paletas de cor (temas nomeados) — DT-019.
+ * A base de cada modo vem de slate-flow (claro) e obsidian-capital (escuro); a paleta "Esmeralda"
+ * é exatamente essa base (sem sobrescritas). As demais trocam apenas destaque/primária, cartão de
+ * saldo, gráficos, fundo do app e, nas paletas neutras/quentes, as superfícies.
+ *
+ * Receitas (verde) e despesas (vermelho) NÃO são sobrescritas: são cores semânticas fixas.
+ * Contrastes (WCAG AA): texto sobre a primária ≥ 4,5:1; `--color-hero-muted` sobre o gradiente ≥ 4,5:1.
+ * Os seletores usam `[data-theme][data-palette]` no mesmo elemento: valem para o `<html>` e para as
+ * prévias da tela Ajustes → Aparência.
+ */
+
+/* ---------- Oceano ---------- */
+[data-theme='light'][data-palette='oceano'] {
+  --color-bg: #f5f9ff;
+  --color-header-bg: rgba(245, 249, 255, 0.85);
+  --color-primary: #0b5cad;
+  --color-on-primary: #ffffff;
+  --color-primary-hover: #084a8c;
+  --color-primary-soft: #e0edfb;
+  --color-focus: #0b5cad;
+  --color-progress: #0b5cad;
+  --color-accent: #0b5cad;
+  --color-hero-bg: linear-gradient(135deg, #0a3566 0%, #0e5a9c 100%);
+  --color-hero-muted: #c4def7;
+  --color-hero-chip: rgba(255, 255, 255, 0.16);
+  --color-hero-accent: #7dd3fc;
+  --color-hero-glow: rgba(125, 211, 252, 0.24);
+  --color-brand: #7dd3fc;
+  --chart-1: #0b5cad;
+  --chart-2: #0891b2;
+  --chart-3: #6366f1;
+  --chart-4: #d97706;
+  --chart-5: #db2777;
+  --chart-6: #64748b;
+  --chart-7: #a5b4fc;
+}
+
+[data-theme='dark'][data-palette='oceano'] {
+  --color-bg: #0c131d;
+  --color-header-bg: rgba(9, 16, 26, 0.82);
+  --color-primary: #38bdf8;
+  --color-on-primary: #06121f;
+  --color-primary-hover: #7dd3fc;
+  --color-primary-soft: rgba(56, 189, 248, 0.14);
+  --color-focus: #7dd3fc;
+  --color-progress: #38bdf8;
+  --color-accent: #38bdf8;
+  --color-hero-bg: linear-gradient(145deg, #13304f 0%, #0d1a2b 100%);
+  --color-hero-muted: #a9c0d9;
+  --color-hero-accent: #38bdf8;
+  --color-hero-glow: rgba(56, 189, 248, 0.2);
+  --color-brand: #38bdf8;
+  --chart-1: #38bdf8;
+  --chart-2: #a78bfa;
+  --chart-3: #fbbf24;
+  --chart-4: #f472b6;
+  --chart-5: #2dd4bf;
+  --chart-6: #fb923c;
+  --chart-7: #94a3b8;
+}
+
+/* ---------- Ametista ---------- */
+[data-theme='light'][data-palette='ametista'] {
+  --color-bg: #faf8ff;
+  --color-header-bg: rgba(250, 248, 255, 0.85);
+  --color-primary: #6d28d9;
+  --color-on-primary: #ffffff;
+  --color-primary-hover: #5b21b6;
+  --color-primary-soft: #efe9fd;
+  --color-focus: #6d28d9;
+  --color-progress: #6d28d9;
+  --color-accent: #6d28d9;
+  --color-hero-bg: linear-gradient(135deg, #2e1065 0%, #4c1d95 100%);
+  --color-hero-muted: #d4c9fd;
+  --color-hero-chip: rgba(255, 255, 255, 0.14);
+  --color-hero-accent: #c4b5fd;
+  --color-hero-glow: rgba(196, 181, 253, 0.26);
+  --color-brand: #c4b5fd;
+  --chart-1: #6d28d9;
+  --chart-2: #db2777;
+  --chart-3: #0891b2;
+  --chart-4: #d97706;
+  --chart-5: #4f46e5;
+  --chart-6: #64748b;
+  --chart-7: #c4b5fd;
+}
+
+[data-theme='dark'][data-palette='ametista'] {
+  --color-bg: #110f1a;
+  --color-header-bg: rgba(13, 11, 22, 0.82);
+  --color-primary: #a78bfa;
+  --color-on-primary: #120a24;
+  --color-primary-hover: #c4b5fd;
+  --color-primary-soft: rgba(167, 139, 250, 0.14);
+  --color-focus: #c4b5fd;
+  --color-progress: #a78bfa;
+  --color-accent: #a78bfa;
+  --color-hero-bg: linear-gradient(145deg, #2a1f4a 0%, #161226 100%);
+  --color-hero-muted: #bdb2dc;
+  --color-hero-accent: #c4b5fd;
+  --color-hero-glow: rgba(167, 139, 250, 0.22);
+  --color-brand: #a78bfa;
+  --chart-1: #a78bfa;
+  --chart-2: #f472b6;
+  --chart-3: #38bdf8;
+  --chart-4: #fbbf24;
+  --chart-5: #2dd4bf;
+  --chart-6: #818cf8;
+  --chart-7: #94a3b8;
+}
+
+/* ---------- Pôr do sol (âmbar) ---------- */
+[data-theme='light'][data-palette='por-do-sol'] {
+  --color-bg: #fffaf5;
+  --color-header-bg: rgba(255, 250, 245, 0.85);
+  --color-surface-low: #fdf4ea;
+  --color-surface-container: #f8eadb;
+  --color-surface-high: #f3dfca;
+  --color-surface-highest: #eed5bb;
+  --color-divider: #f3e6d8;
+  --color-track: #f3e6d8;
+  --color-secondary-bg: #f8eadb;
+  --color-primary: #b45309;
+  --color-on-primary: #ffffff;
+  --color-primary-hover: #92400e;
+  --color-primary-soft: #fdecd8;
+  --color-focus: #b45309;
+  --color-progress: #b45309;
+  --color-accent: #b45309;
+  --color-hero-bg: linear-gradient(135deg, #431407 0%, #7c2d12 100%);
+  --color-hero-muted: #fed7aa;
+  --color-hero-chip: rgba(255, 255, 255, 0.14);
+  --color-hero-accent: #fdba74;
+  --color-hero-glow: rgba(253, 186, 116, 0.26);
+  --color-brand: #fdba74;
+  --chart-1: #b45309;
+  --chart-2: #0f766e;
+  --chart-3: #7c3aed;
+  --chart-4: #db2777;
+  --chart-5: #ca8a04;
+  --chart-6: #64748b;
+  --chart-7: #fdba74;
+}
+
+[data-theme='dark'][data-palette='por-do-sol'] {
+  --color-bg: #14110e;
+  --color-header-bg: rgba(16, 13, 10, 0.82);
+  --color-primary: #fbbf24;
+  --color-on-primary: #1c1206;
+  --color-primary-hover: #fcd34d;
+  --color-primary-soft: rgba(251, 191, 36, 0.13);
+  --color-focus: #fcd34d;
+  --color-progress: #fbbf24;
+  --color-accent: #fbbf24;
+  --color-hero-bg: linear-gradient(145deg, #3a2414 0%, #1c140f 100%);
+  --color-hero-muted: #d2bda5;
+  --color-hero-accent: #fbbf24;
+  --color-hero-glow: rgba(251, 191, 36, 0.18);
+  --color-brand: #fbbf24;
+  --chart-1: #fbbf24;
+  --chart-2: #fb923c;
+  --chart-3: #38bdf8;
+  --chart-4: #a78bfa;
+  --chart-5: #f472b6;
+  --chart-6: #2dd4bf;
+  --chart-7: #a8a29e;
+}
+
+/* ---------- Grafite (neutro) ---------- */
+[data-theme='light'][data-palette='grafite'] {
+  --color-bg: #f7f8fa;
+  --color-header-bg: rgba(247, 248, 250, 0.85);
+  --color-surface-low: #f1f3f6;
+  --color-surface-container: #e8ebf0;
+  --color-surface-high: #dfe3e9;
+  --color-surface-highest: #d5dae2;
+  --color-divider: #e8ebf0;
+  --color-track: #e8ebf0;
+  --color-secondary-bg: #e8ebf0;
+  --color-primary: #334155;
+  --color-on-primary: #ffffff;
+  --color-primary-hover: #1e293b;
+  --color-primary-soft: #e8ebf0;
+  --color-focus: #334155;
+  --color-progress: #334155;
+  --color-accent: #334155;
+  --color-hero-bg: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  --color-hero-muted: #cbd5e1;
+  --color-hero-chip: rgba(255, 255, 255, 0.14);
+  --color-hero-accent: #e2e8f0;
+  --color-hero-glow: rgba(226, 232, 240, 0.14);
+  --color-brand: #e2e8f0;
+  --chart-1: #334155;
+  --chart-2: #0ea5e9;
+  --chart-3: #f59e0b;
+  --chart-4: #a855f7;
+  --chart-5: #64748b;
+  --chart-6: #ec4899;
+  --chart-7: #cbd5e1;
+}
+
+[data-theme='dark'][data-palette='grafite'] {
+  --color-bg: #111214;
+  --color-header-bg: rgba(13, 14, 16, 0.82);
+  --color-surface: #18191c;
+  --color-surface-low: #141518;
+  --color-surface-container: #1d1f23;
+  --color-surface-high: #26282d;
+  --color-surface-highest: #303238;
+  --color-divider: #23252a;
+  --color-border: rgba(64, 68, 76, 0.55);
+  --color-border-strong: #3a3d44;
+  --color-track: #26282d;
+  --color-secondary-bg: #23252a;
+  --color-sheet-bg: #1b1c20;
+  --color-primary: #e2e8f0;
+  --color-on-primary: #111214;
+  --color-primary-hover: #f8fafc;
+  --color-primary-soft: rgba(226, 232, 240, 0.1);
+  --color-focus: #e2e8f0;
+  --color-progress: #e2e8f0;
+  --color-accent: #e2e8f0;
+  --color-hero-bg: linear-gradient(145deg, #2a2d33 0%, #18191c 100%);
+  --color-hero-muted: #a9afba;
+  --color-hero-accent: #e2e8f0;
+  --color-hero-glow: rgba(226, 232, 240, 0.1);
+  --color-brand: #e2e8f0;
+  --chart-1: #e2e8f0;
+  --chart-2: #38bdf8;
+  --chart-3: #fbbf24;
+  --chart-4: #c084fc;
+  --chart-5: #94a3b8;
+  --chart-6: #f472b6;
+  --chart-7: #64748b;
+}

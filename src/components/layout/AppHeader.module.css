@@ -34,17 +34,12 @@
   height: 2.25rem;
   border-radius: var(--radius-md);
   background: var(--color-hero-bg);
-  color: var(--color-income-strong);
-}
-
-[data-theme='light'] .logo {
-  color: #4edea3;
+  color: var(--color-brand);
 }
 
 [data-theme='dark'] .logo {
   border: 1px solid var(--color-border-strong);
   background: var(--color-surface-high);
-  color: var(--color-primary);
 }
 
 .brandText {

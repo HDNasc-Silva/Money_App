@@ -65,7 +65,7 @@ describe('categorias em Ajustes', () => {
     await user.click(screen.getAllByRole('link', { name: /Extrato|Lançamentos/ })[0]!);
     await user.click(await screen.findByRole('button', { name: /Nova Movimentação/ }));
     const txForm = await screen.findByRole('dialog', { name: 'Novo lançamento' });
-    expect(within(within(txForm).getByLabelText('Categoria')).getByRole('option', { name: 'Veterinário' })).toBeInTheDocument();
+    expect(within(within(txForm).getByRole('radiogroup', { name: 'Categoria' })).getByRole('radio', { name: 'Veterinário' })).toBeInTheDocument();
   });
 
   it('restaura uma categoria padrão excluída sem duplicar as existentes', async () => {

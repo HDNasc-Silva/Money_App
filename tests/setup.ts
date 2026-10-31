@@ -36,6 +36,8 @@ Object.defineProperty(window, 'localStorage', { value: new MemoryStorage(), conf
 beforeEach(() => {
   window.localStorage.clear();
   document.documentElement.removeAttribute('data-theme');
+  document.documentElement.removeAttribute('data-palette');
+  document.documentElement.removeAttribute('data-text-size');
   mediaState.systemPrefersDark = false;
   window.matchMedia = vi.fn().mockImplementation((query: string) => ({
     matches: query.includes('dark') ? mediaState.systemPrefersDark : false,

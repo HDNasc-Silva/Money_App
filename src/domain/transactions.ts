@@ -85,4 +85,12 @@ export function groupByDay(transactions: readonly Transaction[]): DayGroup[] {
   return groups;
 }
 
-export const signedAmount = (t: Transaction): Cents => (t.type === 'income' ? t.amount : -t.amount);
+/** Os `limit` lançamentos mais recentes do período (do mais novo para o mais antigo). */
+export function latestTransactions(transactions: readonly Transaction[], period: Period, limit: number): Transaction[] {
+  return transactions
+    .filter((t) => t.date >= period.start && t.date <= period.end)
+    .sort(sortByDateDesc)
+    .slice(0, limit);
+}
+
+export const signedAmount =(t: Transaction): Cents => (t.type === 'income' ? t.amount : -t.amount);

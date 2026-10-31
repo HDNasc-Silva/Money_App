@@ -83,15 +83,18 @@ export function GoalsPage() {
               </div>
             )}
           </Card>
-          <GoalSimulator key={goals.map((g) => g.id).join()} goals={goals} />
-        </PageColumn>
 
-        <PageColumn>
           <div className={styles.listHeader}>
             <h2>Metas em andamento</h2>
             <span className={styles.muted}>{goals.length === 1 ? '1 meta' : `${goals.length} metas`}</span>
           </div>
-          {goals.length === 0 && <EmptyState icon="flag" title="Nenhuma meta criada" description="Defina um objetivo e acompanhe o progresso." />}
+          {goals.length === 0 && (
+            <EmptyState
+              icon="flag"
+              title="Nenhuma meta criada"
+              description="Reserva de emergência, viagem, um carro novo… defina um objetivo e acompanhe cada aporte."
+            />
+          )}
           {goals.map((goal) => {
             const progress = goalProgress(goal);
             const forecast = goalForecast(goal, today);
@@ -145,6 +148,11 @@ export function GoalsPage() {
           <Button icon="add_circle" fullWidth onClick={() => setEditing({ key: Date.now(), goal: null })}>
             Criar Nova Meta
           </Button>
+        </PageColumn>
+
+        {/* Simulador depois da lista (v1.7.0): a lista de metas é o conteúdo principal da tela. */}
+        <PageColumn>
+          <GoalSimulator key={goals.map((g) => g.id).join()} goals={goals} />
         </PageColumn>
       </PageGrid>
 

@@ -1,13 +1,11 @@
 import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Badge } from '@/components/common/Badge';
 import { Button } from '@/components/common/Button';
-import { Card } from '@/components/common/Card';
 import { EmptyState } from '@/components/common/EmptyState';
 import { Icon } from '@/components/common/Icon';
 import { Money } from '@/components/common/Money';
 import { SegmentedControl } from '@/components/common/SegmentedControl';
-import { SelectField } from '@/components/forms/Fields';
+import { useToast } from '@/components/common/Toast';
 import { Page } from '@/components/layout/Page';
 import { summarize } from '@/domain/summary';
 import {
@@ -19,9 +17,10 @@ import {
   type TypeFilter,
 } from '@/domain/transactions';
 import type { Transaction } from '@/models';
+import { downloadFile, transactionsToCsv } from '@/services/export';
 import { useFinanceData } from '@/store/FinanceProvider';
 import { addDays, formatDayMonth, todayIso } from '@/utils/dates';
-import { normalizeText } from '@/utils/format';
+import { normalizeText, pluralize } from '@/utils/format';
 import { TransactionActions } from './TransactionActions';
 import { useTransactionEditor } from './TransactionEditor';
 import { TransactionItem } from './TransactionItem';
@@ -40,15 +39,22 @@ const TYPE_OPTIONS: { value: TypeFilter; label: string }[] = [
   { value: 'expense', label: 'Despesas' },
 ];
 
+const ALL_CATEGORIES = '';
+
 function dayTitle(date: string, today: string): string {
   if (date === today) return `Hoje • ${formatDayMonth(date)}`;
   if (date === addDays(today, -1)) return `Ontem • ${formatDayMonth(date)}`;
   return formatDayMonth(date);
 }
 
+/**
+ * Extrato (v1.7.0): resumo do filtro (entradas, saídas e saldo), busca, filtros em chips,
+ * lista agrupada por dia com o total do dia e, no desktop, colunas como numa planilha.
+ */
 export function TransactionsPage() {
   const { transactions, categories } = useFinanceData();
   const { openNew } = useTransactionEditor();
+  const { showToast } = useToast();
   const [searchParams] = useSearchParams();
   const initialCategory = searchParams.get('categoria');
   const [filters, setFilters] = useState<TransactionFilters>(() => ({
@@ -65,50 +71,75 @@ export function TransactionsPage() {
     [transactions, categories, filters, today],
   );
   const groups = useMemo(() => groupByDay(filtered), [filtered]);
-  // O resumo considera período e categoria, mas não tipo/busca, para mostrar entradas e saídas.
-  const periodSummary = useMemo(
-    () => summarize(filterTransactions(transactions, categories, { ...filters, type: 'all', search: '' }, today)),
-    [transactions, categories, filters, today],
-  );
+  // O resumo reflete exatamente o que está filtrado (como o rodapé de uma planilha filtrada).
+  const filteredSummary = useMemo(() => summarize(filtered), [filtered]);
+  const categoryOptions = useMemo(() => {
+    const visible = filters.type === 'all' ? categories : categories.filter((c) => c.kind === filters.type);
+    return [{ value: ALL_CATEGORIES, label: 'Todas' }, ...visible.map((c) => ({ value: c.id, label: c.name }))];
+  }, [categories, filters.type]);
 
   const setFilter = <K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K]) =>
     setFilters((current) => ({ ...current, [key]: value }));
+  const changeType = (type: TypeFilter) =>
+    setFilters((current) => {
+      const category = current.categoryId ? categoriesById.get(current.categoryId) : undefined;
+      // Ao filtrar por tipo, descarta uma categoria do outro tipo (o resultado ficaria sempre vazio).
+      const keep = !category || type === 'all' || category.kind === type;
+      return { ...current, type, categoryId: keep ? current.categoryId : null };
+    });
   const hasActiveFilters =
     normalizeText(filters.search) !== '' || filters.type !== 'all' || filters.categoryId !== null || filters.period !== 'this-month';
-
-  const categoryOptions = [
-    { value: '', label: 'Todas as categorias' },
-    ...categories.map((c) => ({ value: c.id, label: `${c.name} (${c.kind === 'income' ? 'receita' : 'despesa'})` })),
-  ];
   const periodLabel = PERIOD_OPTIONS.find((o) => o.value === filters.period)?.label ?? '';
 
+  const exportFiltered = () => {
+    downloadFile(`money-app_extrato_${today}.csv`, transactionsToCsv(filtered, categories), 'text/csv;charset=utf-8');
+    showToast({ message: `${pluralize(filtered.length, 'lançamento exportado', 'lançamentos exportados')} para planilha (CSV).` });
+  };
+
   return (
-    <Page title="Lançamentos" description="Histórico, busca e filtros de receitas e despesas.">
-      <Card className={styles.summary}>
+    <Page title="Lançamentos" description="Seu extrato: busque, filtre e acompanhe dia a dia.">
+      <section className={styles.summary} aria-label="Resumo do filtro">
         <div className={styles.summaryHeader}>
           <span className={styles.summaryPeriod}>
             <Icon name="calendar_month" size={18} />
             {periodLabel}
+            {hasActiveFilters && filters.period === 'this-month' ? ' · filtrado' : ''}
           </span>
-          <Badge tone={periodSummary.balance >= 0 ? 'income' : 'expense'} icon={periodSummary.balance >= 0 ? 'trending_up' : 'trending_down'}>
-            {periodSummary.balance >= 0 ? 'Balanço positivo' : 'Balanço negativo'}
-          </Badge>
+          <Button variant="ghost" size="sm" icon="download" onClick={exportFiltered} disabled={filtered.length === 0}>
+            Exportar CSV
+          </Button>
         </div>
-        <div className={styles.summaryGrid}>
+        <dl className={styles.summaryGrid}>
           <div className={styles.summaryBox}>
-            <span className={[styles.summaryLabel, styles.labelIncome].join(' ')}>
-              <Icon name="arrow_downward" size={16} /> Entradas
-            </span>
-            <Money value={periodSummary.income} className={[styles.summaryValue, styles.amountIncome].join(' ')} />
+            <dt className={[styles.summaryLabel, styles.labelIncome].join(' ')}>
+              <Icon name="arrow_downward" size={14} /> Entradas
+            </dt>
+            <dd>
+              <Money value={filteredSummary.income} className={[styles.summaryValue, styles.amountIncome].join(' ')} />
+            </dd>
           </div>
           <div className={styles.summaryBox}>
-            <span className={[styles.summaryLabel, styles.labelExpense].join(' ')}>
-              <Icon name="arrow_upward" size={16} /> Saídas
-            </span>
-            <Money value={periodSummary.expense} className={styles.summaryValue} />
+            <dt className={[styles.summaryLabel, styles.labelExpense].join(' ')}>
+              <Icon name="arrow_upward" size={14} /> Saídas
+            </dt>
+            <dd>
+              <Money value={filteredSummary.expense} className={styles.summaryValue} />
+            </dd>
           </div>
-        </div>
-      </Card>
+          <div className={styles.summaryBox}>
+            <dt className={styles.summaryLabel}>
+              <Icon name="account_balance" size={14} /> Saldo
+            </dt>
+            <dd>
+              <Money
+                value={filteredSummary.balance}
+                signed
+                className={[styles.summaryValue, filteredSummary.balance < 0 ? styles.amountExpense : styles.amountIncome].join(' ')}
+              />
+            </dd>
+          </div>
+        </dl>
+      </section>
 
       <section className={styles.filters} aria-label="Busca e filtros">
         <div className={styles.search}>
@@ -119,7 +150,7 @@ export function TransactionsPage() {
           <input
             id="transaction-search"
             type="search"
-            placeholder="Buscar por descrição ou categoria"
+            placeholder="Buscar por descrição, categoria ou observação"
             value={filters.search}
             onChange={(event) => setFilter('search', event.target.value)}
           />
@@ -130,22 +161,31 @@ export function TransactionsPage() {
           )}
         </div>
         <SegmentedControl variant="pills" label="Período" options={PERIOD_OPTIONS} value={filters.period} onChange={(v) => setFilter('period', v)} />
-        <div className={styles.filterRow}>
-          <SegmentedControl label="Tipo" options={TYPE_OPTIONS} value={filters.type} onChange={(v) => setFilter('type', v)} />
-          <SelectField
-            label="Categoria"
-            value={filters.categoryId ?? ''}
-            onChange={(v) => setFilter('categoryId', v || null)}
-            options={categoryOptions}
-          />
-        </div>
+        <SegmentedControl variant="pills" label="Tipo" options={TYPE_OPTIONS} value={filters.type} onChange={changeType} />
+        <SegmentedControl
+          variant="pills"
+          label="Categoria"
+          options={categoryOptions}
+          value={filters.categoryId ?? ALL_CATEGORIES}
+          onChange={(v) => setFilter('categoryId', v || null)}
+        />
+        {hasActiveFilters && groups.length > 0 && (
+          <button type="button" className={styles.clearFilters} onClick={() => setFilters(DEFAULT_FILTERS)}>
+            <Icon name="filter_alt_off" size={16} />
+            Limpar filtros
+          </button>
+        )}
       </section>
 
       {groups.length === 0 ? (
         <EmptyState
-          icon="search_off"
-          title="Nenhum lançamento encontrado"
-          description={hasActiveFilters ? 'Tente outro termo ou ajuste os filtros.' : 'Registre sua primeira receita ou despesa.'}
+          icon={hasActiveFilters ? 'search_off' : 'receipt_long'}
+          title={hasActiveFilters ? 'Nenhum lançamento encontrado' : 'Seu extrato começa aqui'}
+          description={
+            hasActiveFilters
+              ? 'Tente outro termo ou ajuste os filtros.'
+              : 'Registre seus gastos e receitas — leva poucos segundos e substitui a planilha.'
+          }
           action={
             hasActiveFilters ? (
               <Button variant="secondary" size="sm" icon="filter_alt_off" onClick={() => setFilters(DEFAULT_FILTERS)}>
@@ -160,11 +200,19 @@ export function TransactionsPage() {
         />
       ) : (
         <div className={styles.groups}>
+          <div className={styles.tableHead} aria-hidden="true">
+            <span>Descrição</span>
+            <span>Categoria</span>
+            <span>Valor</span>
+          </div>
           {groups.map((group) => (
             <section key={group.date} className={styles.group} aria-label={dayTitle(group.date, today)}>
               <div className={styles.groupHeader}>
                 <h2>{dayTitle(group.date, today)}</h2>
-                <Money value={group.net} signed className={group.net > 0 ? styles.amountIncome : undefined} />
+                <span className={styles.groupTotal}>
+                  <span className={styles.groupCount}>{pluralize(group.items.length, 'item', 'itens')} · </span>
+                  <Money value={group.net} signed className={group.net > 0 ? styles.amountIncome : undefined} />
+                </span>
               </div>
               <ul className={styles.list}>
                 {group.items.map((t) => (

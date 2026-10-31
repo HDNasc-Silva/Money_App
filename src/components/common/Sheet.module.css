@@ -20,13 +20,9 @@
   border: 1px solid var(--color-border);
   border-bottom: 0;
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-  background: var(--color-surface);
+  background: var(--color-sheet-bg);
   box-shadow: var(--shadow-overlay);
   animation: slideUp 220ms var(--ease-standard);
-}
-
-[data-theme='dark'] .panel {
-  background: #1a2130;
 }
 
 .handle {

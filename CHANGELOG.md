@@ -7,6 +7,44 @@ Categorias: **Adicionado** · **Modificado** · **Corrigido** · **Removido** ·
 
 ---
 
+## [1.7.0] - 31/10/2026 — Temas escolhíveis e "substituir a planilha"
+
+### Adicionado
+- **Temas de cores** (DT-019): 5 paletas — **Esmeralda** (visual original), **Oceano**, **Ametista**, **Pôr do sol** e **Grafite** —, cada uma com variantes clara e escura (primária, cartão de saldo, gráficos, fundo e `theme-color`). Receitas continuam verdes e despesas vermelhas em todas.
+- **Ajustes → Aparência**: cartões de prévia de cada tema (mini cartão de saldo + botão + barras), modo **Claro / Escuro / Automático** (segue o sistema) e tamanho do texto **Normal / Grande**. "Ocultar valores" foi para este cartão.
+- **Lançamento rápido**: valor com foco automático (teclado numérico), **categorias em chips com ícone, mais usadas primeiro** (`CategoryPicker`, com "Mais N" quando há muitas), **sugestões de descrição** a partir do histórico que também aplicam a categoria usada da última vez (digitar uma descrição já usada também seleciona a categoria, sem sobrescrever uma escolha manual) e botão **"Salvar e adicionar outro"** (mantém tipo e data, limpa o resto e volta ao valor). Funções puras em `src/domain/quickEntry.ts`.
+- **Início**: blocos **Próximas cobranças** (assinaturas previstas até o fim do mês, com total), **Últimos lançamentos** (5 do mês, tocar abre a edição, link "Ver extrato"), **Suas metas** (até 3, progresso compacto) e **Alertas do mês** compactos (2 visíveis, "Ver todos (+N)"). Estados vazios com convite e ação.
+- **Importação de planilha (CSV) com prévia** (DT-020): Ajustes → "Importar de planilha" (colunas Data, Descrição, Valor, Categoria; Tipo/Observação opcionais), validação linha a linha com as regras do formulário, categorias desconhecidas em "Outros", lançamentos já existentes ignorados. Ação `importTransactions` no `FinanceProvider`.
+- **Exportação CSV acessível**: Ajustes → "Seus dados" → **Planilha (CSV)** ("Leve seus dados para a planilha quando quiser") e botão "Exportar CSV" no Extrato (exporta o que está filtrado).
+- Carregamento com **esqueleto** no formato do Início; classes globais `.enter` (entrada sutil) e `.skeleton`, ambas desligadas com `prefers-reduced-motion`.
+- Escala tipográfica `--text-2xs … --text-2xl` e `--duration-enter` em `foundation.css`.
+- Testes: `tests/theme.test.tsx` reescrito (13: modo automático, migração da chave antiga, campos inválidos, sincronia com o `index.html` e o CSS, provider, botão sol/lua, Aparência com paleta/modo/tamanho e `theme-color`, prévias), `tests/quickEntry.test.ts` (7), `tests/quickEntryFlow.test.tsx` (5), `tests/dashboardHome.test.tsx` (4), `tests/csvImport.test.ts` (6) e `tests/csvImportFlow.test.tsx` (2). Total: 218 testes.
+
+### Modificado
+- **Início reorganizado** por importância: saudação e mês → saldo → resumo do mês → "Novo Lançamento" → próximas cobranças → últimos lançamentos; na segunda coluna (ou abaixo, no celular) metas, alertas, gráfico semanal, gastos por categoria e consistência.
+- **KPIs mais limpos**: um único cartão com Receitas, Despesas e Poupança; variação discreta (seta colorida pelo significado — subir despesa é vermelho — e percentual neutro) e a legenda "Variação vs mês anterior". Despesas passou a mostrar a variação vs mês anterior (antes: % das receitas).
+- **Aviso de demonstração** compacto (uma linha) com o botão **"Sair da demonstração"**, que pede confirmação e apaga os dados de demonstração ali mesmo (antes: link "Começar do zero" para Ajustes).
+- **Extrato**: resumo do filtro com **Entradas, Saídas e Saldo** do que está filtrado (antes ignorava tipo e busca), filtros de tipo e categoria em **chips** (antes: select), "Limpar filtros", contagem de itens e total por dia, colunas Descrição | Categoria | Valor no desktop (≥ 1024 px), estado vazio convidativo ("Seu extrato começa aqui").
+- **Metas**: a lista vem antes do **Simulador de Aportes** (simulador na segunda coluna/no fim).
+- **Barra inferior** (revisão da DT-018): item ativo sem negrito (cor, ícone preenchido e ponto) e rótulo com fonte `min(11px, 3vw)` e reticências de último recurso — "Assinaturas" não transborda mais em 320 px.
+- Acabamento: alvos de toque maiores (chips de filtro 44 px, segmentos 40 px, botões pequenos 40 px, menu de ações do lançamento 44 px), foco visível nos botões, links de cartão na cor primária do tema, botão "Ocultar valores" e item ativo da lateral seguindo a paleta.
+
+### Corrigido
+- Rótulo "Assinaturas" ativo transbordava ≈ 2 px na barra inferior em 320 px.
+- Cores fixas (`#4edea3`, `#1a2130`) no cartão de saldo, logo, sheet e relatórios substituídas por tokens.
+
+### Técnico
+- Tema: `ThemeName` agora é o modo efetivo; novos `ThemeMode`, `TextSize`, `ThemePreferences`, `parseThemePreferences`, `loadThemePreferences`, `saveThemePreferences`, `resolveMode`, `themeColorFor`; `applyTheme` recebe `{ theme, palette, textSize }`. Removidos `resolveInitialTheme`, `loadThemePreference`, `saveThemePreference`, `THEME_LABELS` e `THEME_COLORS`.
+- Preferência de tema em `money-app:theme:v2` (JSON); migração automática de `money-app:theme` (`'light'`/`'dark'`).
+- `Blob.text()` com alternativa via `FileReader` (`services/import/readTextFile.ts`), usada também na importação de backup.
+- `CACHE_VERSION` do service worker: `v1.7.0`. Versão do pacote: 1.6.0 → 1.7.0 (MINOR). Nenhuma dependência nova.
+- Testes ajustados ao novo formulário (categoria por chips em vez de select), ao aviso de demonstração e ao estado vazio do Extrato.
+
+### Documentação
+- `DECISOES_TECNICAS.md`: DT-019 (sistema de temas), DT-020 (importação CSV) e revisão da DT-018. `ESCOPO_PROJETO.md`: módulos, funcionalidades 10.1/10.2/10.4/10.7, regras 48–56, seção 14 (temas), fluxos, RF-19 a RF-22, acompanhamento v1.7.0 e limitações. `README.md`: descrição, módulos, estrutura e notas sobre temas e planilha.
+
+---
+
 ## [1.6.0] - 31/10/2026 — Assinaturas mensais
 
 ### Adicionado

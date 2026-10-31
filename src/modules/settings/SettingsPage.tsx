@@ -3,23 +3,24 @@ import { Badge } from '@/components/common/Badge';
 import { Button } from '@/components/common/Button';
 import { Card, CardHeader } from '@/components/common/Card';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
-import { SegmentedControl } from '@/components/common/SegmentedControl';
+import { Icon } from '@/components/common/Icon';
 import { useToast } from '@/components/common/Toast';
 import { FormRow, FormStack, MoneyField, TextField } from '@/components/forms/Fields';
 import { Page } from '@/components/layout/Page';
+import { sortByDateDesc } from '@/domain/transactions';
 import { USER_NAME_MAX } from '@/models';
-import { backupToJson, downloadFile } from '@/services/export';
+import { backupToJson, downloadFile, transactionsToCsv } from '@/services/export';
+import { readTextFile } from '@/services/import/readTextFile';
 import { DomainError, useFinanceActions, useFinanceData } from '@/store/FinanceProvider';
-import { THEME_LABELS, type ThemeName } from '@/theme/theme';
-import { useTheme } from '@/theme/ThemeProvider';
 import { todayIso } from '@/utils/dates';
 import { centsToInput } from '@/utils/money';
 import { validateProfileSettings, type FieldErrors, type ProfileSettingsFormValues } from '@/validations';
+import { AppearanceSettings } from './AppearanceSettings';
 import { CategoriesSettings } from './CategoriesSettings';
+import { CsvImportSheet } from './CsvImportSheet';
 import { InstallAppCard } from './InstallAppCard';
 import styles from './Settings.module.css';
 
-const THEME_OPTIONS = (Object.keys(THEME_LABELS) as ThemeName[]).map((value) => ({ value, label: THEME_LABELS[value] }));
 const MAX_BACKUP_BYTES = 4 * 1024 * 1024;
 
 type PendingAction = 'demo' | 'clear' | null;
@@ -28,8 +29,8 @@ export function SettingsPage() {
   const data = useFinanceData();
   const { settings } = data;
   const actions = useFinanceActions();
-  const { theme, setTheme } = useTheme();
   const { showToast } = useToast();
+  const [csvImportOpen, setCsvImportOpen] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const [profile, setProfile] = useState<ProfileSettingsFormValues>(() => ({
     name: settings.userName,
@@ -59,6 +60,12 @@ export function SettingsPage() {
     showToast({ message: 'Backup exportado.' });
   };
 
+  const exportSpreadsheet = () => {
+    const sorted = [...data.transactions].sort(sortByDateDesc);
+    downloadFile(`money-app_lancamentos_${todayIso()}.csv`, transactionsToCsv(sorted, data.categories), 'text/csv;charset=utf-8');
+    showToast({ message: 'Planilha exportada. Abra o arquivo no Excel ou no Google Planilhas.' });
+  };
+
   const importBackup = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = '';
@@ -68,7 +75,7 @@ export function SettingsPage() {
       return;
     }
     try {
-      await actions.importBackup(await file.text());
+      await actions.importBackup(await readTextFile(file));
       showToast({ message: 'Backup importado com sucesso.' });
     } catch (error) {
       showToast({ tone: 'error', message: error instanceof DomainError ? error.message : 'Não foi possível ler o arquivo.' });
@@ -115,9 +122,7 @@ export function SettingsPage() {
         </form>
       </Card>
 
-      <Card>
-        <CardHeader title="Aparência" subtitle="A preferência fica salva neste dispositivo." />
-        <SegmentedControl label="Tema" options={THEME_OPTIONS} value={theme} onChange={setTheme} />
+      <AppearanceSettings>
         <label className={styles.switchRow}>
           <span>
             <strong>Ocultar valores</strong>
@@ -131,7 +136,7 @@ export function SettingsPage() {
             onChange={(event) => actions.updateSettings({ hideBalances: event.target.checked })}
           />
         </label>
-      </Card>
+      </AppearanceSettings>
 
       <CategoriesSettings />
 
@@ -146,14 +151,45 @@ export function SettingsPage() {
         <p className={styles.stats}>
           {data.transactions.length} lançamentos · {data.categories.length} categorias · {data.goals.length} metas
         </p>
+
+        <section className={styles.dataGroup} aria-labelledby="spreadsheet-title">
+          <h3 id="spreadsheet-title" className={styles.dataGroupTitle}>
+            <Icon name="table_view" size={20} />
+            Planilha (CSV)
+          </h3>
+          <p className={styles.dataGroupText}>
+            Leve seus dados para a planilha quando quiser — ou traga o histórico que você já controla no Excel ou no Google Planilhas.
+          </p>
+          <div className={styles.buttons}>
+            <Button variant="secondary" icon="download" onClick={exportSpreadsheet} disabled={data.transactions.length === 0}>
+              Exportar para planilha
+            </Button>
+            <Button variant="secondary" icon="upload_file" onClick={() => setCsvImportOpen(true)}>
+              Importar de planilha
+            </Button>
+          </div>
+        </section>
+
+        <section className={styles.dataGroup} aria-labelledby="backup-title">
+          <h3 id="backup-title" className={styles.dataGroupTitle}>
+            <Icon name="backup" size={20} />
+            Backup completo
+          </h3>
+          <p className={styles.dataGroupText}>
+            Um arquivo com tudo (lançamentos, categorias, metas, assinaturas e perfil) para trocar de celular ou guardar uma cópia.
+          </p>
+          <div className={styles.buttons}>
+            <Button variant="secondary" icon="download" onClick={exportBackup}>
+              Exportar backup
+            </Button>
+            <Button variant="secondary" icon="upload" onClick={() => fileInput.current?.click()}>
+              Importar backup
+            </Button>
+            <input ref={fileInput} type="file" accept="application/json,.json" hidden onChange={importBackup} />
+          </div>
+        </section>
+
         <div className={styles.buttons}>
-          <Button variant="secondary" icon="download" onClick={exportBackup}>
-            Exportar backup
-          </Button>
-          <Button variant="secondary" icon="upload" onClick={() => fileInput.current?.click()}>
-            Importar backup
-          </Button>
-          <input ref={fileInput} type="file" accept="application/json,.json" hidden onChange={importBackup} />
           <Button variant="secondary" icon="science" onClick={() => setPending('demo')}>
             Carregar dados de demonstração
           </Button>
@@ -162,6 +198,8 @@ export function SettingsPage() {
           </Button>
         </div>
       </Card>
+
+      <CsvImportSheet open={csvImportOpen} onClose={() => setCsvImportOpen(false)} />
 
       <ConfirmDialog
         open={pending !== null}

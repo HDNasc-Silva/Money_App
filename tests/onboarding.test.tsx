@@ -101,7 +101,7 @@ describe('primeiro acesso', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Novo lançamento' });
     await user.type(within(dialog).getByLabelText('Valor'), '4250');
     await user.type(within(dialog).getByLabelText('Descrição'), 'Padaria');
-    await user.selectOptions(within(dialog).getByLabelText('Categoria'), 'Alimentação');
+    await user.click(within(dialog).getByRole('radio', { name: 'Alimentação' }));
     await user.click(within(dialog).getByRole('button', { name: /Adicionar lançamento/ }));
     await waitFor(() => expect(readStored(adapter).transactions).toHaveLength(1));
   });
@@ -165,14 +165,12 @@ describe('Ajustes: demonstração e renda mensal', () => {
     expect(stored.settings).not.toHaveProperty('savingsTarget');
     expect(stored.settings.userName).not.toBe('Gabriel');
 
-    // Fora de Ajustes, o aviso de demonstração aparece com o atalho para começar do zero.
+    // Fora de Ajustes, o aviso compacto de demonstração tem o botão "Sair da demonstração" (com confirmação).
     await user.click(screen.getAllByRole('link', { name: /Início|Visão Geral/ })[0]!);
     expect(await screen.findByText(/dados de demonstração/)).toBeInTheDocument();
-    await user.click(screen.getByRole('link', { name: 'Começar do zero' }));
-
-    await user.click(await screen.findByRole('button', { name: /Apagar todos os dados/ }));
-    const clear = await screen.findByRole('dialog', { name: 'Apagar todos os dados?' });
-    await user.click(within(clear).getByRole('button', { name: /Apagar tudo/ }));
+    await user.click(screen.getByRole('button', { name: 'Sair da demonstração' }));
+    const leave = await screen.findByRole('dialog', { name: 'Sair da demonstração?' });
+    await user.click(within(leave).getByRole('button', { name: /Começar do zero/ }));
     await waitFor(() => expect(readStored(adapter).settings.isDemoData).toBe(false));
     expect(readStored(adapter).transactions).toHaveLength(0);
     expect(readStored(adapter).settings.userName).toBe('Ana');

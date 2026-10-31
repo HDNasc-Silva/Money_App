@@ -1,6 +1,7 @@
 @import '../design-system/foundation.css';
 @import '../design-system/slate-flow/tokens.css';
 @import '../design-system/obsidian-capital/tokens.css';
+@import '../design-system/palettes.css';
 
 *,
 *::before,
@@ -114,6 +115,39 @@ a {
   font-family: var(--font-money);
   font-feature-settings: 'tnum' 1;
   font-variant-numeric: tabular-nums;
+}
+
+/* Entrada sutil de blocos (desativada com prefers-reduced-motion via --duration-enter = 0). */
+.enter {
+  animation: enter var(--duration-enter) var(--ease-standard) both;
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* Esqueleto de carregamento. */
+.skeleton {
+  border-radius: var(--radius-md);
+  background: linear-gradient(90deg, var(--color-surface-container) 0%, var(--color-surface-high) 50%, var(--color-surface-container) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enter,
+  .skeleton {
+    animation: none;
+  }
 }
 
 /* Relatório PDF (impressão do navegador): apenas o conteúdo da tela. */

@@ -137,7 +137,7 @@ describe('recuperação quando não há categorias', () => {
     await user.type(within(dialog).getByLabelText('Valor'), '4250');
     expect(within(dialog).getByLabelText('Valor')).toHaveValue('42,50');
     await user.type(within(dialog).getByLabelText('Descrição'), 'Padaria');
-    await user.selectOptions(within(dialog).getByLabelText('Categoria'), 'Alimentação');
+    await user.click(within(dialog).getByRole('radio', { name: 'Alimentação' }));
     await user.click(within(dialog).getByRole('button', { name: /Adicionar lançamento/ }));
 
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());

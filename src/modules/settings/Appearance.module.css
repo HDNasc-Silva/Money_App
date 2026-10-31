@@ -1,0 +1,144 @@
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.groupLabel {
+  font-family: var(--font-heading);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+/* ---------- Paletas ---------- */
+.paletteGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: var(--space-sm);
+}
+
+.paletteOption {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: var(--space-sm);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-align: left;
+  transition:
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease,
+    transform var(--duration-fast) ease;
+}
+
+.paletteOption:hover {
+  border-color: var(--color-text-subtle);
+}
+
+.paletteOption:active {
+  transform: scale(0.98);
+}
+
+.paletteSelected,
+.paletteSelected:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.paletteName {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  margin-top: 2px;
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.paletteName > :last-child:not(:first-child) {
+  color: var(--color-primary);
+}
+
+.paletteDescription {
+  font-size: var(--text-2xs);
+  line-height: 1rem;
+  color: var(--color-text-muted);
+}
+
+/* Prévia: usa os tokens da própria paleta (o elemento tem data-theme e data-palette). */
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.previewHero {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  background: var(--color-hero-bg);
+  color: var(--color-hero-text);
+}
+
+.previewLabel {
+  font-family: var(--font-heading);
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-hero-muted);
+}
+
+.previewValue {
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.previewFooter {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.previewBars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 1.25rem;
+}
+
+.previewBars > span {
+  width: 4px;
+  border-radius: 2px;
+}
+
+.previewButton {
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-family: var(--font-heading);
+  font-size: 0.625rem;
+  font-weight: 600;
+}

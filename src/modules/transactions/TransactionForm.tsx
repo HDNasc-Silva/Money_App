@@ -1,15 +1,19 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import { useMemo, useRef, useState, type FormEvent } from 'react';
 import { Button } from '@/components/common/Button';
+import { Icon } from '@/components/common/Icon';
 import { SegmentedControl } from '@/components/common/SegmentedControl';
 import { Sheet } from '@/components/common/Sheet';
 import { useToast } from '@/components/common/Toast';
-import { FormRow, FormStack, MoneyField, SelectField, TextField } from '@/components/forms/Fields';
+import { CategoryPicker } from '@/components/forms/CategoryPicker';
+import { FormStack, MoneyField, TextField } from '@/components/forms/Fields';
+import { categoriesByUsage, descriptionSuggestions, lastCategoryForDescription, type DescriptionSuggestion } from '@/domain/quickEntry';
 import type { IsoDate, Transaction, TransactionType } from '@/models';
 import { useFinanceActions, useFinanceData } from '@/store/FinanceProvider';
 import { todayIso } from '@/utils/dates';
 import { centsToInput } from '@/utils/money';
 import { validateTransaction, type FieldErrors, type TransactionFormValues } from '@/validations';
 import { MissingCategoriesNotice } from './MissingCategoriesNotice';
+import styles from './TransactionForm.module.css';
 
 const TYPE_OPTIONS = [
   { value: 'expense', label: 'Despesa' },
@@ -51,20 +55,34 @@ function initialValues(transaction: Transaction | null, preset: TransactionPrese
   };
 }
 
-/** Formulário de criação/edição; montado com `key` para reiniciar o estado a cada abertura. */
+/**
+ * Formulário de criação/edição (lançamento rápido, v1.7.0): valor com foco automático, categorias em
+ * chips (mais usadas primeiro), descrição com sugestões que trazem a categoria usada da última vez e
+ * "Salvar e adicionar outro". Montado com `key` para reiniciar o estado a cada abertura.
+ */
 export function TransactionFormSheet({ open, transaction, preset, onClose }: TransactionFormSheetProps) {
-  const { categories } = useFinanceData();
+  const { categories, transactions } = useFinanceData();
   const { saveTransaction, ensureDefaultCategories } = useFinanceActions();
   const { showToast } = useToast();
   const [values, setValues] = useState(() => initialValues(transaction, preset));
   const [errors, setErrors] = useState<FieldErrors<keyof TransactionFormValues>>({});
   const [saving, setSaving] = useState(false);
   const [creatingCategories, setCreatingCategories] = useState(false);
+  const [addedCount, setAddedCount] = useState(0);
+  /** Categoria escolhida pelo usuário: as sugestões de descrição não a substituem. */
+  const categoryTouched = useRef(Boolean(transaction || preset?.categoryId));
+  const formRef = useRef<HTMLFormElement>(null);
+  const isEditing = Boolean(transaction);
 
-  const categoryOptions = useMemo(
-    () => categories.filter((c) => c.kind === values.type).map((c) => ({ value: c.id, label: c.name })),
-    [categories, values.type],
+  const orderedCategories = useMemo(
+    () => categoriesByUsage(categories, transactions, values.type),
+    [categories, transactions, values.type],
   );
+  const suggestions = useMemo(
+    () => (isEditing ? [] : descriptionSuggestions(transactions, values.description, values.type)),
+    [isEditing, transactions, values.description, values.type],
+  );
+  const categoryName = (id: string) => categories.find((c) => c.id === id)?.name;
 
   const update = <K extends keyof TransactionFormValues>(field: K, value: TransactionFormValues[K]) => {
     setValues((current) => ({ ...current, [field]: value }));
@@ -78,6 +96,24 @@ export function TransactionFormSheet({ open, transaction, preset, onClose }: Tra
     });
   };
 
+  const changeCategory = (categoryId: string) => {
+    categoryTouched.current = true;
+    update('categoryId', categoryId);
+  };
+
+  /** Ao digitar uma descrição já usada, sugere a categoria da última vez (se o usuário não escolheu outra). */
+  const changeDescription = (description: string) => {
+    update('description', description);
+    if (categoryTouched.current || isEditing) return;
+    const last = lastCategoryForDescription(transactions, description, values.type);
+    if (last) update('categoryId', last);
+  };
+
+  const applySuggestion = (suggestion: DescriptionSuggestion) => {
+    update('description', suggestion.description);
+    if (!categoryTouched.current) update('categoryId', suggestion.categoryId);
+  };
+
   const createDefaultCategories = async () => {
     setCreatingCategories(true);
     const added = await ensureDefaultCategories();
@@ -88,8 +124,8 @@ export function TransactionFormSheet({ open, transaction, preset, onClose }: Tra
     });
   };
 
-  const submit = async (event: FormEvent) => {
-    event.preventDefault();
+  /** Valida e salva; com `addAnother`, mantém o formulário aberto e pronto para o próximo lançamento. */
+  const save = async (addAnother: boolean) => {
     const result = validateTransaction(values, categories, todayIso());
     if (!result.ok) {
       setErrors(result.errors);
@@ -99,42 +135,44 @@ export function TransactionFormSheet({ open, transaction, preset, onClose }: Tra
     await saveTransaction(result.value, transaction?.id);
     setSaving(false);
     showToast({ message: transaction ? 'Lançamento atualizado.' : 'Lançamento adicionado.' });
-    onClose();
+    if (!addAnother) {
+      onClose();
+      return;
+    }
+    // Mantém tipo e data (lançamentos em sequência costumam ser do mesmo dia); limpa o resto.
+    setValues((current) => ({ ...current, description: '', amount: '', categoryId: '', note: '' }));
+    setErrors({});
+    categoryTouched.current = false;
+    setAddedCount((count) => count + 1);
+    formRef.current?.querySelector<HTMLInputElement>('input[inputmode="numeric"]')?.focus();
   };
 
-  const isEditing = Boolean(transaction);
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    void save(false);
+  };
+
+  const subtitle = isEditing
+    ? 'Altere valor, categoria ou data'
+    : addedCount > 0
+      ? `${addedCount} adicionado(s) nesta sequência`
+      : 'Registre uma receita ou despesa em poucos toques';
 
   return (
-    <Sheet
-      open={open}
-      title={isEditing ? 'Editar lançamento' : 'Novo lançamento'}
-      subtitle={isEditing ? 'Altere valor, categoria ou data' : 'Registre uma receita ou despesa'}
-      onClose={onClose}
-    >
-      <form onSubmit={submit} noValidate>
+    <Sheet open={open} title={isEditing ? 'Editar lançamento' : 'Novo lançamento'} subtitle={subtitle} onClose={onClose}>
+      <form ref={formRef} onSubmit={submit} noValidate>
         <FormStack>
           <SegmentedControl label="Tipo do lançamento" options={TYPE_OPTIONS} value={values.type} onChange={changeType} />
-          <MoneyField label="Valor" value={values.amount} onChange={(v) => update('amount', v)} error={errors.amount} />
-          <TextField
-            label="Descrição"
-            value={values.description}
-            onChange={(v) => update('description', v)}
-            error={errors.description}
-            placeholder={values.type === 'expense' ? 'Ex.: Supermercado' : 'Ex.: Salário'}
-            maxLength={80}
-          />
-          <FormRow>
-            <TextField label="Data" type="date" value={values.date} onChange={(v) => update('date', v)} error={errors.date} />
-            <SelectField
+          <MoneyField label="Valor" value={values.amount} onChange={(v) => update('amount', v)} error={errors.amount} enterKeyHint="next" />
+          {orderedCategories.length > 0 ? (
+            <CategoryPicker
               label="Categoria"
+              categories={orderedCategories}
               value={values.categoryId}
-              onChange={(v) => update('categoryId', v)}
-              options={categoryOptions}
-              placeholder={categoryOptions.length ? 'Selecione' : 'Nenhuma categoria'}
+              onChange={changeCategory}
               error={errors.categoryId}
             />
-          </FormRow>
-          {categoryOptions.length === 0 && (
+          ) : (
             <MissingCategoriesNotice
               type={values.type}
               busy={creatingCategories}
@@ -142,6 +180,34 @@ export function TransactionFormSheet({ open, transaction, preset, onClose }: Tra
               onCustomize={onClose}
             />
           )}
+          <div className={styles.descriptionField}>
+            <TextField
+              label="Descrição"
+              value={values.description}
+              onChange={changeDescription}
+              error={errors.description}
+              placeholder={values.type === 'expense' ? 'Ex.: Supermercado' : 'Ex.: Salário'}
+              maxLength={80}
+              autoComplete="off"
+              enterKeyHint="done"
+            />
+            {suggestions.length > 0 && (
+              <ul className={styles.suggestions} aria-label="Sugestões de descrição">
+                {suggestions.map((suggestion) => (
+                  <li key={suggestion.description}>
+                    <button type="button" className={styles.suggestion} onClick={() => applySuggestion(suggestion)}>
+                      <Icon name="history" size={16} />
+                      <span className={styles.suggestionText}>{suggestion.description}</span>
+                      {categoryName(suggestion.categoryId) && (
+                        <span className={styles.suggestionCategory}>{categoryName(suggestion.categoryId)}</span>
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <TextField label="Data" type="date" value={values.date} onChange={(v) => update('date', v)} error={errors.date} />
           <TextField
             label="Observação (opcional)"
             value={values.note}
@@ -149,9 +215,16 @@ export function TransactionFormSheet({ open, transaction, preset, onClose }: Tra
             error={errors.note}
             maxLength={200}
           />
-          <Button type="submit" icon="check" fullWidth disabled={saving}>
-            {isEditing ? 'Salvar alterações' : 'Adicionar lançamento'}
-          </Button>
+          <div className={styles.actions}>
+            <Button type="submit" icon="check" fullWidth disabled={saving}>
+              {isEditing ? 'Salvar alterações' : 'Adicionar lançamento'}
+            </Button>
+            {!isEditing && (
+              <Button variant="secondary" icon="playlist_add" fullWidth disabled={saving} onClick={() => void save(true)}>
+                Salvar e adicionar outro
+              </Button>
+            )}
+          </div>
         </FormStack>
       </form>
     </Sheet>

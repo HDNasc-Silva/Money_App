@@ -51,6 +51,21 @@
   color: var(--color-text-muted);
 }
 
+.compact {
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+}
+
+.compact .message {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: var(--text-xs);
+  line-height: 1.125rem;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
 .warning {
   background: var(--color-warning-bg);
 }

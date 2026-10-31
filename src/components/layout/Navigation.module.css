@@ -39,23 +39,29 @@
   transform: scale(0.95);
 }
 
+/*
+ * Rótulos (DT-018, revisado na v1.7.0): o peso da fonte é o mesmo para item ativo e inativo
+ * (o ativo é indicado por cor, ícone preenchido e ponto), então a largura não muda ao selecionar.
+ * A fonte acompanha a largura da tela (3vw, no máximo 11 px): em 320 px fica ≈ 9,6 px e
+ * "Assinaturas" cabe nos ≈ 53 px do item; reticências só como último recurso.
+ */
 .bottomLabel {
   max-width: 100%;
   overflow: hidden;
   font-family: var(--font-heading);
-  font-size: 0.6875rem;
+  font-size: min(0.6875rem, 3vw);
+  font-weight: 500;
   letter-spacing: -0.01em;
   white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
-/* Telas muito estreitas (320–359 px): fonte um pouco menor para "Assinaturas" caber inteira. */
 @media (max-width: 359px) {
   .bottomInner {
-    padding: 0 2px;
+    padding: 0;
   }
 
   .bottomLabel {
-    font-size: 0.625rem;
     letter-spacing: -0.02em;
   }
 }
@@ -68,12 +74,12 @@
 }
 
 .bottom .active {
-  color: var(--color-text);
-  font-weight: 600;
+  color: var(--color-primary);
 }
 
-[data-theme='dark'] .bottom .active {
-  color: var(--color-primary);
+.bottom .link:focus-visible {
+  outline-offset: -2px;
+  border-radius: var(--radius-md);
 }
 
 .bottom .active .indicator {
@@ -124,7 +130,7 @@
     height: 2.25rem;
     border-radius: var(--radius-md);
     background: var(--color-hero-bg);
-    color: #4edea3;
+    color: var(--color-brand);
   }
 
   .sideName {
@@ -177,13 +183,12 @@
   }
 
   .side .active {
-    background: var(--color-surface-container);
+    background: var(--color-primary-soft);
     color: var(--color-text);
     font-weight: 600;
   }
 
   [data-theme='dark'] .side .active {
-    background: var(--color-income-bg);
     color: var(--color-primary);
   }
 }
