@@ -106,6 +106,16 @@ Status possíveis: **Aceita** · **Substituída por DT-XXX** · **Obsoleta**
 - **Desvantagens:** editar o "já guardado" não altera aportes registrados (comportamento explicado no formulário).
 - **Módulos afetados:** `models`, `domain/goals`, Metas, Visão Geral (alertas).
 
+## DT-012 — Meses futuros para planejamento, com limite de 60 meses
+
+- **Data:** 30/10/2026 · **Status:** Aceita (substitui a regra de negócio 20 da v1.0.0, "o seletor de mês não avança para meses futuros")
+- **Contexto:** O usuário quer navegar para meses à frente (ex.: Dezembro de 2026) e planejar lançamentos. Até a v1.2.0 o `SelectedMonthProvider` e o `MonthSwitcher` bloqueavam qualquer mês posterior ao atual. A validação de lançamentos já aceitava qualquer data futura, sem limite.
+- **Decisão:** Permitir navegar e lançar até `MAX_FUTURE_MONTHS = 60` meses (5 anos) à frente do mês atual. Constante e helpers puros em `domain/periods.ts` (`maxPlanningMonth`, `maxPlanningDate`, `isFutureMonth`), usados pelo provider (clamp em `next`/`setMonth`), pelo seletor (botão "Próximo mês" desabilitado no limite) e por `validateTransaction`, que passa a receber `today` e rejeita datas após o fim do mês limite. Navegação para trás continua sem limite. Num mês futuro, a Visão Geral mostra o **saldo previsto ao fim do mês** (inclui lançamentos planejados até lá) e o seletor exibe a indicação "Mês futuro".
+- **Alternativas:** sem limite (risco de datas digitadas por engano, como ano 20266, e navegação sem fim); limite curto até dezembro do ano seguinte (insuficiente para planejar metas e compras maiores); limite diferente para navegação e para datas (inconsistente: lançamentos ficariam em meses inalcançáveis pelo seletor).
+- **Vantagens:** um único limite para navegação e validação; regras testáveis sem React; nenhuma alteração no modelo de dados.
+- **Desvantagens:** `validateTransaction` ganhou o parâmetro obrigatório `today`. Lançamentos antigos (ex.: importados por backup) com data além do limite continuam salvos e visíveis, mas precisam ter a data ajustada para serem editados.
+- **Módulos afetados:** `domain/periods`, `store/SelectedMonth`, `components/common/MonthSwitcher`, `validations`, `modules/transactions`, `modules/dashboard`, `modules/reports`.
+
 ## DT-010 — Roteamento com HashRouter
 
 - **Data:** 30/10/2026 · **Status:** Aceita

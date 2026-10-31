@@ -2,7 +2,15 @@ import { describe, expect, it } from 'vitest';
 import { buildAlerts } from '@/domain/alerts';
 import { budgetStatus, categoryBudgets, globalBudget } from '@/domain/budgets';
 import { goalForecast, goalProgress, goalsSummary, monthsToReach, requiredMonthly, simulationScenarios } from '@/domain/goals';
-import { monthsPeriod, previousPeriod } from '@/domain/periods';
+import {
+  isFutureMonth,
+  MAX_FUTURE_MONTHS,
+  maxPlanningDate,
+  maxPlanningMonth,
+  monthPeriod,
+  monthsPeriod,
+  previousPeriod,
+} from '@/domain/periods';
 import { expenseDistribution, monthlySeries, periodIndicators, weeklyBreakdown } from '@/domain/reports';
 import { cumulativeBalance, percentChange, summarize } from '@/domain/summary';
 import { DEFAULT_FILTERS, filterTransactions, groupByDay } from '@/domain/transactions';
@@ -169,6 +177,26 @@ describe('periods & reports', () => {
     expect(indicators.daysWithRecords).toBe(3);
     expect(indicators.largestExpense?.amount).toBe(20_000);
     expect(indicators.averageDailyExpense).toBe(3_000);
+  });
+
+  it('limite de planejamento é de 60 meses à frente do mês atual', () => {
+    expect(MAX_FUTURE_MONTHS).toBe(60);
+    expect(maxPlanningMonth('2026-10-30')).toBe('2031-10');
+    expect(maxPlanningDate('2026-10-30')).toBe('2031-10-31');
+    expect(isFutureMonth('2026-12', '2026-10-30')).toBe(true);
+    expect(isFutureMonth('2026-10', '2026-10-30')).toBe(false);
+    expect(isFutureMonth('2026-09', '2026-10-30')).toBe(false);
+  });
+
+  it('mês futuro sem lançamentos não gera divisões por zero', () => {
+    const period = monthPeriod('2026-12');
+    const indicators = periodIndicators([], period, '2026-10-30');
+    expect(indicators).toEqual({ days: 0, noSpendDays: 0, daysWithRecords: 0, largestExpense: null, averageDailyExpense: 0 });
+    expect(summarize([]).savingsRate).toBe(0);
+    expect(expenseDistribution([], categories, period)).toEqual([]);
+    expect(monthlySeries(list, monthsPeriod('2026-12', 3)).map((p) => p.closingBalance)).toEqual([110_000, 110_000, 110_000]);
+    const alerts = buildAlerts({ transactions: list, categories, goals: [], month: '2026-12', today: '2026-10-30' });
+    expect(alerts.filter((a) => a.id === 'spending-up' || a.id === 'savings-up')).toEqual([]);
   });
 });
 

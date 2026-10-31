@@ -7,7 +7,8 @@ import type {
   Transaction,
   TransactionType,
 } from '@/models';
-import { isValidIso } from '@/utils/dates';
+import { maxPlanningDate } from '@/domain/periods';
+import { formatDateBr, isValidIso } from '@/utils/dates';
 import { normalizeText } from '@/utils/format';
 import { MAX_AMOUNT, parseMoney } from '@/utils/money';
 
@@ -51,9 +52,14 @@ export interface TransactionFormValues {
 export type TransactionDraft = Pick<Transaction, 'type' | 'description' | 'amount' | 'date' | 'categoryId' | 'note'>;
 type TransactionField = keyof TransactionFormValues;
 
+/**
+ * Datas futuras são aceitas (planejamento), até o fim do mês limite
+ * (`maxPlanningDate`, mês atual + `MAX_FUTURE_MONTHS`).
+ */
 export function validateTransaction(
   values: TransactionFormValues,
   categories: readonly Category[],
+  today: IsoDate,
 ): ValidationResult<TransactionDraft, TransactionField> {
   const errors: FieldErrors<TransactionField> = {};
 
@@ -64,6 +70,9 @@ export function validateTransaction(
   if (amount.error) errors.amount = amount.error;
 
   if (!isValidIso(values.date)) errors.date = 'Informe uma data válida.';
+  else if (values.date > maxPlanningDate(today)) {
+    errors.date = `A data deve ser até ${formatDateBr(maxPlanningDate(today))}.`;
+  }
 
   const category = categories.find((c) => c.id === values.categoryId);
   if (!category) errors.categoryId = 'Selecione uma categoria.';

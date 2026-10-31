@@ -36,6 +36,20 @@ export function previousPeriod(period: Period): Period {
   return monthsPeriod(addMonths(startMonth, -1), months);
 }
 
+/**
+ * Quantos meses à frente do mês atual o usuário pode navegar e planejar lançamentos
+ * (5 anos). Limita erros de digitação (ex.: ano 20266) sem impedir o planejamento.
+ */
+export const MAX_FUTURE_MONTHS = 60;
+
+/** Último mês permitido para navegação e para datas de lançamentos. */
+export const maxPlanningMonth = (today: IsoDate): MonthKey => addMonths(monthKeyOf(today), MAX_FUTURE_MONTHS);
+
+/** Último dia permitido para datas de lançamentos. */
+export const maxPlanningDate = (today: IsoDate): IsoDate => lastDayOfMonth(maxPlanningMonth(today));
+
+export const isFutureMonth = (month: MonthKey, today: IsoDate): boolean => month > monthKeyOf(today);
+
 /** Lista de meses (YYYY-MM) cobertos pelo período. */
 export function monthsInPeriod(period: Period): MonthKey[] {
   const months: MonthKey[] = [];

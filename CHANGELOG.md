@@ -7,6 +7,31 @@ Categorias: **Adicionado** · **Modificado** · **Corrigido** · **Removido** ·
 
 ---
 
+## [1.3.0] - 30/10/2026 — Navegação e planejamento em meses futuros
+
+### Adicionado
+- Seletor de mês (`MonthSwitcher`, compartilhado por Visão Geral, Categorias e Relatórios) avança para meses futuros (ex.: Dezembro de 2026) até **60 meses à frente** do mês atual; o botão "Próximo mês" só fica desabilitado no último mês permitido. A navegação para trás continua livre.
+- Indicação discreta "Mês futuro" abaixo do nome do mês no seletor (token `--color-info`, funciona nos dois temas).
+- Helpers puros em `src/domain/periods.ts`: `MAX_FUTURE_MONTHS` (60), `maxPlanningMonth(today)`, `maxPlanningDate(today)` e `isFutureMonth(month, today)`.
+- `SelectedMonth` expõe `maxMonth` e `isFuture`; `next()` e `setMonth()` limitam ao mês máximo.
+- Visão Geral num mês futuro: cartão de saldo passa a "Saldo previsto ao fim do mês" (saldo acumulado até o último dia do mês, incluindo lançamentos planejados) e o texto sem receitas vira "Nenhuma receita planejada para este mês".
+- Testes: 2 de domínio (limite e mês futuro sem dados, sem divisão por zero/alertas incoerentes), 2 de validação (datas futuras até o limite, datas passadas) e 4 de integração (`tests/futureMonths.test.tsx`: navegar até +2 meses e até o limite, Categorias/Relatórios em mês futuro, criar lançamento com data futura refletindo no saldo previsto, rejeitar data além do limite). Total: 112 testes.
+
+### Modificado
+- `validateTransaction(values, categories, today)` recebe a data de hoje e rejeita datas após o fim do mês limite ("A data deve ser até DD/MM/AAAA."). Datas futuras dentro do limite já eram aceitas e continuam aceitas; antes não havia limite superior.
+- Relatórios: o insight "Média diária de gastos" mostra "Período ainda não iniciado." quando o período ainda não começou (antes: "Considerando 0 dia(s)…").
+
+### Removido
+- Bloqueio de meses futuros no seletor de mês (regra de negócio 20 da v1.0.0, substituída — ver DT-012).
+
+### Técnico
+- Versão do pacote: 1.2.0 → 1.3.0 (MINOR).
+
+### Documentação
+- `DECISOES_TECNICAS.md`: DT-012. `ESCOPO_PROJETO.md`: regras 3, 20 (substituída) e 27, seção 10.1 e acompanhamento v1.3.0.
+
+---
+
 ## [1.2.0] - 30/10/2026 — Categorias em Ajustes e catálogo de ícones com busca
 
 ### Adicionado

@@ -2,7 +2,7 @@
 
 > Documento oficial de referência. Representa o **estado atual real** do aplicativo e deve ser atualizado a cada alteração do sistema (ver `CHANGELOG.md` e `DECISOES_TECNICAS.md`).
 
-**Versão atual:** 1.2.0 (categorias em Ajustes e catálogo de ícones com busca)
+**Versão atual:** 1.3.0 (navegação e planejamento em meses futuros)
 **Última atualização:** 30/10/2026
 
 ---
@@ -148,7 +148,7 @@ Money_APP/
 - Alertas automáticos: categoria acima do limite, categoria acima de 80%, gastos maiores que o mês anterior, meta ≥ 80%, economia maior que o mês anterior.
 - Gráfico Receitas vs Despesas por semana do mês (interativo).
 - Gastos por categoria com barra de limite; "Editar tetos" leva a Categorias.
-- Seletor de mês (anterior/próximo) compartilhado com Categorias e Relatórios.
+- Seletor de mês (anterior/próximo) compartilhado com Categorias e Relatórios; permite meses futuros até 60 meses à frente, com indicação "Mês futuro" e saldo previsto (regras 20 e 27).
 - Indicador de consistência (dias com registro no mês).
 
 ### 10.2 Lançamentos
@@ -187,7 +187,7 @@ Money_APP/
 
 1. Valores são positivos e armazenados em centavos; o tipo (receita/despesa) define o sinal.
 2. Valor mínimo de lançamento: R$ 0,01; máximo: R$ 999.999.999,99.
-3. Descrição obrigatória (1–80 caracteres). Data obrigatória e válida.
+3. Descrição obrigatória (1–80 caracteres). Data obrigatória e válida (futuras permitidas até o limite da regra 27).
 4. Lançamento de despesa só aceita categoria de despesa; receita só categoria de receita.
 5. Saldo do período = Σ receitas − Σ despesas do período. Saldo acumulado = mesma soma até o fim do período.
 6. Poupança do período = max(saldo do período, 0); taxa de poupança = poupança ÷ receitas (0 se não houver receitas).
@@ -204,13 +204,14 @@ Money_APP/
 17. Dados de demonstração são identificados por um aviso na interface e podem ser apagados em Ajustes.
 18. Alertas do mês corrente comparam com o **mesmo intervalo de dias** do mês anterior (ex.: 1–10 vs 1–10); aumento de gastos gera alerta a partir de 10%.
 19. Uma categoria com lançamentos não pode mudar de tipo (despesa ↔ receita).
-20. O seletor de mês não avança para meses futuros.
+20. ~~O seletor de mês não avança para meses futuros.~~ Substituída na v1.3.0 (DT-012): o seletor de mês avança até **60 meses à frente** do mês atual (`MAX_FUTURE_MONTHS`; em 30/10/2026 o limite é Outubro de 2031) e volta sem limite. Meses posteriores ao atual exibem "Mês futuro" no seletor; na Visão Geral o saldo vira "Saldo previsto ao fim do mês" (saldo acumulado até o último dia do mês, incluindo lançamentos planejados). No mês atual, o saldo continua considerando apenas lançamentos até hoje.
 21. **Categorias padrão** (`store/defaultCategories.ts`): Alimentação, Moradia, Transporte, Lazer, Saúde, Educação e Outros (despesa, com limites mensais) e Salário, Freelance e Rendimentos (receita, sem limite). São as mesmas usadas na demonstração.
 22. "Apagar todos os dados" (Ajustes, também acessado por "Começar do zero") remove lançamentos, metas e categorias personalizadas, mantém o nome do usuário, volta as demais preferências ao padrão e **recria as categorias padrão**, para que seja sempre possível lançar em seguida.
 23. "Criar categorias padrão" adiciona apenas as categorias padrão ausentes: uma categoria é considerada existente quando há outra do mesmo tipo com o mesmo nome (sem acento e sem diferenciar maiúsculas, como na regra 16); ids padrão já ocupados recebem um id novo, nunca sobrescrevendo dados do usuário.
 24. **Entrada de valores monetários** (máscara pelos centavos, `formatMoneyInput`): só dígitos são considerados e os dois últimos são os centavos ("15000" → "150,00"; "1234567" → "12.345,67"); letras, vírgulas e pontos digitados são ignorados; colar "1.234,56" ou "R$ 1234,56" resulta em "1.234,56"; backspace remove o último dígito; sem dígitos significativos o campo fica vazio (a validação de obrigatório continua valendo); no máximo os dígitos de `MAX_AMOUNT` (R$ 999.999.999,99). Valores pré-preenchidos aparecem no mesmo formato ("1.234,56").
 25. **Ícones**: categorias e metas escolhem ícones do catálogo `ICON_CATALOG` (nomes do Material Symbols Outlined, sem duplicatas). A busca considera rótulo, palavras-chave e nome, sem acento e sem diferenciar maiúsculas; todos os termos digitados precisam corresponder. Um ícone já salvo fora do catálogo continua válido e exibido.
 26. "Restaurar categorias padrão" (Ajustes) segue a regra 23: só adiciona as categorias padrão ausentes e nunca altera ou remove as existentes.
+27. **Datas futuras em lançamentos** são permitidas (planejamento) até o último dia do mês limite da regra 20 (mensagem: "A data deve ser até DD/MM/AAAA."). Datas passadas continuam sem limite. Num mês futuro sem lançamentos, indicadores mostram "Período ainda não iniciado." e as comparações com o mês anterior usam os meses completos.
 
 ## 12. Fluxos de navegação
 
@@ -345,6 +346,11 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 - ✅ Catálogo de 139 ícones com rótulos e palavras-chave em português; `IconPicker` com busca, grade rolável, "Selecionado" e estado vazio; usado por Categorias e Metas.
 - ✅ 104 testes automatizados (10 unitários do catálogo/busca e 2 de integração de Ajustes → Categorias).
 
+### Concluído (v1.3.0 — testado automaticamente)
+- ✅ Navegação para meses futuros até 60 meses à frente, com "Mês futuro" no seletor e saldo previsto na Visão Geral (regra 20, DT-012).
+- ✅ Lançamentos com data futura até o fim do mês limite (regra 27).
+- ✅ 112 testes automatizados (2 de domínio, 2 de validação e 4 de integração novos).
+
 ### Em desenvolvimento
 - Nenhum.
 
@@ -363,6 +369,8 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 - O aviso de categorias ausentes no formulário (v1.0.1) foi validado por testes automatizados (jsdom); falta verificação visual manual no navegador nos dois temas.
 - A máscara de valores (v1.1.0) foi validada em jsdom; falta testar manualmente em teclados de celulares reais (Android/iOS) e com edição no meio do texto (o cursor sempre volta ao fim, por decisão de design).
 - Ícones do catálogo (v1.2.0): os nomes foram escolhidos entre os existentes no Material Symbols Outlined, mas a renderização de cada um não foi conferida visualmente no navegador (jsdom não carrega a fonte). Um nome inexistente apareceria como texto.
+
+- Meses futuros (v1.3.0): validados em jsdom; a indicação "Mês futuro" no seletor ainda não foi conferida visualmente no navegador nos dois temas. O formulário de novo lançamento continua sugerindo a data de hoje mesmo com um mês futuro selecionado. Lançamentos importados com data além do limite ficam visíveis, mas exigem ajustar a data para salvar uma edição.
 
 ### Próximas etapas (sugestões)
 1. Inicializar repositório Git.

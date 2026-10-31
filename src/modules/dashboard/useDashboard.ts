@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { buildAlerts } from '@/domain/alerts';
 import { categoryBudgets } from '@/domain/budgets';
-import { monthPeriod } from '@/domain/periods';
+import { isFutureMonth, monthPeriod } from '@/domain/periods';
 import { periodIndicators, weeklyBreakdown } from '@/domain/reports';
 import { cumulativeBalance, percentChange, summarizePeriod } from '@/domain/summary';
 import { useFinanceData } from '@/store/FinanceProvider';
@@ -17,9 +17,13 @@ export function useDashboard() {
   return useMemo(() => {
     const summary = summarizePeriod(transactions, monthPeriod(month));
     const previous = summarizePeriod(transactions, monthPeriod(addMonths(month, -1)));
-    const balanceDate = lastDayOfMonth(month) < today ? lastDayOfMonth(month) : today;
+    const isFuture = isFutureMonth(month, today);
+    // Mês passado: saldo ao fim do mês. Mês atual: saldo até hoje.
+    // Mês futuro: saldo previsto ao fim do mês, incluindo lançamentos planejados.
+    const balanceDate = isFuture || lastDayOfMonth(month) < today ? lastDayOfMonth(month) : today;
     return {
       month,
+      isFuture,
       summary,
       incomeChange: percentChange(summary.income, previous.income),
       balance: cumulativeBalance(transactions, balanceDate),

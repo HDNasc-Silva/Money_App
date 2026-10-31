@@ -88,7 +88,7 @@ export function TransactionFormSheet({ open, transaction, preset, onClose }: Tra
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    const result = validateTransaction(values, categories);
+    const result = validateTransaction(values, categories, todayIso());
     if (!result.ok) {
       setErrors(result.errors);
       return;

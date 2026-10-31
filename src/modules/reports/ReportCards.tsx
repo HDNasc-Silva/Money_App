@@ -225,7 +225,7 @@ export function InsightsCard({ indicators, savingsDiff }: InsightsProps) {
       icon: 'calendar_today',
       title: 'Média diária de gastos',
       value: formatCurrency(indicators.averageDailyExpense),
-      text: `Considerando ${indicators.days} dia(s) decorridos no período.`,
+      text: indicators.days ? `Considerando ${indicators.days} dia(s) decorridos no período.` : 'Período ainda não iniciado.',
       tone: styles.insightNeutral,
       money: true,
     },

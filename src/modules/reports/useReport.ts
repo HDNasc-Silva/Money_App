@@ -13,7 +13,7 @@ const TREND_MONTHS = 6;
 function resolvePeriod(interval: ReportInterval, month: MonthKey): Period {
   if (interval === 'month') return monthPeriod(month);
   if (interval === 'six-months') return monthsPeriod(month, 6);
-  // Ano até o mês selecionado (meses futuros ainda não têm dados).
+  // Ano até o mês selecionado (inclui lançamentos planejados quando o mês é futuro).
   return { start: `${month.slice(0, 4)}-01-01`, end: monthPeriod(month).end };
 }
 

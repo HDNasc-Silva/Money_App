@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { validateCategory, validateContribution, validateGoal, validateTransaction } from '@/validations';
 import { categories } from './helpers';
 
+const TODAY = '2026-10-30';
+
 const validTransaction = {
   type: 'expense' as const,
   description: '  Supermercado   Extra ',
@@ -13,7 +15,7 @@ const validTransaction = {
 
 describe('validateTransaction', () => {
   it('aceita e normaliza um lançamento válido', () => {
-    const result = validateTransaction(validTransaction, categories);
+    const result = validateTransaction(validTransaction, categories, TODAY);
     expect(result).toEqual({
       ok: true,
       value: { type: 'expense', description: 'Supermercado Extra', amount: 24550, date: '2026-10-30', categoryId: 'food', note: undefined },
@@ -21,20 +23,32 @@ describe('validateTransaction', () => {
   });
 
   it('rejeita campos inválidos', () => {
-    const result = validateTransaction({ ...validTransaction, description: ' ', amount: '0', date: '2026-02-31', categoryId: '' }, categories);
+    const result = validateTransaction({ ...validTransaction, description: ' ', amount: '0', date: '2026-02-31', categoryId: '' }, categories, TODAY);
     expect(result.ok).toBe(false);
     if (!result.ok) expect(Object.keys(result.errors).sort()).toEqual(['amount', 'categoryId', 'date', 'description']);
   });
 
   it('rejeita categoria incompatível com o tipo', () => {
-    const result = validateTransaction({ ...validTransaction, type: 'income' }, categories);
+    const result = validateTransaction({ ...validTransaction, type: 'income' }, categories, TODAY);
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.errors.categoryId).toMatch(/incompatível/);
   });
 
   it('rejeita valor acima do máximo', () => {
-    const result = validateTransaction({ ...validTransaction, amount: '1000000000' }, categories);
+    const result = validateTransaction({ ...validTransaction, amount: '1000000000' }, categories, TODAY);
     expect(result.ok).toBe(false);
+  });
+
+  it('aceita datas futuras para planejamento até o limite de 60 meses', () => {
+    expect(validateTransaction({ ...validTransaction, date: '2026-12-15' }, categories, TODAY).ok).toBe(true);
+    expect(validateTransaction({ ...validTransaction, date: '2031-10-31' }, categories, TODAY).ok).toBe(true);
+    const beyond = validateTransaction({ ...validTransaction, date: '2031-11-01' }, categories, TODAY);
+    expect(beyond.ok).toBe(false);
+    if (!beyond.ok) expect(beyond.errors.date).toBe('A data deve ser até 31/10/2031.');
+  });
+
+  it('mantém datas passadas permitidas', () => {
+    expect(validateTransaction({ ...validTransaction, date: '2020-01-01' }, categories, TODAY).ok).toBe(true);
   });
 });
 

@@ -1,4 +1,5 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import { isFutureMonth, maxPlanningMonth } from '@/domain/periods';
 import type { MonthKey } from '@/models';
 import { addMonths, monthKeyOf, todayIso } from '@/utils/dates';
 
@@ -6,6 +7,10 @@ import { addMonths, monthKeyOf, todayIso } from '@/utils/dates';
 interface SelectedMonthValue {
   month: MonthKey;
   currentMonth: MonthKey;
+  /** Último mês navegável (mês atual + `MAX_FUTURE_MONTHS`). */
+  maxMonth: MonthKey;
+  /** O mês selecionado é posterior ao mês atual (planejamento). */
+  isFuture: boolean;
   setMonth(month: MonthKey): void;
   previous(): void;
   next(): void;
@@ -14,20 +19,24 @@ interface SelectedMonthValue {
 const SelectedMonthContext = createContext<SelectedMonthValue | null>(null);
 
 export function SelectedMonthProvider({ children }: { children: ReactNode }) {
-  const currentMonth = monthKeyOf(todayIso());
-  const [month, setMonth] = useState<MonthKey>(currentMonth);
+  const today = todayIso();
+  const currentMonth = monthKeyOf(today);
+  const maxMonth = maxPlanningMonth(today);
+  const [month, setMonthState] = useState<MonthKey>(currentMonth);
 
-  const value = useMemo<SelectedMonthValue>(
-    () => ({
+  const value = useMemo<SelectedMonthValue>(() => {
+    const clamp = (m: MonthKey): MonthKey => (m > maxMonth ? maxMonth : m);
+    return {
       month,
       currentMonth,
-      setMonth,
-      previous: () => setMonth((m) => addMonths(m, -1)),
-      // Não permite navegar para meses futuros.
-      next: () => setMonth((m) => (m < currentMonth ? addMonths(m, 1) : m)),
-    }),
-    [month, currentMonth],
-  );
+      maxMonth,
+      isFuture: isFutureMonth(month, today),
+      setMonth: (m) => setMonthState(clamp(m)),
+      previous: () => setMonthState((m) => addMonths(m, -1)),
+      // Meses futuros são permitidos para planejamento, até `maxMonth`.
+      next: () => setMonthState((m) => clamp(addMonths(m, 1))),
+    };
+  }, [month, currentMonth, maxMonth, today]);
 
   return <SelectedMonthContext.Provider value={value}>{children}</SelectedMonthContext.Provider>;
 }

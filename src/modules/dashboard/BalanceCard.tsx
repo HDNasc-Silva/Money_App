@@ -11,14 +11,16 @@ interface BalanceCardProps {
   monthBalance: Cents;
   savingsRate: number;
   hasIncome: boolean;
+  /** Mês futuro: o saldo é uma previsão para o fim do mês. */
+  projected?: boolean;
 }
 
-export function BalanceCard({ balance, monthBalance, savingsRate, hasIncome }: BalanceCardProps) {
+export function BalanceCard({ balance, monthBalance, savingsRate, hasIncome, projected = false }: BalanceCardProps) {
   const { hideBalances } = useFinanceData().settings;
   const { updateSettings } = useFinanceActions();
 
   let insight: string;
-  if (!hasIncome) insight = 'Nenhuma receita registrada neste mês';
+  if (!hasIncome) insight = projected ? 'Nenhuma receita planejada para este mês' : 'Nenhuma receita registrada neste mês';
   else if (monthBalance < 0) insight = `Mês negativo em ${hideBalances ? HIDDEN_VALUE : formatCurrency(-monthBalance)}`;
   else insight = `Planejamento equilibrado com ${formatPercent(savingsRate)} guardado`;
 
@@ -28,7 +30,7 @@ export function BalanceCard({ balance, monthBalance, savingsRate, hasIncome }: B
       <div className={styles.heroTop}>
         <span className={styles.heroLabel}>
           <span className={styles.heroDot} aria-hidden="true" />
-          Saldo atual disponível
+          {projected ? 'Saldo previsto ao fim do mês' : 'Saldo atual disponível'}
         </span>
         <button
           type="button"

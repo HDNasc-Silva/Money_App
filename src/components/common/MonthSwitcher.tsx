@@ -5,7 +5,7 @@ import styles from './MonthSwitcher.module.css';
 
 /** Seletor de mês compartilhado (Visão Geral, Categorias, Relatórios). */
 export function MonthSwitcher() {
-  const { month, currentMonth, previous, next } = useSelectedMonth();
+  const { month, maxMonth, isFuture, previous, next } = useSelectedMonth();
   return (
     <div className={styles.switcher}>
       <button type="button" className={styles.arrow} aria-label="Mês anterior" onClick={previous}>
@@ -13,13 +13,14 @@ export function MonthSwitcher() {
       </button>
       <span className={styles.label} aria-live="polite">
         {formatMonthLabel(month)}
+        {isFuture && <span className={styles.future}>Mês futuro</span>}
       </span>
       <button
         type="button"
         className={styles.arrow}
         aria-label="Próximo mês"
         onClick={next}
-        disabled={month >= currentMonth}
+        disabled={month >= maxMonth}
       >
         <Icon name="chevron_right" size={18} />
       </button>
