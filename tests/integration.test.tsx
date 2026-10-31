@@ -146,7 +146,7 @@ describe('integração entre módulos', () => {
     expect(await screen.findByText(/possui 1 lançamento/)).toBeInTheDocument();
   });
 
-  it('carrega dados de demonstração na primeira execução', async () => {
+  it('não carrega dados de demonstração na primeira execução (ver tests/onboarding.test.tsx)', async () => {
     const adapter = new MemoryStorageAdapter();
     render(
       <MemoryRouter>
@@ -155,7 +155,8 @@ describe('integração entre módulos', () => {
         </AppProviders>
       </MemoryRouter>,
     );
-    expect(await screen.findByText(/dados de demonstração/)).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Como prefere ser chamado?' })).toBeInTheDocument();
+    expect(screen.queryByText(/dados de demonstração/)).not.toBeInTheDocument();
     expect(adapter.read(DATA_KEY)).not.toBeNull();
   });
 });

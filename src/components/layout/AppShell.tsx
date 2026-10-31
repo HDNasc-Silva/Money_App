@@ -8,7 +8,7 @@ import styles from './AppShell.module.css';
 import { BottomNav, SideNav } from './Navigation';
 
 const NOTICE_MESSAGES = {
-  corrupted: 'Os dados salvos estavam ilegíveis e foram preservados em backup. Carregamos dados de demonstração.',
+  corrupted: 'Os dados salvos estavam ilegíveis e foram preservados em backup. O app recomeçou do zero.',
   'not-persistent': 'O armazenamento do navegador está indisponível: os dados não serão mantidos ao fechar o app.',
   'load-failed': 'Não foi possível carregar os dados salvos.',
 } as const;
@@ -21,15 +21,7 @@ export function AppShell() {
     window.scrollTo({ top: 0 });
   }, [pathname]);
 
-  if (state.status === 'loading') {
-    return (
-      <div className={styles.loading} role="status">
-        <Icon name="hourglass_empty" size={28} />
-        Carregando suas finanças…
-      </div>
-    );
-  }
-
+  // O carregamento e o onboarding são tratados antes, pelo OnboardingGate (ver AppRoutes).
   return (
     <div className={styles.shell}>
       <a href="#conteudo" className={styles.skip}>

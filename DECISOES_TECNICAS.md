@@ -136,3 +136,34 @@ Status possíveis: **Aceita** · **Substituída por DT-XXX** · **Obsoleta**
 - **Vantagens:** zero configuração de servidor.
 - **Desvantagens:** URLs com `#`. Trocar para `BrowserRouter` quando houver hospedagem definida.
 - **Módulos afetados:** `app/`.
+
+## DT-014 — Primeiro acesso vazio, onboarding por flag em Settings e migração aditiva
+
+- **Data:** 30/10/2026 · **Status:** Aceita (substitui o comportamento da v1.0.0 de carregar dados de demonstração na primeira execução)
+- **Contexto:** O usuário quer começar com os dados zerados e ver a demonstração só se pedir; e quer que todo primeiro acesso passe por "Como prefere ser chamado?" antes do Início. Quem já usa o app (dados salvos sem os novos campos) não pode perder dados nem ser interrompido.
+- **Decisão:**
+  - Primeiro acesso (storage vazio ou corrompido) grava `buildInitialData()` (`store/initialData.ts`): sem lançamentos/metas, com as categorias padrão e `onboardingCompleted: false`. A demonstração vira a ação `loadDemoData()`, chamada só por Ajustes, que **mantém o perfil e as preferências** do usuário (os dados de demonstração não têm mais nome fixo).
+  - Novos campos em `Settings`: `onboardingCompleted: boolean` e `monthlyIncome: Cents`. Em `DEFAULT_SETTINGS`, `onboardingCompleted` é **`true`**, porque esses padrões também completam documentos antigos: documento sem o campo = usuário existente = onboarding concluído. O único caminho que grava `false` é `buildInitialData`.
+  - `parseFinanceData` passa a sanear `settings` campo a campo (`sanitizeSettings`): tipo errado ou fora da faixa → padrão. `schemaVersion` continua 1, pois a mudança é aditiva e compatível; backups da v1.4.0 importados numa versão antiga apenas ignoram os campos novos.
+  - Roteamento: rota de layout `OnboardingGate` (`modules/onboarding`) envolve todas as rotas; mostra o carregamento (`LoadingScreen`, extraído do `AppShell`), redireciona para `/boas-vindas` enquanto o onboarding estiver pendente e de volta para `/` depois. A tela de boas-vindas fica **fora** do `AppShell` (sem cabeçalho/navegação).
+  - Validação do perfil em `validations` (`validateOnboarding`: nome obrigatório; `validateProfileSettings`: nome opcional, renda opcional, meta 0–100), com o limite `USER_NAME_MAX = 40` compartilhado em `models`.
+  - Renda mensal: só referência. Ajustes mostra `savingsTargetAmount(renda, meta%)` (função pura em `domain/summary.ts`); a Visão Geral continua calculando a taxa de poupança sobre as receitas lançadas, para não misturar valor informado com valor realizado.
+- **Alternativas:** incrementar `schemaVersion` com uma função de migração dedicada (desnecessário para campos opcionais com padrão); flag de onboarding em chave separada do `localStorage` (dois pontos de verdade, perderia o vínculo com backup/“apagar dados”); `DEFAULT_SETTINGS.onboardingCompleted = false` com migração explícita (todos os documentos e testes existentes que usam os padrões passariam a cair no onboarding); exibir o onboarding como modal sobre o Início (mantém navegação acessível por trás e complica o foco).
+- **Vantagens:** nenhum dado existente é alterado; o fluxo é testável com o `MemoryStorageAdapter`; preferências corrompidas não quebram o app.
+- **Desvantagens:** o significado de `DEFAULT_SETTINGS.onboardingCompleted = true` não é óbvio (documentado no código). Dados ilegíveis também reiniciam o onboarding (o nome se perdeu junto).
+- **Módulos afetados:** `models`, `services/storage`, `store` (`FinanceProvider`, `initialData`, `demoData`), `validations`, `domain/summary`, `app/routes`, `components/layout` (`AppShell`, `LoadingScreen`), `modules/onboarding`, `modules/settings`.
+
+## DT-015 — PWA manual (manifest + service worker próprio), sem plugin
+
+- **Data:** 30/10/2026 · **Status:** Aceita
+- **Contexto:** No celular não era possível instalar o app. O build é publicado no GitHub Pages num subcaminho (`/Money_App/`, `base: './'`) e a política do projeto é não adicionar dependências sem necessidade.
+- **Decisão:**
+  - `public/manifest.webmanifest` com `start_url`/`scope`/`id` relativos (`./`), `display: standalone`, `lang: pt-BR`, cores `#f8f9ff` (fundo do Slate & Flow) e ícones PNG 192/512 em versões `any` (cantos arredondados) e `maskable` (fundo sangrado, símbolo na zona segura de 80%), mais `apple-touch-icon` 180 e `favicon-32`. Os PNGs foram gerados a partir do mesmo desenho do `favicon.svg` (script PowerShell/System.Drawing, fora do repositório).
+  - `index.html`: link do manifest, ícones, metas `apple-mobile-web-app-*`/`mobile-web-app-capable` e duas metas `theme-color` (claro/escuro por `prefers-color-scheme`), sincronizadas com o tema escolhido no app pelo script inline e por `applyTheme` (`THEME_COLORS`).
+  - `public/sw.js` escrito à mão: precache do app shell; navegação **network-first** (sempre a versão mais nova online; cópia do `index.html` para offline); `assets/` com hash **cache-first**; demais arquivos do site stale-while-revalidate; outras origens (Google Fonts) não são interceptadas. Cache nomeado por `CACHE_VERSION`; o `activate` apaga caches antigos com o prefixo `money-app-`; `skipWaiting` + `clients.claim` para a nova versão assumir sem passos extras. Todos os caminhos são relativos ao `registration.scope`.
+  - Registro em `services/pwa/serviceWorker.ts`, chamado por `main.tsx` **apenas em produção** (`import.meta.env.PROD`), com `./sw.js` e escopo `./`.
+  - Instalação: `services/pwa/installPrompt.ts` captura `beforeinstallprompt` desde a inicialização (store de módulo + `useSyncExternalStore`); `InstallAppCard` em Ajustes mostra o botão nativo, instruções para iPhone/iPad ou para o menu do navegador, ou "já instalado" em modo standalone.
+- **Alternativas:** `vite-plugin-pwa`/Workbox (gera precache automático com hashes e aviso de atualização, mas adiciona dependências e configuração; proibido instalar pacotes neste momento); manifest sem service worker (o Chrome no Android exige service worker com `fetch` para oferecer a instalação completa).
+- **Vantagens:** zero dependência; funciona no subcaminho do GitHub Pages e em qualquer hospedagem estática; comportamento simples de entender e testar.
+- **Desvantagens:** `CACHE_VERSION` precisa ser atualizado manualmente a cada release; o precache não conhece os nomes com hash (são guardados na primeira visita); sem aviso de "nova versão" (a navegação network-first já entrega a versão nova quando online); fontes/ícones do Google Fonts não ficam garantidos offline; o service worker em si não tem testes automatizados (o store de instalação tem).
+- **Módulos afetados:** `public/`, `index.html`, `main.tsx`, `services/pwa`, `theme/theme.ts`, `modules/settings`.

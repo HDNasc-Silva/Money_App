@@ -1,11 +1,13 @@
-import type {
-  Category,
-  CategoryGroup,
-  Cents,
-  Goal,
-  IsoDate,
-  Transaction,
-  TransactionType,
+import {
+  USER_NAME_MAX,
+  type Category,
+  type CategoryGroup,
+  type Cents,
+  type Goal,
+  type IsoDate,
+  type Settings,
+  type Transaction,
+  type TransactionType,
 } from '@/models';
 import { maxPlanningDate } from '@/domain/periods';
 import { formatDateBr, isValidIso } from '@/utils/dates';
@@ -213,6 +215,59 @@ export function validateGoal(values: GoalFormValues, today: IsoDate): Validation
       deadline,
     },
   };
+}
+
+/* ---------- Perfil (boas-vindas e Ajustes) ---------- */
+
+export type ProfileDraft = Pick<Settings, 'userName' | 'monthlyIncome'>;
+
+export interface OnboardingFormValues {
+  name: string;
+  monthlyIncome: string;
+}
+
+type OnboardingField = keyof OnboardingFormValues;
+
+/** Renda mensal é opcional: vazio vale 0 (não informada). */
+function validateMonthlyIncome(raw: string): { value: Cents; error?: string } {
+  if (!raw.trim()) return { value: 0 };
+  const income = validateAmount(raw, { allowZero: true });
+  return { value: income.value ?? 0, error: income.error };
+}
+
+/** Tela de boas-vindas: nome obrigatório (até `USER_NAME_MAX` caracteres) e renda mensal opcional. */
+export function validateOnboarding(values: OnboardingFormValues): ValidationResult<ProfileDraft, OnboardingField> {
+  const errors: FieldErrors<OnboardingField> = {};
+  const name = validateText(values.name, 'Nome', USER_NAME_MAX);
+  if (name.error) errors.name = name.error;
+  const income = validateMonthlyIncome(values.monthlyIncome);
+  if (income.error) errors.monthlyIncome = income.error;
+  if (Object.keys(errors).length > 0) return { ok: false, errors };
+  return { ok: true, value: { userName: name.value, monthlyIncome: income.value } };
+}
+
+export interface ProfileSettingsFormValues extends OnboardingFormValues {
+  savingsTarget: string;
+}
+
+export type ProfileSettingsDraft = ProfileDraft & Pick<Settings, 'savingsTarget'>;
+type ProfileSettingsField = keyof ProfileSettingsFormValues;
+
+/** Ajustes → Perfil e metas. O nome pode ficar vazio aqui (a saudação passa a ser só "Olá"). */
+export function validateProfileSettings(
+  values: ProfileSettingsFormValues,
+): ValidationResult<ProfileSettingsDraft, ProfileSettingsField> {
+  const errors: FieldErrors<ProfileSettingsField> = {};
+  const name = validateText(values.name, 'Nome', USER_NAME_MAX, false);
+  if (name.error) errors.name = name.error;
+  const income = validateMonthlyIncome(values.monthlyIncome);
+  if (income.error) errors.monthlyIncome = income.error;
+  const target = Number(values.savingsTarget.replace(',', '.'));
+  if (!values.savingsTarget.trim() || !Number.isFinite(target) || target < 0 || target > 100) {
+    errors.savingsTarget = 'Informe um percentual entre 0 e 100.';
+  }
+  if (Object.keys(errors).length > 0) return { ok: false, errors };
+  return { ok: true, value: { userName: name.value, monthlyIncome: income.value, savingsTarget: Math.round(target) } };
 }
 
 /* ---------- Aporte ---------- */

@@ -5,20 +5,25 @@ import { Card, CardHeader } from '@/components/common/Card';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { SegmentedControl } from '@/components/common/SegmentedControl';
 import { useToast } from '@/components/common/Toast';
-import { FormRow, FormStack, TextField } from '@/components/forms/Fields';
+import { FormRow, FormStack, MoneyField, TextField } from '@/components/forms/Fields';
 import { Page } from '@/components/layout/Page';
+import { USER_NAME_MAX } from '@/models';
 import { backupToJson, downloadFile } from '@/services/export';
 import { DomainError, useFinanceActions, useFinanceData } from '@/store/FinanceProvider';
 import { THEME_LABELS, type ThemeName } from '@/theme/theme';
 import { useTheme } from '@/theme/ThemeProvider';
 import { todayIso } from '@/utils/dates';
+import { centsToInput } from '@/utils/money';
+import { validateProfileSettings, type FieldErrors, type ProfileSettingsFormValues } from '@/validations';
 import { CategoriesSettings } from './CategoriesSettings';
+import { InstallAppCard } from './InstallAppCard';
+import { SavingsTargetSummary } from './SavingsTargetSummary';
 import styles from './Settings.module.css';
 
 const THEME_OPTIONS = (Object.keys(THEME_LABELS) as ThemeName[]).map((value) => ({ value, label: THEME_LABELS[value] }));
 const MAX_BACKUP_BYTES = 4 * 1024 * 1024;
 
-type PendingAction = 'restore' | 'clear' | null;
+type PendingAction = 'demo' | 'clear' | null;
 
 export function SettingsPage() {
   const data = useFinanceData();
@@ -27,19 +32,27 @@ export function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const { showToast } = useToast();
   const fileInput = useRef<HTMLInputElement>(null);
-  const [name, setName] = useState(settings.userName);
-  const [target, setTarget] = useState(String(settings.savingsTarget));
-  const [targetError, setTargetError] = useState<string>();
+  const [profile, setProfile] = useState<ProfileSettingsFormValues>(() => ({
+    name: settings.userName,
+    monthlyIncome: settings.monthlyIncome > 0 ? centsToInput(settings.monthlyIncome) : '',
+    savingsTarget: String(settings.savingsTarget),
+  }));
+  const [profileErrors, setProfileErrors] = useState<FieldErrors<keyof ProfileSettingsFormValues>>({});
   const [pending, setPending] = useState<PendingAction>(null);
+
+  const changeProfile = (field: keyof ProfileSettingsFormValues) => (value: string) => {
+    setProfile((current) => ({ ...current, [field]: value }));
+    setProfileErrors((current) => ({ ...current, [field]: undefined }));
+  };
 
   const saveProfile = async (event: FormEvent) => {
     event.preventDefault();
-    const parsed = Number(target.replace(',', '.'));
-    if (!Number.isFinite(parsed) || parsed < 0 || parsed > 100) {
-      setTargetError('Informe um percentual entre 0 e 100.');
+    const result = validateProfileSettings(profile);
+    if (!result.ok) {
+      setProfileErrors(result.errors);
       return;
     }
-    await actions.updateSettings({ userName: name.trim().slice(0, 40), savingsTarget: Math.round(parsed) });
+    await actions.updateSettings(result.value);
     showToast({ message: 'Preferências salvas.' });
   };
 
@@ -65,9 +78,9 @@ export function SettingsPage() {
   };
 
   const confirmPending = async () => {
-    if (pending === 'restore') {
-      await actions.restoreDemoData();
-      showToast({ message: 'Dados de demonstração restaurados.' });
+    if (pending === 'demo') {
+      await actions.loadDemoData();
+      showToast({ message: 'Dados de demonstração carregados.' });
     } else if (pending === 'clear') {
       await actions.clearAllData();
       showToast({ message: 'Dados apagados. As categorias padrão foram recriadas.' });
@@ -78,22 +91,33 @@ export function SettingsPage() {
   return (
     <Page title="Ajustes" description="Perfil, aparência e gerenciamento dos seus dados.">
       <Card>
-        <CardHeader title="Perfil e metas" />
+        <CardHeader title="Perfil e meta de poupança" />
         <form onSubmit={saveProfile} noValidate>
           <FormStack>
+            <TextField
+              label="Seu nome"
+              value={profile.name}
+              onChange={changeProfile('name')}
+              error={profileErrors.name}
+              maxLength={USER_NAME_MAX}
+              autoComplete="given-name"
+            />
             <FormRow>
-              <TextField label="Seu nome" value={name} onChange={setName} maxLength={40} autoComplete="given-name" />
+              <MoneyField
+                label="Renda mensal"
+                value={profile.monthlyIncome}
+                onChange={changeProfile('monthlyIncome')}
+                error={profileErrors.monthlyIncome}
+              />
               <TextField
                 label="Meta de poupança (%)"
                 inputMode="numeric"
-                value={target}
-                onChange={(v) => {
-                  setTarget(v);
-                  setTargetError(undefined);
-                }}
-                error={targetError}
+                value={profile.savingsTarget}
+                onChange={changeProfile('savingsTarget')}
+                error={profileErrors.savingsTarget}
               />
             </FormRow>
+            <SavingsTargetSummary monthlyIncome={profile.monthlyIncome} savingsTarget={profile.savingsTarget} />
             <Button type="submit" icon="check">
               Salvar preferências
             </Button>
@@ -121,6 +145,8 @@ export function SettingsPage() {
 
       <CategoriesSettings />
 
+      <InstallAppCard />
+
       <Card>
         <CardHeader
           title="Seus dados"
@@ -138,8 +164,8 @@ export function SettingsPage() {
             Importar backup
           </Button>
           <input ref={fileInput} type="file" accept="application/json,.json" hidden onChange={importBackup} />
-          <Button variant="secondary" icon="science" onClick={() => setPending('restore')}>
-            Restaurar demonstração
+          <Button variant="secondary" icon="science" onClick={() => setPending('demo')}>
+            Carregar dados de demonstração
           </Button>
           <Button variant="danger" icon="delete_forever" onClick={() => setPending('clear')}>
             Apagar todos os dados
@@ -149,13 +175,13 @@ export function SettingsPage() {
 
       <ConfirmDialog
         open={pending !== null}
-        title={pending === 'clear' ? 'Apagar todos os dados?' : 'Restaurar dados de demonstração?'}
+        title={pending === 'clear' ? 'Apagar todos os dados?' : 'Carregar dados de demonstração?'}
         message={
           pending === 'clear'
-            ? 'Lançamentos, metas e categorias personalizadas serão removidos deste dispositivo; as categorias padrão serão recriadas para você começar do zero. Exporte um backup antes, se quiser guardá-los.'
-            : 'Os dados atuais serão substituídos pelos dados de demonstração.'
+            ? 'Lançamentos, metas e categorias personalizadas serão removidos deste dispositivo; as categorias padrão serão recriadas para você começar do zero. Seu nome e sua renda mensal são mantidos. Exporte um backup antes, se quiser guardá-los.'
+            : 'Seus lançamentos, categorias e metas atuais serão substituídos pelos dados de demonstração. Seu nome e preferências são mantidos. Exporte um backup antes, se quiser guardar seus dados.'
         }
-        confirmLabel={pending === 'clear' ? 'Apagar tudo' : 'Restaurar'}
+        confirmLabel={pending === 'clear' ? 'Apagar tudo' : 'Carregar demonstração'}
         onConfirm={confirmPending}
         onCancel={() => setPending(null)}
       />

@@ -2,7 +2,7 @@
 
 > Documento oficial de referência. Representa o **estado atual real** do aplicativo e deve ser atualizado a cada alteração do sistema (ver `CHANGELOG.md` e `DECISOES_TECNICAS.md`).
 
-**Versão atual:** 1.3.1 (data sugerida do novo lançamento no mês selecionado)
+**Versão atual:** 1.4.0 (primeiro acesso vazio com boas-vindas, renda mensal na meta de poupança e app instalável/PWA)
 **Última atualização:** 30/10/2026
 
 ---
@@ -101,7 +101,7 @@ design-system/ + theme/       → apresentação apenas; nunca importam regras f
 ```
 Money_APP/
 ├── App_Financas_Layout/      # referência visual (não alterar)
-├── public/                   # favicon e estáticos
+├── public/                   # favicon, manifest.webmanifest, sw.js (service worker), icons/ (PWA)
 ├── src/
 │   ├── main.tsx / App.tsx
 │   ├── app/                  # rotas e providers
@@ -111,10 +111,10 @@ Money_APP/
 │   │   ├── charts/           # BarChart (agrupado/empilhado), DonutChart, LineChart
 │   │   └── forms/            # campos reutilizáveis (MoneyField, Field, Select)
 │   ├── modules/
-│   │   ├── dashboard/  transactions/  categories/  goals/  reports/  settings/
+│   │   ├── dashboard/  transactions/  categories/  goals/  reports/  settings/  onboarding/
 │   ├── domain/               # regras de negócio puras
-│   ├── services/             # storage, repositórios, exportação
-│   ├── store/                # estado global financeiro + dados de demonstração
+│   ├── services/             # storage, repositórios, exportação, pwa (service worker, instalação)
+│   ├── store/                # estado global financeiro, dados iniciais e de demonstração
 │   ├── hooks/                # hooks de leitura derivada
 │   ├── theme/                # contexto e persistência do tema
 │   ├── design-system/        # tokens slate-flow (claro) e obsidian-capital (escuro)
@@ -136,7 +136,8 @@ Money_APP/
 | **Categorias** (`modules/categories`) | CRUD de categorias, limite mensal, gasto atual, % consumido, alertas de limite, teto global, filtro por grupo |
 | **Metas** (`modules/goals`) | CRUD de metas, valor alvo/acumulado, prazo, progresso, aportes, simulador de aporte mensal e cenários |
 | **Relatórios** (`modules/reports`) | Receitas × despesas, evolução do saldo, tendência de 6 meses/ano, distribuição por categoria, comparação com período anterior, indicadores, exportação CSV/PDF |
-| **Ajustes** (`modules/settings`) | Nome do usuário, tema, gerenciamento de categorias (lista, criar, editar, excluir, restaurar padrão), restaurar dados de demonstração, apagar dados (recriando as categorias padrão), exportar/importar backup JSON |
+| **Boas-vindas** (`modules/onboarding`) | Tela do primeiro acesso ("Como prefere ser chamado?": nome obrigatório e renda mensal opcional) e `OnboardingGate`, que mostra o carregamento e redireciona entre boas-vindas e app conforme `settings.onboardingCompleted` |
+| **Ajustes** (`modules/settings`) | Perfil e meta de poupança (nome, renda mensal, meta % e valor da meta em R$), tema, gerenciamento de categorias (lista, criar, editar, excluir, restaurar padrão), instalar app (PWA), carregar dados de demonstração, apagar dados (recriando as categorias padrão), exportar/importar backup JSON |
 | Design System (`design-system`, `theme`) | Tokens dos dois temas, alternância e persistência |
 | Persistência (`services`) | Leitura/gravação segura e versionada dos dados |
 
@@ -201,23 +202,32 @@ Money_APP/
 14. Semanas do mês: dias 1–7, 8–14, 15–21, 22–28, 29–fim (a 5ª semana só aparece se existir).
 15. Categoria com lançamentos vinculados não pode ser excluída.
 16. Nomes de categoria únicos (sem diferenciar maiúsculas/minúsculas) por tipo.
-17. Dados de demonstração são identificados por um aviso na interface e podem ser apagados em Ajustes.
+17. Dados de demonstração são identificados por um aviso na interface e podem ser apagados em Ajustes. Desde a v1.4.0 eles **só são carregados a pedido** (Ajustes → "Carregar dados de demonstração", com confirmação de que substituem lançamentos, categorias e metas atuais); o perfil e as preferências do usuário são mantidos e não há nome fixo. O aviso com "Começar do zero" aparece apenas enquanto `isDemoData` for verdadeiro.
 18. Alertas do mês corrente comparam com o **mesmo intervalo de dias** do mês anterior (ex.: 1–10 vs 1–10); aumento de gastos gera alerta a partir de 10%.
 19. Uma categoria com lançamentos não pode mudar de tipo (despesa ↔ receita).
 20. ~~O seletor de mês não avança para meses futuros.~~ Substituída na v1.3.0 (DT-012): o seletor de mês avança até **60 meses à frente** do mês atual (`MAX_FUTURE_MONTHS`; em 30/10/2026 o limite é Outubro de 2031) e volta sem limite. Meses posteriores ao atual exibem "Mês futuro" no seletor; na Visão Geral o saldo vira "Saldo previsto ao fim do mês" (saldo acumulado até o último dia do mês, incluindo lançamentos planejados). No mês atual, o saldo continua considerando apenas lançamentos até hoje.
 21. **Categorias padrão** (`store/defaultCategories.ts`): Alimentação, Moradia, Transporte, Lazer, Saúde, Educação e Outros (despesa, com limites mensais) e Salário, Freelance e Rendimentos (receita, sem limite). São as mesmas usadas na demonstração.
-22. "Apagar todos os dados" (Ajustes, também acessado por "Começar do zero") remove lançamentos, metas e categorias personalizadas, mantém o nome do usuário, volta as demais preferências ao padrão e **recria as categorias padrão**, para que seja sempre possível lançar em seguida.
+22. "Apagar todos os dados" (Ajustes, também acessado por "Começar do zero") remove lançamentos, metas e categorias personalizadas, mantém o nome e a renda mensal do usuário, volta as demais preferências ao padrão e **recria as categorias padrão**, para que seja sempre possível lançar em seguida.
 23. "Criar categorias padrão" adiciona apenas as categorias padrão ausentes: uma categoria é considerada existente quando há outra do mesmo tipo com o mesmo nome (sem acento e sem diferenciar maiúsculas, como na regra 16); ids padrão já ocupados recebem um id novo, nunca sobrescrevendo dados do usuário.
 24. **Entrada de valores monetários** (máscara pelos centavos, `formatMoneyInput`): só dígitos são considerados e os dois últimos são os centavos ("15000" → "150,00"; "1234567" → "12.345,67"); letras, vírgulas e pontos digitados são ignorados; colar "1.234,56" ou "R$ 1234,56" resulta em "1.234,56"; backspace remove o último dígito; sem dígitos significativos o campo fica vazio (a validação de obrigatório continua valendo); no máximo os dígitos de `MAX_AMOUNT` (R$ 999.999.999,99). Valores pré-preenchidos aparecem no mesmo formato ("1.234,56").
 25. **Ícones**: categorias e metas escolhem ícones do catálogo `ICON_CATALOG` (nomes do Material Symbols Outlined, sem duplicatas). A busca considera rótulo, palavras-chave e nome, sem acento e sem diferenciar maiúsculas; todos os termos digitados precisam corresponder. Um ícone já salvo fora do catálogo continua válido e exibido.
 26. "Restaurar categorias padrão" (Ajustes) segue a regra 23: só adiciona as categorias padrão ausentes e nunca altera ou remove as existentes.
 27. **Datas futuras em lançamentos** são permitidas (planejamento) até o último dia do mês limite da regra 20 (mensagem: "A data deve ser até DD/MM/AAAA."). Datas passadas continuam sem limite. Num mês futuro sem lançamentos, indicadores mostram "Período ainda não iniciado." e as comparações com o mês anterior usam os meses completos.
 28. **Data sugerida de novo lançamento** (`defaultDateForMonth`, DT-013): se o mês selecionado no seletor de mês for o mês atual, sugere hoje; em qualquer outro mês (passado ou futuro), sugere o mesmo dia de hoje limitado ao último dia daquele mês (ex.: hoje 30/10/2026 com Dezembro 2026 selecionado → 30/12/2026; hoje 31/10 com Novembro → 30/11; fevereiro → 28 ou 29). Vale para todos os pontos que abrem o formulário (Visão Geral, Lançamentos, navegação lateral, botão flutuante). Edição mantém a data do lançamento. A data continua editável. O aporte em metas continua sugerindo hoje (a tela de Metas não tem seletor de mês).
+29. **Primeiro acesso** (sem dados salvos, ou dados ilegíveis): o app começa **vazio** — nenhum lançamento ou meta —, com as **categorias padrão** (regra 21) para que seja possível lançar de imediato, e abre a tela de boas-vindas (DT-014).
+30. **Boas-vindas (onboarding)**: aparece enquanto `settings.onboardingCompleted` for `false`; qualquer rota leva a ela e não há cabeçalho nem navegação. Nome obrigatório (espaços extras removidos, 1–40 caracteres); renda mensal opcional (máscara da regra 24; vazio = não informada). "Começar" salva o perfil, marca o onboarding como concluído e abre o Início com "Olá, <nome>". Depois de concluído, a rota de boas-vindas redireciona para o Início.
+31. **Migração (v1.4.0)**: documentos salvos por versões anteriores não têm `onboardingCompleted` e são tratados como onboarding concluído (quem já usava o app não é interrompido); `monthlyIncome` ausente vale 0. Campos de preferências inválidos voltam ao padrão. Importar um backup nunca reabre as boas-vindas.
+32. **Nome do usuário**: não há nome padrão. Sem nome (possível apagando-o em Ajustes), a saudação é apenas "Olá".
+33. **Renda mensal** (`settings.monthlyIncome`, centavos, 0 = não informada): editável no onboarding e em Ajustes, no mesmo card da meta de poupança. O card mostra quanto a meta representa por mês: `round(renda × meta% ÷ 100)` (ex.: 20% de R$ 5.000,00 = R$ 1.000,00). É apenas referência: os cálculos da Visão Geral (taxa de poupança = poupança ÷ receitas lançadas) não mudam.
+34. **Instalação (PWA)**: o app é instalável (manifest + service worker, DT-015). Em Ajustes → "Instalar app": botão nativo quando o navegador oferece a instalação (Chrome/Edge/Android); no iPhone/iPad, instruções (Safari → Compartilhar → Adicionar à Tela de Início); nos demais, instrução pelo menu do navegador; já instalado, informa que está aberto como aplicativo.
 
 ## 12. Fluxos de navegação
 
 ```
-Abrir app → (primeira vez) carregar dados de demonstração → Visão Geral
+Abrir app → (primeira vez) dados vazios + categorias padrão → Boas-vindas ("Como prefere ser chamado?": nome, renda opcional) → "Começar" → Visão Geral ("Olá, <nome>")
+Abrir app → (já usa o app) → Visão Geral
+Ajustes → "Carregar dados de demonstração" → confirmação → demonstração (aviso "Começar do zero" nas demais telas → Ajustes → "Apagar todos os dados")
+Ajustes → "Instalar app" → diálogo do navegador (ou instruções no iPhone)
 Navegação: Visão Geral ⇄ Lançamentos ⇄ Categorias ⇄ Metas ⇄ Relatórios (barra inferior / lateral)
 Cabeçalho: alternar tema · notificações (lista de alertas) · Ajustes
 Visão Geral → "Novo Lançamento" → formulário (sheet, data sugerida no mês selecionado) → salvar → todos os módulos recalculam
@@ -257,6 +267,8 @@ Os tokens ficam em `src/design-system/` como variáveis CSS com **nomes semânti
 - Repositórios assíncronos (`TransactionRepository`, `CategoryRepository`, `GoalRepository`, `SettingsRepository`) — a UI nunca acessa o storage diretamente.
 - Erros de leitura (JSON corrompido) → dados preservados em chave de backup e app inicia vazio com aviso; erros de gravação (cota) → toast de erro, estado não é perdido em memória.
 - Nenhum dado sensível (senhas, documentos) é armazenado.
+- Preferências (`settings`) são saneadas campo a campo na leitura (`sanitizeSettings` em `FinanceDocument.ts`): ausentes ou inválidos recebem o padrão (migração da v1.4.0, regra 31). O `schemaVersion` continua 1 (mudança apenas aditiva).
+- Service worker (`public/sw.js`, só em produção): guarda o app shell e os arquivos do build no Cache Storage para abrir offline. Os dados financeiros continuam apenas no `localStorage`.
 
 ## 16. Integração entre módulos
 
@@ -278,7 +290,10 @@ Os tokens ficam em `src/design-system/` como variáveis CSS com **nomes semânti
 | RF-10 | Exportar lançamentos em CSV e relatório em PDF (impressão) |
 | RF-11 | Alternar tema claro/escuro com persistência e respeito ao tema do sistema |
 | RF-12 | Persistir todos os dados localmente entre sessões |
-| RF-13 | Restaurar dados de demonstração, apagar dados, exportar/importar backup JSON |
+| RF-13 | Carregar dados de demonstração (a pedido), apagar dados, exportar/importar backup JSON |
+| RF-14 | Tela de boas-vindas no primeiro acesso (nome obrigatório, renda opcional) |
+| RF-15 | Renda mensal no perfil, com o valor da meta de poupança em R$ |
+| RF-16 | Instalar o app no celular/computador (PWA) e abrir offline após o primeiro acesso |
 
 ## 18. Requisitos não funcionais
 
@@ -356,6 +371,13 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 - ✅ Novo lançamento sugere data no mês selecionado (regra 28, DT-013), em todos os pontos de abertura do formulário.
 - ✅ 120 testes automatizados (4 unitários de `defaultDateForMonth` e 4 de integração novos).
 
+### Concluído (v1.4.0 — testado automaticamente)
+- ✅ Primeiro acesso vazio com categorias padrão; demonstração só a pedido em Ajustes, com confirmação, mantendo o perfil (regras 17, 29). Nome fixo "Gabriel" removido (regra 32).
+- ✅ Tela de boas-vindas (`modules/onboarding`) com nome obrigatório e renda opcional, sem navegação, nos dois temas; migração de documentos antigos sem interromper quem já usava o app (regras 30–31, DT-014).
+- ✅ Renda mensal no card "Perfil e meta de poupança" de Ajustes, com o valor mensal da meta em R$ (regra 33).
+- ✅ PWA: manifest, ícones PNG 192/512 (any e maskable) e apple-touch-icon 180, metas para iOS/Android, service worker versionado e card "Instalar app" (regra 34, DT-015). Build verificado: `dist/` contém `manifest.webmanifest`, `sw.js` e `icons/`.
+- ✅ 141 testes automatizados (12 de integração em `tests/onboarding.test.tsx` e 9 unitários em `tests/profile.test.ts` novos).
+
 ### Em desenvolvimento
 - Nenhum.
 
@@ -377,10 +399,12 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 
 - Meses futuros (v1.3.0): validados em jsdom; a indicação "Mês futuro" no seletor ainda não foi conferida visualmente no navegador nos dois temas. Lançamentos importados com data além do limite ficam visíveis, mas exigem ajustar a data para salvar uma edição.
 - Data sugerida (v1.3.1): a tela de Lançamentos não exibe o seletor de mês (usa filtro de período próprio), mas a data sugerida segue o mês escolhido nas outras telas (DT-013). Validado em jsdom; não conferido manualmente no navegador.
+- Boas-vindas e Ajustes (v1.4.0): validados em jsdom; a aparência da tela de boas-vindas e do card "Instalar app" ainda não foi conferida visualmente no navegador nos dois temas.
+- PWA (v1.4.0): a instalação real (Android/Chrome e iPhone/Safari) e o funcionamento offline não foram testados em dispositivos; o service worker só é registrado no build de produção (GitHub Pages ou `npm run preview`), não no `npm run dev`. `CACHE_VERSION` em `public/sw.js` precisa ser atualizado a cada release. Offline, fontes e ícones do Google Fonts só aparecem se já estiverem no cache HTTP do navegador. A cor de abertura (splash) do app instalado é a do tema claro (o manifest aceita uma única cor).
 
 ### Próximas etapas (sugestões)
 1. Inicializar repositório Git.
-2. PWA instalável (manifest + service worker) com fontes/ícones locais para uso offline.
+2. Fontes e ícones locais (hoje do Google Fonts) para uso offline completo do PWA; aviso de "nova versão disponível".
 3. Lançamentos recorrentes e parcelados.
 4. Testes E2E com Playwright.
 5. Backend e sincronização (trocar os repositórios por implementações HTTP).

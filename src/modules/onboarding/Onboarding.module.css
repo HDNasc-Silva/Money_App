@@ -1,0 +1,73 @@
+/* Tela de boas-vindas: mobile-first, sem navegação, apenas tokens (funciona nos dois temas). */
+.screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding: env(safe-area-inset-top, 0px) var(--page-margin) env(safe-area-inset-bottom, 0px);
+  background: var(--color-bg);
+}
+
+.topBar {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--space-md);
+}
+
+.content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  max-width: 26rem;
+  margin: 0 auto;
+  padding: var(--space-lg) 0 var(--space-xl);
+}
+
+.brand img {
+  display: block;
+  width: 4rem;
+  height: 4rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-raised);
+}
+
+.eyebrow {
+  margin-top: var(--space-xl);
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.title {
+  margin-top: var(--space-sm);
+  font-size: 1.75rem;
+  line-height: 1.2;
+  color: var(--color-text);
+}
+
+.lead {
+  margin-top: var(--space-sm);
+  color: var(--color-text-muted);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  margin-top: var(--space-xl);
+}
+
+@media (min-width: 768px) {
+  .content {
+    padding: var(--space-xl);
+    margin-block: var(--space-xl);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+  }
+}

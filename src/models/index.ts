@@ -58,10 +58,14 @@ export interface Goal {
 
 export interface Settings {
   userName: string;
+  /** Renda mensal informada pelo usuário (referência para a meta de poupança); 0 = não informada. */
+  monthlyIncome: Cents;
   /** Meta de taxa de poupança, em pontos percentuais (0–100). */
   savingsTarget: number;
   hideBalances: boolean;
   isDemoData: boolean;
+  /** `false` só num primeiro acesso, até o usuário concluir a tela de boas-vindas (ver DT-014). */
+  onboardingCompleted: boolean;
 }
 
 export interface FinanceData {
@@ -76,11 +80,21 @@ export interface Period {
   end: IsoDate;
 }
 
+/** Limite de caracteres do nome do usuário (onboarding, Ajustes e saneamento do storage). */
+export const USER_NAME_MAX = 40;
+
+/**
+ * Valores padrão, também usados para completar documentos salvos por versões anteriores.
+ * `onboardingCompleted` é `true` aqui de propósito: quem já tem dados salvos não deve ser
+ * interrompido pela tela de boas-vindas. O primeiro acesso usa `buildInitialData` (onboarding pendente).
+ */
 export const DEFAULT_SETTINGS: Settings = {
   userName: '',
+  monthlyIncome: 0,
   savingsTarget: 20,
   hideBalances: false,
   isDemoData: false,
+  onboardingCompleted: true,
 };
 
 export const EMPTY_DATA: FinanceData = {

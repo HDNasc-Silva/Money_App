@@ -53,3 +53,13 @@ export function percentChange(current: number, previous: number): number | null 
   if (previous === 0) return null;
   return (current - previous) / Math.abs(previous);
 }
+
+/**
+ * Valor mensal que a meta de poupança representa sobre a renda informada em Ajustes
+ * (ex.: 20% de R$ 5.000,00 = R$ 1.000,00). `null` quando a renda não foi informada.
+ */
+export function savingsTargetAmount(monthlyIncome: Cents, targetPercent: number): Cents | null {
+  if (monthlyIncome <= 0) return null;
+  const percent = Math.min(Math.max(targetPercent, 0), 100);
+  return Math.round((monthlyIncome * percent) / 100);
+}

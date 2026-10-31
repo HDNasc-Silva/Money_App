@@ -1,4 +1,4 @@
-import type { FinanceData, Goal, IsoDate, Transaction, TransactionType } from '@/models';
+import { DEFAULT_SETTINGS, type FinanceData, type Goal, type IsoDate, type Transaction, type TransactionType } from '@/models';
 import { addMonths, daysInMonth, monthKeyOf } from '@/utils/dates';
 import { fromReais } from '@/utils/money';
 import { buildDefaultCategories } from './defaultCategories';
@@ -6,8 +6,8 @@ import { buildDefaultCategories } from './defaultCategories';
 /**
  * DADOS DE DEMONSTRAÇÃO.
  * Gerados de forma determinística relativa à data atual (últimos 6 meses), para que todas as telas
- * tenham conteúdo na primeira execução. São sinalizados por `settings.isDemoData` e podem ser
- * apagados em Ajustes.
+ * tenham conteúdo. Carregados apenas a pedido do usuário (Ajustes → "Carregar dados de demonstração");
+ * são sinalizados por `settings.isDemoData` e podem ser apagados em Ajustes.
  */
 
 const CREATED_AT = '2020-01-01T00:00:00.000Z';
@@ -131,6 +131,7 @@ export function buildDemoData(today: IsoDate): FinanceData {
       goal('goal-notebook', 'Upgrade Notebook', 'Trabalho & Produção', 'laptop_mac', 5000, 2400, 300, `${year + 1}-10-31`, []),
       goal('goal-room', 'Reforma do Quarto', 'Moradia & Bem-estar', 'format_paint', 5000, 600, 250, `${year + 1}-12-31`, []),
     ],
-    settings: { userName: 'Gabriel', savingsTarget: 50, hideBalances: false, isDemoData: true },
+    // Sem nome fixo: ao carregar a demonstração, o FinanceProvider mantém o perfil do usuário.
+    settings: { ...DEFAULT_SETTINGS, savingsTarget: 50, isDemoData: true },
   };
 }

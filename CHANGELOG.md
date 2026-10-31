@@ -7,6 +7,54 @@ Categorias: **Adicionado** · **Modificado** · **Corrigido** · **Removido** ·
 
 ---
 
+## [1.4.0] - 30/10/2026 — Primeiro acesso vazio, boas-vindas, renda mensal e app instalável (PWA)
+
+### Adicionado
+- **Tela de boas-vindas** (`src/modules/onboarding`): no primeiro acesso, "Como prefere ser chamado?" com nome obrigatório (até 40 caracteres, espaços extras removidos) e renda mensal opcional (`MoneyField` com máscara); botão "Começar" leva ao Início com "Olá, <nome>". Mobile-first, sem cabeçalho nem navegação, com alternância de tema, nos dois temas.
+- `OnboardingGate` (rota de layout): exibe o carregamento e redireciona para `/boas-vindas` enquanto o onboarding estiver pendente (e de volta ao Início depois).
+- `Settings.onboardingCompleted` e `Settings.monthlyIncome` (centavos; 0 = não informada); constante `USER_NAME_MAX` em `models`.
+- `buildInitialData()` (`src/store/initialData.ts`): dados do primeiro acesso — vazios, com as categorias padrão.
+- Ações `completeOnboarding(profile)` e `loadDemoData()` no `FinanceProvider`.
+- Validações `validateOnboarding` e `validateProfileSettings`; função pura `savingsTargetAmount(renda, meta%)` em `domain/summary.ts`.
+- Ajustes → card "Perfil e meta de poupança": campo **Renda mensal** e resumo "Meta de 20% de R$ 5.000,00 = R$ 1.000,00 por mês." que acompanha a digitação (`SavingsTargetSummary`).
+- Ajustes → **"Carregar dados de demonstração"**, com confirmação de que substitui lançamentos, categorias e metas atuais.
+- **PWA**: `public/manifest.webmanifest` (nome "Money App", `start_url`/`scope` `./`, `standalone`, `pt-BR`), ícones PNG `icon-192`, `icon-512`, `icon-maskable-192`, `icon-maskable-512`, `apple-touch-icon` (180) e `favicon-32` em `public/icons/`; `public/sw.js` (app shell network-first, `assets/` cache-first, caches versionados); registro em `src/services/pwa/serviceWorker.ts` apenas em produção.
+- Ajustes → card **"Instalar app"**: botão nativo via `beforeinstallprompt` (`src/services/pwa/installPrompt.ts`), instruções para iPhone/iPad (Compartilhar → Adicionar à Tela de Início) e para outros navegadores, ou aviso de app já instalado.
+- `index.html`: link do manifest, `apple-touch-icon`, favicon PNG, `theme-color` claro/escuro e metas `apple-mobile-web-app-*`.
+- Testes: `tests/onboarding.test.tsx` (12 de integração: primeiro acesso vazio com categorias padrão, redirecionamento, validação do nome, conclusão com saudação e lançamento em seguida, renda opcional, documento antigo sem onboarding, redirecionamento após concluído, saudação sem nome, carregar/cancelar demonstração e sair dela, salvar renda com resumo da meta, validar meta) e `tests/profile.test.ts` (9 unitários: validações, `savingsTargetAmount`, dados iniciais, migração/saneamento de preferências, store de instalação). Total: 141 testes.
+
+### Modificado
+- **Primeiro acesso começa vazio** (com as categorias padrão) em vez de carregar dados de demonstração. Dados ilegíveis também reiniciam assim (aviso atualizado).
+- "Restaurar demonstração" passou a "Carregar dados de demonstração" e **mantém o perfil e as preferências** do usuário.
+- "Apagar todos os dados" mantém também a renda mensal (além do nome).
+- Importar backup nunca reabre a tela de boas-vindas.
+- Ajustes: card "Perfil e metas" renomeado para "Perfil e meta de poupança"; meta vazia agora é rejeitada ("Informe um percentual entre 0 e 100.").
+- `applyTheme` atualiza todas as metas `theme-color` (cores centralizadas em `THEME_COLORS`).
+
+### Removido
+- Nome padrão fixo "Gabriel" dos dados de demonstração (a saudação sem nome é "Olá").
+- Carregamento automático de dados de demonstração na primeira execução.
+
+### Corrigido
+- No celular não era possível instalar o app (faltavam manifest, ícones e service worker).
+
+### Segurança
+- Preferências lidas do storage ou de backups são saneadas campo a campo (tipos e faixas); valores inválidos voltam ao padrão.
+
+### Refatorado
+- `LoadingScreen` extraído do `AppShell` (o carregamento passou ao `OnboardingGate`).
+- Validação do perfil movida da tela de Ajustes para `src/validations`.
+
+### Técnico
+- Migração aditiva sem mudar `schemaVersion` (continua 1): documentos sem `onboardingCompleted` são tratados como onboarding concluído; `monthlyIncome` ausente vale 0 (DT-014).
+- PWA manual, sem plugin nem novas dependências (DT-015). `CACHE_VERSION` do service worker: `v1.4.0`.
+- Versão do pacote: 1.3.1 → 1.4.0 (MINOR).
+
+### Documentação
+- `DECISOES_TECNICAS.md`: DT-014 e DT-015. `ESCOPO_PROJETO.md`: módulos, regras 17, 22 e 29–34, fluxos, persistência, RF-13 a RF-16, acompanhamento v1.4.0 e limitações. `README.md`: instalação no celular, primeiro acesso e estrutura.
+
+---
+
 ## [1.3.1] - 30/10/2026 — Data sugerida do novo lançamento no mês selecionado
 
 ### Adicionado

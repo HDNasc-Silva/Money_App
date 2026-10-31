@@ -17,16 +17,6 @@
   outline: none;
 }
 
-.loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-md);
-  min-height: 100dvh;
-  color: var(--color-text-muted);
-}
-
 .skip {
   position: absolute;
   top: -100px;

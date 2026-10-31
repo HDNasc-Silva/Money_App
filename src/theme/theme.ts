@@ -32,6 +32,9 @@ export function saveThemePreference(theme: ThemeName): void {
 export const resolveInitialTheme = (saved: ThemeName | null, systemPrefersDark: boolean): ThemeName =>
   saved ?? (systemPrefersDark ? 'dark' : 'light');
 
+/** Cor da barra do navegador/app instalado por tema (mesmos valores do `index.html`). */
+export const THEME_COLORS: Record<ThemeName, string> = { light: '#f8f9ff', dark: '#0b0f17' };
+
 const TRANSITION_CLASS = 'theme-transition';
 const TRANSITION_MS = 300;
 let transitionTimer: ReturnType<typeof setTimeout> | undefined;
@@ -46,6 +49,6 @@ export function applyTheme(theme: ThemeName, animate = false): void {
   }
   root.dataset.theme = theme;
   root.style.colorScheme = theme;
-  const meta = document.querySelector('meta[name="theme-color"]');
-  meta?.setAttribute('content', theme === 'dark' ? '#0b0f17' : '#f8f9ff');
+  // Há uma meta por esquema de cor do sistema; ambas seguem o tema escolhido no app.
+  document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => meta.setAttribute('content', THEME_COLORS[theme]));
 }

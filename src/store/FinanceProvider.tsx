@@ -6,10 +6,11 @@ import { parseFinanceData } from '@/services/storage/FinanceDocument';
 import { createDefaultAdapter } from '@/services/storage/StorageAdapter';
 import { todayIso } from '@/utils/dates';
 import { createId } from '@/utils/id';
-import type { CategoryDraft, GoalDraft, TransactionDraft } from '@/validations';
+import type { CategoryDraft, GoalDraft, ProfileDraft, TransactionDraft } from '@/validations';
 import { buildDefaultCategories, missingDefaultCategories } from './defaultCategories';
 import { buildDemoData } from './demoData';
 import { financeReducer, initialFinanceState, type FinanceState } from './financeReducer';
+import { buildInitialData } from './initialData';
 
 /** Erro de regra de negócio, com mensagem pronta para o usuário. */
 export class DomainError extends Error {
@@ -31,7 +32,9 @@ export interface FinanceActions {
   deleteGoal(id: string): Promise<void>;
   addContribution(goalId: string, amount: number, date: IsoDate): Promise<Goal>;
   updateSettings(changes: Partial<Settings>): Promise<void>;
-  restoreDemoData(): Promise<void>;
+  /** Salva o perfil informado na tela de boas-vindas e libera o acesso ao app. */
+  completeOnboarding(profile: ProfileDraft): Promise<void>;
+  loadDemoData(): Promise<void>;
   clearAllData(): Promise<void>;
   importBackup(json: string): Promise<void>;
   dismissNotice(): void;
@@ -80,11 +83,12 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
           dispatch({ type: 'loaded', data: result.data, notice: isPersistent ? null : 'not-persistent' });
           return;
         }
-        const demo = buildDemoData(todayIso());
-        await repos.replaceAll(demo);
+        // Primeiro acesso (ou dados ilegíveis): começa vazio, com as categorias padrão e o onboarding pendente.
+        const initial = buildInitialData(new Date().toISOString());
+        await repos.replaceAll(initial);
         if (!cancelled) {
           const notice = result.status === 'corrupted' ? 'corrupted' : isPersistent ? null : 'not-persistent';
-          dispatch({ type: 'loaded', data: demo, notice });
+          dispatch({ type: 'loaded', data: initial, notice });
         }
       } catch {
         if (!cancelled) dispatch({ type: 'loaded', data: EMPTY_DATA, notice: 'load-failed' });
@@ -114,6 +118,12 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
     const replaceData = async (next: FinanceData) => {
       dispatch({ type: 'data/replaced', data: next });
       await persist(() => repos.replaceAll(next));
+    };
+
+    const updateSettings = async (changes: Partial<Settings>) => {
+      const settings: Settings = { ...data().settings, ...changes };
+      dispatch({ type: 'settings/saved', settings });
+      await persist(() => repos.settings.save(settings));
     };
 
     return {
@@ -209,30 +219,36 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
         return updated;
       },
 
-      async updateSettings(changes) {
-        const settings: Settings = { ...data().settings, ...changes };
-        dispatch({ type: 'settings/saved', settings });
-        await persist(() => repos.settings.save(settings));
+      updateSettings,
+
+      async completeOnboarding(profile) {
+        await updateSettings({ ...profile, onboardingCompleted: true });
       },
 
-      async restoreDemoData() {
-        await replaceData(buildDemoData(todayIso()));
+      /** Substitui os dados pelos de demonstração, mantendo o perfil e as preferências do usuário. */
+      async loadDemoData() {
+        const demo = buildDemoData(todayIso());
+        await replaceData({ ...demo, settings: { ...data().settings, isDemoData: true, onboardingCompleted: true } });
       },
 
-      /** Apaga lançamentos e metas; recria as categorias padrão para que seja possível lançar em seguida. */
+      /**
+       * Apaga lançamentos e metas; recria as categorias padrão para que seja possível lançar em seguida.
+       * O perfil (nome e renda mensal) é mantido.
+       */
       async clearAllData() {
-        const { userName } = data().settings;
+        const { userName, monthlyIncome } = data().settings;
         await replaceData({
           ...EMPTY_DATA,
           categories: buildDefaultCategories(now()),
-          settings: { ...DEFAULT_SETTINGS, userName },
+          settings: { ...DEFAULT_SETTINGS, userName, monthlyIncome },
         });
       },
 
       async importBackup(json) {
         const imported = parseFinanceData(json);
         if (!imported) throw new DomainError('Arquivo de backup inválido ou de uma versão incompatível.');
-        await replaceData({ ...imported, settings: { ...imported.settings, isDemoData: false } });
+        // A importação acontece em Ajustes, depois do onboarding: nunca volta para a tela de boas-vindas.
+        await replaceData({ ...imported, settings: { ...imported.settings, isDemoData: false, onboardingCompleted: true } });
       },
 
       dismissNotice() {
