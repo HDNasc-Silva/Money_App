@@ -3,7 +3,7 @@
 > Documento oficial de referência. Representa o **estado atual real** do aplicativo e deve ser atualizado a cada alteração do sistema (ver `CHANGELOG.md` e `DECISOES_TECNICAS.md`).
 
 **Versão atual:** 1.9.0 (Lembretes de assinatura, saldo projetado e sugestão de lançamento fixo)
-**Última atualização:** 31/10/2026 (v1.9.0)
+**Última atualização:** 31/10/2026 (v1.10.0)
 
 ---
 
@@ -165,7 +165,8 @@ Money_APP/
 - **Lançamento rápido** (v1.7.0, regras 52–54): o valor recebe o foco ao abrir (teclado numérico); categorias em **chips com ícone**, das mais usadas para as menos usadas (até 8 visíveis + "Mais N"); a descrição mostra até 4 **sugestões** de descrições anteriores com a categoria usada da última vez; **"Salvar e adicionar outro"** grava, mantém tipo e data, limpa os demais campos e volta ao valor. As validações são as mesmas (regras 2–4, 27).
 - **Sugestão de fixo/recorrente** (v1.9.0, regra 59): ao criar uma despesa, se valor (±10%) e descrição (sem acento/maiúsculas) forem parecidos com uma despesa da mesma categoria no mês anterior, aparece "Marcar como fixo", que cria uma assinatura com os dados do lançamento (os meses seguintes passam a ser gerados automaticamente, como em Assinaturas). Só em lançamentos novos (não na edição); ignora lançamentos já vinculados a uma assinatura.
 - Extrato agrupado por dia com a contagem de itens e o total do dia; **resumo do filtro** com entradas, saídas e saldo do que está filtrado (regra 55).
-- Busca por descrição/categoria/observação; filtros em **chips**: período (este mês, 7 dias, mês anterior, todos), tipo e categoria (ao escolher um tipo, só aparecem as categorias desse tipo); "Limpar filtros"; estado vazio com "limpar filtros" ou, sem filtros, o convite "Seu extrato começa aqui" com "Novo lançamento".
+- **Seletor de mês** (v1.10.0, regra 60, DT-023): o mesmo `MonthSwitcher` da Visão Geral/Categorias/Relatórios aparece como ação do cabeçalho; os filtros "Mês selecionado" e "Mês anterior ao selecionado" seguem o mês navegado (compartilhado entre as telas), em vez do dia real do sistema.
+- Busca por descrição/categoria/observação; filtros em **chips**: período (mês selecionado, 7 dias, mês anterior ao selecionado, todos), tipo e categoria (ao escolher um tipo, só aparecem as categorias desse tipo); "Limpar filtros"; estado vazio com "limpar filtros" ou, sem filtros, o convite "Seu extrato começa aqui" com "Novo lançamento".
 - Desktop (≥ 1024 px): linhas em colunas Descrição | Categoria | Valor, com cabeçalho, como numa planilha.
 - "Exportar CSV" exporta exatamente os lançamentos filtrados.
 - Sem categoria do tipo selecionado, o formulário mostra um aviso com "Criar categorias padrão" (adiciona só as que faltam) e "Criar categoria personalizada" (fecha o formulário e abre Categorias).
@@ -275,6 +276,7 @@ Money_APP/
 57. **Saldo projetado até o fim do mês** (v1.9.0, DT-022): só no mês corrente; `Σ receitas do mês − Σ despesas já lançadas no mês − Σ cobranças de assinaturas previstas entre hoje e o fim do mês`. Independe do saldo disponível do cartão principal (regra 36, que desconta aportes em metas).
 58. **Lembrete de assinatura chegando** (v1.9.0, DT-022): para cada cobrança prevista (ativa, ainda não lançada, não ignorada) com data entre hoje e os próximos 3 dias (inclusive), um alerta "`<nome>` desconta hoje/amanhã/em N dias (`<valor>`)", com link para Assinaturas. Entra em `buildAlerts` antes dos demais alertas (regra 51).
 59. **Sugestão de fixo/recorrente no lançamento rápido** (v1.9.0, DT-022): ao criar uma despesa, se existir uma despesa da mesma categoria no mês anterior com a mesma descrição (sem acento/maiúsculas) e valor dentro de ±10%, mostra "Marcar como fixo". Confirmar cria uma assinatura (nome = descrição, valor, categoria, dia de cobrança = dia da data informada, primeiro mês = mês da data informada); os meses seguintes são gerados automaticamente (regras 39–47). Não sugere na edição nem quando o lançamento comparado já é gerado por uma assinatura.
+60. **Seletor de mês no Extrato** (v1.10.0, DT-023): o Extrato ganha o mesmo `MonthSwitcher` da Visão Geral/Categorias/Relatórios; os filtros "Mês selecionado" e "Mês anterior ao selecionado" passam a usar o mês navegado nesse seletor compartilhado (`useSelectedMonth`), em vez do mês do calendário real.
 
 ## 12. Fluxos de navegação
 
@@ -498,6 +500,10 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 - ✅ Sugestão de fixo/recorrente no lançamento rápido (regra 59, DT-022): "Marcar como fixo" quando a nova despesa é parecida (categoria, descrição e valor ±10%) com uma do mês anterior; confirmar cria uma assinatura a partir do lançamento.
 - ✅ 231 testes automatizados (8 novos: 3 em `tests/subscriptions.test.ts` para `subscriptionsChargingSoon`, 2 em `tests/domain.test.ts` para o alerta de cobrança chegando, 3 em `tests/quickEntry.test.ts` para `findRecurringCandidate`).
 
+### Concluído (v1.10.0 — testado automaticamente)
+- ✅ Seletor de mês no Extrato (regra 60, DT-023): `MonthSwitcher` reaproveitado como ação do cabeçalho de Lançamentos; filtros "Mês selecionado" e "Mês anterior ao selecionado" seguem o mês navegado, sincronizado com as demais telas.
+- ✅ 231 testes automatizados (nenhum teste novo dedicado; `tests/newTransactionDate.test.tsx` ajustado para o novo comportamento de filtro por mês).
+
 ### Em desenvolvimento
 - Nenhum.
 
@@ -519,7 +525,7 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 - Ícones do catálogo (v1.2.0): os nomes foram escolhidos entre os existentes no Material Symbols Outlined, mas a renderização de cada um não foi conferida visualmente no navegador (jsdom não carrega a fonte). Um nome inexistente apareceria como texto.
 
 - Meses futuros (v1.3.0): validados em jsdom; a indicação "Mês futuro" no seletor ainda não foi conferida visualmente no navegador nos dois temas. Lançamentos importados com data além do limite ficam visíveis, mas exigem ajustar a data para salvar uma edição.
-- Data sugerida (v1.3.1): a tela de Lançamentos não exibe o seletor de mês (usa filtro de período próprio), mas a data sugerida segue o mês escolhido nas outras telas (DT-013). Validado em jsdom; não conferido manualmente no navegador.
+- Data sugerida (v1.3.1): a data sugerida segue o mês escolhido no seletor compartilhado em todas as telas, incluindo Lançamentos desde a v1.10.0 (DT-013, DT-023). Validado em jsdom; não conferido manualmente no navegador.
 - Boas-vindas e Ajustes (v1.4.0): validados em jsdom; a aparência da tela de boas-vindas e do card "Instalar app" ainda não foi conferida visualmente no navegador nos dois temas.
 - PWA (v1.4.0): a instalação real (Android/Chrome e iPhone/Safari) e o funcionamento offline não foram testados em dispositivos; o service worker só é registrado no build de produção (GitHub Pages ou `npm run preview`), não no `npm run dev`. `CACHE_VERSION` em `public/sw.js` precisa ser atualizado a cada release. Offline, fontes e ícones do Google Fonts só aparecem se já estiverem no cache HTTP do navegador. A cor de abertura (splash) do app instalado é a do tema claro (o manifest aceita uma única cor).
 

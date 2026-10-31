@@ -1,4 +1,4 @@
-import type { Category, Cents, IsoDate, Period, Transaction, TransactionType } from '@/models';
+import type { Category, Cents, IsoDate, MonthKey, Period, Transaction, TransactionType } from '@/models';
 import { addMonths, monthKeyOf } from '@/utils/dates';
 import { normalizeText } from '@/utils/format';
 import { lastDaysPeriod, monthPeriod } from './periods';
@@ -21,15 +21,18 @@ export const DEFAULT_FILTERS: TransactionFilters = {
   categoryId: null,
 };
 
-export function resolvePeriodFilter(filter: PeriodFilter, today: IsoDate): Period | null {
-  const month = monthKeyOf(today);
+/**
+ * `selectedMonth` (padrão: mês de `today`) define o mês de referência para `this-month` e
+ * `previous-month` — permite navegar o Extrato pelo mesmo seletor de mês usado na Visão Geral.
+ */
+export function resolvePeriodFilter(filter: PeriodFilter, today: IsoDate, selectedMonth: MonthKey = monthKeyOf(today)): Period | null {
   switch (filter) {
     case 'this-month':
-      return monthPeriod(month);
+      return monthPeriod(selectedMonth);
     case 'last-7-days':
       return lastDaysPeriod(today, 7);
     case 'previous-month':
-      return monthPeriod(addMonths(month, -1));
+      return monthPeriod(addMonths(selectedMonth, -1));
     case 'all':
       return null;
   }
@@ -44,8 +47,9 @@ export function filterTransactions(
   categories: readonly Category[],
   filters: TransactionFilters,
   today: IsoDate,
+  selectedMonth?: MonthKey,
 ): Transaction[] {
-  const period = resolvePeriodFilter(filters.period, today);
+  const period = resolvePeriodFilter(filters.period, today, selectedMonth);
   const query = normalizeText(filters.search);
   const categoryNames = new Map(categories.map((c) => [c.id, normalizeText(c.name)]));
 

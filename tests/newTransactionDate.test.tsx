@@ -94,7 +94,10 @@ describe('data sugerida para novo lançamento', () => {
       expect(dialog.getByLabelText('Data')).toHaveValue('2026-09-30');
       await user.keyboard('{Escape}');
 
-      // Edição: a data do lançamento é preservada.
+      // Edição: a data do lançamento é preservada. O Extrato também filtra pelo mês
+      // selecionado, então é preciso voltar a outubro (mês do lançamento) para encontrá-lo.
+      await user.click(screen.getByRole('button', { name: 'Próximo mês' }));
+      expect(screen.getByText('Outubro 2026')).toBeInTheDocument();
       await user.click(screen.getByRole('button', { name: 'Ações do lançamento Salário' }));
       await user.click(await screen.findByRole('button', { name: /Editar informações/ }));
       dialog = within(await screen.findByRole('dialog', { name: 'Editar lançamento' }));

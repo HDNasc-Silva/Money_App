@@ -7,6 +7,23 @@ Categorias: **Adicionado** · **Modificado** · **Corrigido** · **Removido** ·
 
 ---
 
+## [1.10.0] - 31/10/2026 — Seletor de mês no Extrato
+
+### Adicionado
+- **Seletor de mês no Extrato** (`src/modules/transactions/TransactionsPage.tsx`): reaproveita o mesmo `MonthSwitcher` (`src/components/common/MonthSwitcher.tsx`) já usado na Visão Geral, Categorias e Relatórios, exibido como ação do cabeçalho da página. O filtro "Mês selecionado" (antes "Este mês") e "Mês anterior ao selecionado" (antes "Mês anterior") passam a usar o mês escolhido no seletor compartilhado (`useSelectedMonth`), em vez do mês do calendário real.
+
+### Modificado
+- `resolvePeriodFilter` e `filterTransactions` (`src/domain/transactions.ts`) recebem um `selectedMonth` opcional (padrão: mês de `today`, mantendo compatibilidade com os testes e usos existentes) para resolver os filtros `this-month`/`previous-month` a partir do mês navegável, e não mais do dia real do sistema.
+- `tests/newTransactionDate.test.tsx`: ajustado para voltar ao mês de outubro antes de editar um lançamento lançado em outubro, já que o Extrato agora filtra pelo mês selecionado.
+
+### Técnico
+- `CACHE_VERSION` do service worker: `v1.10.0`. Versão do pacote: 1.9.0 → 1.10.0 (MINOR).
+
+### Documentação
+- `DECISOES_TECNICAS.md`: DT-023 (reaproveitar `MonthSwitcher` e o mês compartilhado em vez de um seletor de período próprio no Extrato). `ESCOPO_PROJETO.md`: seção de Extrato e acompanhamento v1.10.0.
+
+---
+
 ## [1.9.0] - 31/10/2026 — Lembretes de assinatura, saldo projetado e sugestão de lançamento fixo
 
 ### Adicionado

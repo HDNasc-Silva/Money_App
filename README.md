@@ -11,7 +11,7 @@ Registrar receitas e despesas, controlar limites de orçamento por categoria, ac
 | Módulo | O que faz |
 |---|---|
 | Visão Geral ("Início") | Saldo disponível (já descontados os aportes em metas), resumo do mês (receitas, despesas, poupança com variação vs mês anterior), próximas cobranças de assinaturas, últimos lançamentos, metas em destaque, alertas compactos, gráfico semanal e gastos por categoria |
-| Lançamentos ("Extrato") | Lançamento rápido (valor com foco automático, categorias em chips, sugestões de descrição, "Salvar e adicionar outro"); extrato agrupado por dia com total do dia, resumo do filtro (entradas, saídas, saldo), busca, filtros em chips, colunas no desktop e exportação CSV; selo "Assinatura" nos lançamentos gerados |
+| Lançamentos ("Extrato") | Lançamento rápido (valor com foco automático, categorias em chips, sugestões de descrição, "Salvar e adicionar outro"); seletor de mês (compartilhado com a Visão Geral); extrato agrupado por dia com total do dia, resumo do filtro (entradas, saídas, saldo), busca, filtros em chips, colunas no desktop e exportação CSV; selo "Assinatura" nos lançamentos gerados |
 | Categorias ("Gastos") | Categorias, limites mensais, consumo, alertas e o bloco "Assinaturas do mês" (lançadas e previstas) |
 | Assinaturas | Assinaturas mensais (Netflix, Spotify, Claude...): valor, dia de cobrança, pausar/retomar, total mensal e anual; as cobranças viram despesas automaticamente no dia de cobrança |
 | Metas | Metas, aportes, progresso e simulador de economia |

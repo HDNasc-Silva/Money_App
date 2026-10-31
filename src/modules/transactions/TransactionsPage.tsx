@@ -4,6 +4,7 @@ import { Button } from '@/components/common/Button';
 import { EmptyState } from '@/components/common/EmptyState';
 import { Icon } from '@/components/common/Icon';
 import { Money } from '@/components/common/Money';
+import { MonthSwitcher } from '@/components/common/MonthSwitcher';
 import { SegmentedControl } from '@/components/common/SegmentedControl';
 import { useToast } from '@/components/common/Toast';
 import { Page } from '@/components/layout/Page';
@@ -19,6 +20,7 @@ import {
 import type { Transaction } from '@/models';
 import { downloadFile, transactionsToCsv } from '@/services/export';
 import { useFinanceData } from '@/store/FinanceProvider';
+import { useSelectedMonth } from '@/store/SelectedMonth';
 import { addDays, formatDayMonth, todayIso } from '@/utils/dates';
 import { normalizeText, pluralize } from '@/utils/format';
 import { TransactionActions } from './TransactionActions';
@@ -27,9 +29,9 @@ import { TransactionItem } from './TransactionItem';
 import styles from './Transactions.module.css';
 
 const PERIOD_OPTIONS: { value: PeriodFilter; label: string }[] = [
-  { value: 'this-month', label: 'Este mês' },
+  { value: 'this-month', label: 'Mês selecionado' },
   { value: 'last-7-days', label: 'Últimos 7 dias' },
-  { value: 'previous-month', label: 'Mês anterior' },
+  { value: 'previous-month', label: 'Mês anterior ao selecionado' },
   { value: 'all', label: 'Todos' },
 ];
 
@@ -55,6 +57,7 @@ export function TransactionsPage() {
   const { transactions, categories } = useFinanceData();
   const { openNew } = useTransactionEditor();
   const { showToast } = useToast();
+  const { month: selectedMonth } = useSelectedMonth();
   const [searchParams] = useSearchParams();
   const initialCategory = searchParams.get('categoria');
   const [filters, setFilters] = useState<TransactionFilters>(() => ({
@@ -67,8 +70,8 @@ export function TransactionsPage() {
 
   const categoriesById = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
   const filtered = useMemo(
-    () => filterTransactions(transactions, categories, filters, today),
-    [transactions, categories, filters, today],
+    () => filterTransactions(transactions, categories, filters, today, selectedMonth),
+    [transactions, categories, filters, today, selectedMonth],
   );
   const groups = useMemo(() => groupByDay(filtered), [filtered]);
   // O resumo reflete exatamente o que está filtrado (como o rodapé de uma planilha filtrada).
@@ -97,7 +100,7 @@ export function TransactionsPage() {
   };
 
   return (
-    <Page title="Lançamentos" description="Seu extrato: busque, filtre e acompanhe dia a dia.">
+    <Page title="Lançamentos" description="Seu extrato: busque, filtre e acompanhe dia a dia." action={<MonthSwitcher />}>
       <section className={styles.summary} aria-label="Resumo do filtro">
         <div className={styles.summaryHeader}>
           <span className={styles.summaryPeriod}>
