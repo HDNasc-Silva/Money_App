@@ -1,5 +1,8 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { defaultDateForMonth } from '@/domain/periods';
 import type { Transaction } from '@/models';
+import { useSelectedMonth } from '@/store/SelectedMonth';
+import { todayIso } from '@/utils/dates';
 import { TransactionFormSheet, type TransactionPreset } from './TransactionForm';
 
 interface TransactionEditorValue {
@@ -18,10 +21,16 @@ interface EditorState {
 /** Permite abrir o formulário de lançamento de qualquer tela (Visão Geral, Lançamentos, navegação). */
 export function TransactionEditorProvider({ children }: { children: ReactNode }) {
   const [editor, setEditor] = useState<EditorState | null>(null);
+  const { month } = useSelectedMonth();
 
-  const openNew = useCallback((preset?: TransactionPreset) => {
-    setEditor({ key: Date.now(), transaction: null, preset });
-  }, []);
+  // Todo novo lançamento sugere uma data dentro do mês selecionado no seletor de mês.
+  const openNew = useCallback(
+    (preset?: TransactionPreset) => {
+      const date = preset?.date ?? defaultDateForMonth(month, todayIso());
+      setEditor({ key: Date.now(), transaction: null, preset: { ...preset, date } });
+    },
+    [month],
+  );
 
   const openEdit = useCallback((transaction: Transaction) => {
     setEditor({ key: Date.now(), transaction });

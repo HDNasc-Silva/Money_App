@@ -4,7 +4,7 @@ import { SegmentedControl } from '@/components/common/SegmentedControl';
 import { Sheet } from '@/components/common/Sheet';
 import { useToast } from '@/components/common/Toast';
 import { FormRow, FormStack, MoneyField, SelectField, TextField } from '@/components/forms/Fields';
-import type { Transaction, TransactionType } from '@/models';
+import type { IsoDate, Transaction, TransactionType } from '@/models';
 import { useFinanceActions, useFinanceData } from '@/store/FinanceProvider';
 import { todayIso } from '@/utils/dates';
 import { centsToInput } from '@/utils/money';
@@ -19,6 +19,8 @@ const TYPE_OPTIONS = [
 export interface TransactionPreset {
   type?: TransactionType;
   categoryId?: string;
+  /** Data sugerida; por padrão, hoje. O editor preenche conforme o mês selecionado. */
+  date?: IsoDate;
 }
 
 interface TransactionFormSheetProps {
@@ -43,7 +45,7 @@ function initialValues(transaction: Transaction | null, preset: TransactionPrese
     type: preset.type ?? 'expense',
     description: '',
     amount: '',
-    date: todayIso(),
+    date: preset.date ?? todayIso(),
     categoryId: preset.categoryId ?? '',
     note: '',
   };

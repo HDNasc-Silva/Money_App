@@ -116,6 +116,17 @@ Status possíveis: **Aceita** · **Substituída por DT-XXX** · **Obsoleta**
 - **Desvantagens:** `validateTransaction` ganhou o parâmetro obrigatório `today`. Lançamentos antigos (ex.: importados por backup) com data além do limite continuam salvos e visíveis, mas precisam ter a data ajustada para serem editados.
 - **Módulos afetados:** `domain/periods`, `store/SelectedMonth`, `components/common/MonthSwitcher`, `validations`, `modules/transactions`, `modules/dashboard`, `modules/reports`.
 
+## DT-013 — Data sugerida do novo lançamento segue o mês selecionado
+
+- **Data:** 30/10/2026 · **Status:** Aceita (complementa DT-012)
+- **Contexto:** Com meses futuros liberados (v1.3.0), o formulário de novo lançamento continuava sugerindo a data de hoje mesmo com outro mês selecionado, obrigando o usuário a trocar a data manualmente ao planejar.
+- **Decisão:** Função pura `defaultDateForMonth(month, today)` em `domain/periods.ts`: no mês de hoje → hoje; em qualquer outro mês (passado ou futuro) → o **mesmo dia do mês de hoje, limitado ao último dia do mês selecionado** (31/10 → 30/11; 30/10 → 28/02/2027 ou 29/02/2028). O cálculo é feito num único ponto, `TransactionEditorProvider.openNew`, que lê o mês de `useSelectedMonth()` e passa a data em `TransactionPreset.date`; assim todos os pontos que abrem o formulário (Visão Geral, Lançamentos/Extrato, navegação lateral, botão flutuante) seguem a regra sem alterações. Um `preset.date` explícito tem prioridade. Edição mantém a data do lançamento.
+- **Alternativas:** dia 1 do mês selecionado (mais simples, porém concentraria lançamentos planejados no dia 1 e se distanciaria do dia "natural" do usuário, ex.: salário no dia 5); calcular a data dentro de cada tela (duplicação e risco de divergência).
+- **Aporte em metas:** mantém a data de hoje. A tela de Metas não tem seletor de mês e um aporte representa dinheiro efetivamente guardado; usar o mês selecionado, que não é visível ali, seria surpreendente.
+- **Vantagens:** regra pura e testável; um só ponto de integração; nenhuma mudança no modelo de dados.
+- **Desvantagens:** na tela de Lançamentos (que tem filtro de período próprio e não exibe o seletor de mês), a data sugerida segue o mês escolhido nas outras telas, o que pode não ser óbvio; a data continua editável.
+- **Módulos afetados:** `domain/periods`, `modules/transactions` (`TransactionEditor`, `TransactionForm`).
+
 ## DT-010 — Roteamento com HashRouter
 
 - **Data:** 30/10/2026 · **Status:** Aceita

@@ -3,6 +3,7 @@ import { buildAlerts } from '@/domain/alerts';
 import { budgetStatus, categoryBudgets, globalBudget } from '@/domain/budgets';
 import { goalForecast, goalProgress, goalsSummary, monthsToReach, requiredMonthly, simulationScenarios } from '@/domain/goals';
 import {
+  defaultDateForMonth,
   isFutureMonth,
   MAX_FUTURE_MONTHS,
   maxPlanningDate,
@@ -186,6 +187,33 @@ describe('periods & reports', () => {
     expect(isFutureMonth('2026-12', '2026-10-30')).toBe(true);
     expect(isFutureMonth('2026-10', '2026-10-30')).toBe(false);
     expect(isFutureMonth('2026-09', '2026-10-30')).toBe(false);
+  });
+
+  describe('defaultDateForMonth', () => {
+    it('usa hoje quando o mês selecionado é o mês atual', () => {
+      expect(defaultDateForMonth('2026-10', '2026-10-30')).toBe('2026-10-30');
+      expect(defaultDateForMonth('2026-10', '2026-10-01')).toBe('2026-10-01');
+    });
+
+    it('mantém o mesmo dia em meses futuros e passados', () => {
+      expect(defaultDateForMonth('2026-12', '2026-10-30')).toBe('2026-12-30');
+      expect(defaultDateForMonth('2026-08', '2026-10-15')).toBe('2026-08-15');
+      expect(defaultDateForMonth('2027-01', '2026-10-05')).toBe('2027-01-05');
+      expect(defaultDateForMonth('2025-10', '2026-10-30')).toBe('2025-10-30');
+    });
+
+    it('limita ao último dia em meses mais curtos', () => {
+      expect(defaultDateForMonth('2026-11', '2026-10-31')).toBe('2026-11-30');
+      expect(defaultDateForMonth('2026-09', '2026-10-31')).toBe('2026-09-30');
+      expect(defaultDateForMonth('2026-12', '2026-10-31')).toBe('2026-12-31');
+    });
+
+    it('trata fevereiro em anos comuns e bissextos', () => {
+      expect(defaultDateForMonth('2027-02', '2026-10-30')).toBe('2027-02-28');
+      expect(defaultDateForMonth('2028-02', '2026-10-31')).toBe('2028-02-29');
+      expect(defaultDateForMonth('2028-02', '2026-10-28')).toBe('2028-02-28');
+      expect(defaultDateForMonth('2026-02', '2026-10-29')).toBe('2026-02-28');
+    });
   });
 
   it('mês futuro sem lançamentos não gera divisões por zero', () => {

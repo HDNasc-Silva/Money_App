@@ -2,7 +2,7 @@
 
 > Documento oficial de referência. Representa o **estado atual real** do aplicativo e deve ser atualizado a cada alteração do sistema (ver `CHANGELOG.md` e `DECISOES_TECNICAS.md`).
 
-**Versão atual:** 1.3.0 (navegação e planejamento em meses futuros)
+**Versão atual:** 1.3.1 (data sugerida do novo lançamento no mês selecionado)
 **Última atualização:** 30/10/2026
 
 ---
@@ -212,6 +212,7 @@ Money_APP/
 25. **Ícones**: categorias e metas escolhem ícones do catálogo `ICON_CATALOG` (nomes do Material Symbols Outlined, sem duplicatas). A busca considera rótulo, palavras-chave e nome, sem acento e sem diferenciar maiúsculas; todos os termos digitados precisam corresponder. Um ícone já salvo fora do catálogo continua válido e exibido.
 26. "Restaurar categorias padrão" (Ajustes) segue a regra 23: só adiciona as categorias padrão ausentes e nunca altera ou remove as existentes.
 27. **Datas futuras em lançamentos** são permitidas (planejamento) até o último dia do mês limite da regra 20 (mensagem: "A data deve ser até DD/MM/AAAA."). Datas passadas continuam sem limite. Num mês futuro sem lançamentos, indicadores mostram "Período ainda não iniciado." e as comparações com o mês anterior usam os meses completos.
+28. **Data sugerida de novo lançamento** (`defaultDateForMonth`, DT-013): se o mês selecionado no seletor de mês for o mês atual, sugere hoje; em qualquer outro mês (passado ou futuro), sugere o mesmo dia de hoje limitado ao último dia daquele mês (ex.: hoje 30/10/2026 com Dezembro 2026 selecionado → 30/12/2026; hoje 31/10 com Novembro → 30/11; fevereiro → 28 ou 29). Vale para todos os pontos que abrem o formulário (Visão Geral, Lançamentos, navegação lateral, botão flutuante). Edição mantém a data do lançamento. A data continua editável. O aporte em metas continua sugerindo hoje (a tela de Metas não tem seletor de mês).
 
 ## 12. Fluxos de navegação
 
@@ -219,7 +220,7 @@ Money_APP/
 Abrir app → (primeira vez) carregar dados de demonstração → Visão Geral
 Navegação: Visão Geral ⇄ Lançamentos ⇄ Categorias ⇄ Metas ⇄ Relatórios (barra inferior / lateral)
 Cabeçalho: alternar tema · notificações (lista de alertas) · Ajustes
-Visão Geral → "Novo Lançamento" → formulário (sheet) → salvar → todos os módulos recalculam
+Visão Geral → "Novo Lançamento" → formulário (sheet, data sugerida no mês selecionado) → salvar → todos os módulos recalculam
 Visão Geral → "Editar tetos" → Categorias
 Visão Geral → "Ver todas as transações" / "Histórico" → Lançamentos
 Lançamentos → item → ações (editar / duplicar / excluir)
@@ -351,6 +352,10 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 - ✅ Lançamentos com data futura até o fim do mês limite (regra 27).
 - ✅ 112 testes automatizados (2 de domínio, 2 de validação e 4 de integração novos).
 
+### Concluído (v1.3.1 — testado automaticamente)
+- ✅ Novo lançamento sugere data no mês selecionado (regra 28, DT-013), em todos os pontos de abertura do formulário.
+- ✅ 120 testes automatizados (4 unitários de `defaultDateForMonth` e 4 de integração novos).
+
 ### Em desenvolvimento
 - Nenhum.
 
@@ -370,7 +375,8 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 - A máscara de valores (v1.1.0) foi validada em jsdom; falta testar manualmente em teclados de celulares reais (Android/iOS) e com edição no meio do texto (o cursor sempre volta ao fim, por decisão de design).
 - Ícones do catálogo (v1.2.0): os nomes foram escolhidos entre os existentes no Material Symbols Outlined, mas a renderização de cada um não foi conferida visualmente no navegador (jsdom não carrega a fonte). Um nome inexistente apareceria como texto.
 
-- Meses futuros (v1.3.0): validados em jsdom; a indicação "Mês futuro" no seletor ainda não foi conferida visualmente no navegador nos dois temas. O formulário de novo lançamento continua sugerindo a data de hoje mesmo com um mês futuro selecionado. Lançamentos importados com data além do limite ficam visíveis, mas exigem ajustar a data para salvar uma edição.
+- Meses futuros (v1.3.0): validados em jsdom; a indicação "Mês futuro" no seletor ainda não foi conferida visualmente no navegador nos dois temas. Lançamentos importados com data além do limite ficam visíveis, mas exigem ajustar a data para salvar uma edição.
+- Data sugerida (v1.3.1): a tela de Lançamentos não exibe o seletor de mês (usa filtro de período próprio), mas a data sugerida segue o mês escolhido nas outras telas (DT-013). Validado em jsdom; não conferido manualmente no navegador.
 
 ### Próximas etapas (sugestões)
 1. Inicializar repositório Git.

@@ -7,6 +7,27 @@ Categorias: **Adicionado** · **Modificado** · **Corrigido** · **Removido** ·
 
 ---
 
+## [1.3.1] - 30/10/2026 — Data sugerida do novo lançamento no mês selecionado
+
+### Adicionado
+- Função pura `defaultDateForMonth(month, today)` em `src/domain/periods.ts`: hoje, se o mês selecionado for o atual; caso contrário, o mesmo dia de hoje limitado ao último dia do mês selecionado (ex.: 31/10 → 30/11; fevereiro respeita anos bissextos).
+- `TransactionPreset.date` (opcional) no formulário de lançamento.
+- Testes: 4 unitários de `defaultDateForMonth` (mês atual, meses passados/futuros, meses curtos, fevereiro comum e bissexto) e 4 de integração (`tests/newTransactionDate.test.tsx`, com relógio fixo em 30/10/2026 e 31/10/2026: mês atual, Dezembro de 2026 → 2026-12-30, mês passado pela navegação lateral e pela tela de Lançamentos, edição preservando a data, 31/10 → 2026-11-30). Total: 120 testes.
+
+### Modificado
+- Novo lançamento sugere uma data dentro do mês selecionado no seletor de mês, em todos os pontos de abertura (Visão Geral, Lançamentos, navegação lateral, botão flutuante), via `TransactionEditorProvider.openNew`. Edição mantém a data do lançamento. O aporte em metas continua sugerindo hoje (ver DT-013).
+
+### Corrigido
+- Limitação da v1.3.0: o formulário sugeria sempre a data de hoje mesmo com um mês futuro selecionado.
+
+### Técnico
+- Versão do pacote: 1.3.0 → 1.3.1 (PATCH: melhoria de comportamento sem mudança de modelo ou API pública).
+
+### Documentação
+- `DECISOES_TECNICAS.md`: DT-013. `ESCOPO_PROJETO.md`: regra 28, fluxo de navegação, acompanhamento v1.3.1 e limitação removida.
+
+---
+
 ## [1.3.0] - 30/10/2026 — Navegação e planejamento em meses futuros
 
 ### Adicionado

@@ -1,5 +1,5 @@
 import type { IsoDate, MonthKey, Period } from '@/models';
-import { addDays, addMonths, firstDayOfMonth, lastDayOfMonth, monthKeyOf } from '@/utils/dates';
+import { addDays, addMonths, daysInMonth, firstDayOfMonth, lastDayOfMonth, monthKeyOf } from '@/utils/dates';
 
 export const monthPeriod = (month: MonthKey): Period => ({
   start: firstDayOfMonth(month),
@@ -49,6 +49,18 @@ export const maxPlanningMonth = (today: IsoDate): MonthKey => addMonths(monthKey
 export const maxPlanningDate = (today: IsoDate): IsoDate => lastDayOfMonth(maxPlanningMonth(today));
 
 export const isFutureMonth = (month: MonthKey, today: IsoDate): boolean => month > monthKeyOf(today);
+
+/**
+ * Data sugerida para um novo lançamento no mês selecionado.
+ * - Mês de `today`: o próprio `today`.
+ * - Outro mês (passado ou futuro): o mesmo dia do mês de `today`, limitado ao
+ *   último dia do mês selecionado (ex.: hoje 31/10 → 30/11; 30/01 → 28/02 ou 29/02).
+ */
+export function defaultDateForMonth(month: MonthKey, today: IsoDate): IsoDate {
+  if (month === monthKeyOf(today)) return today;
+  const day = Math.min(Number(today.slice(8, 10)), daysInMonth(month));
+  return `${month}-${String(day).padStart(2, '0')}`;
+}
 
 /** Lista de meses (YYYY-MM) cobertos pelo período. */
 export function monthsInPeriod(period: Period): MonthKey[] {
