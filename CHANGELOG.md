@@ -7,6 +7,12 @@ Categorias: **Adicionado** · **Modificado** · **Corrigido** · **Removido** ·
 
 ---
 
+## [1.12.1] - 01/11/2026 — Transição de página e cartão de categoria sem alça separada
+
+### Modificado
+- **Transição suave ao trocar de aba**: `AppShell` (`src/components/layout/AppShell.tsx`) aplica um fade + leve deslocamento (`pageTransition`, `AppShell.module.css`) ao conteúdo da página a cada navegação, respeitando `prefers-reduced-motion`.
+- **Reordenar categorias pelo cartão inteiro**: removida a alça de arrastar separada (`drag_indicator`) do `CategoryCard`/`IncomeCategoryCard` — o arraste agora é iniciado pelo próprio cartão (Pointer Events já existentes em `useDragReorder`, sem lógica nova).
+
 ## [1.12.0] - 01/11/2026 — Sininho de alertas por categoria e reordenar categorias arrastando
 
 ### Adicionado

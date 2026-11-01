@@ -61,7 +61,9 @@ export function AppShell() {
               </button>
             </div>
           )}
-          <Outlet />
+          <div key={pathname} className={styles.pageTransition}>
+            <Outlet />
+          </div>
         </main>
       </div>
       <BottomNav />

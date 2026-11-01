@@ -7,7 +7,7 @@
  * Atualize CACHE_VERSION a cada release: o `activate` apaga os caches de versões anteriores.
  * Caminhos relativos: funciona na raiz e em subcaminhos (ex.: GitHub Pages em /Money_App/).
  */
-const CACHE_VERSION = 'v1.12.0';
+const CACHE_VERSION = 'v1.12.1';
 const CACHE_PREFIX = 'money-app-';
 const CACHE_NAME = `${CACHE_PREFIX}${CACHE_VERSION}`;
 

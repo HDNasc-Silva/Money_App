@@ -9,17 +9,8 @@ import { formatPercent } from '@/utils/format';
 import { GROUP_LABELS } from './CategoryForm';
 import styles from './Categories.module.css';
 
-/** Props do cabo de arrastar (Pointer Events) e do cartão em si, repassadas por `useDragReorder`. */
+/** Props do cartão para arrastar (Pointer Events) e medir posição, repassadas por `useDragReorder`. */
 type DragProps = Record<string, unknown> & HTMLAttributes<HTMLElement>;
-
-function DragHandle({ handleProps }: { handleProps?: DragProps }) {
-  if (!handleProps) return null;
-  return (
-    <button type="button" className={styles.dragHandle} aria-label="Arrastar para reordenar" {...handleProps}>
-      <Icon name="drag_indicator" size={20} />
-    </button>
-  );
-}
 
 const TONE: Record<BudgetStatus, ProgressTone> = { none: 'muted', ok: 'good', warning: 'warning', exceeded: 'danger' };
 const BADGE: Record<BudgetStatus, BadgeTone> = { none: 'neutral', ok: 'income', warning: 'neutral', exceeded: 'expense' };
@@ -38,14 +29,12 @@ interface CategoryCardProps {
   onEdit(): void;
   /** Liga/desliga os alertas de limite desta categoria (DT-025). */
   onToggleAlerts(): void;
-  /** Alça de arrastar (Pointer Events) do `useDragReorder`, repassada pelo contêiner da lista. */
-  dragHandleProps?: DragProps;
-  /** Props do próprio cartão para o `useDragReorder` medir sua posição (`data-drag-id`). */
+  /** Props do próprio cartão para o `useDragReorder` (arrasto pelo cartão inteiro, sem alça separada). */
   cardProps?: DragProps;
   dragging?: boolean;
 }
 
-export function CategoryCard({ budget, onEdit, onToggleAlerts, dragHandleProps, cardProps, dragging }: CategoryCardProps) {
+export function CategoryCard({ budget, onEdit, onToggleAlerts, cardProps, dragging }: CategoryCardProps) {
   const { category, spent, limit, ratio, remaining, status } = budget;
   const text = statusText(budget);
   const exceededBy = remaining !== null && remaining < 0 ? -remaining : 0;
@@ -53,7 +42,6 @@ export function CategoryCard({ budget, onEdit, onToggleAlerts, dragHandleProps, 
   return (
     <article className={[styles.card, dragging && styles.dragging].filter(Boolean).join(' ')} {...cardProps}>
       <div className={styles.cardTop}>
-        <DragHandle handleProps={dragHandleProps} />
         <span className={[styles.cardIcon, status === 'exceeded' && styles.cardIconDanger].filter(Boolean).join(' ')}>
           <Icon name={category.icon} size={22} />
         </span>
@@ -132,16 +120,14 @@ interface IncomeCategoryCardProps {
   received: number;
   id: string;
   onEdit(): void;
-  dragHandleProps?: DragProps;
   cardProps?: DragProps;
   dragging?: boolean;
 }
 
-export function IncomeCategoryCard({ id, name, icon, description, received, onEdit, dragHandleProps, cardProps, dragging }: IncomeCategoryCardProps) {
+export function IncomeCategoryCard({ id, name, icon, description, received, onEdit, cardProps, dragging }: IncomeCategoryCardProps) {
   return (
     <article className={[styles.card, dragging && styles.dragging].filter(Boolean).join(' ')} {...cardProps}>
       <div className={styles.cardTop}>
-        <DragHandle handleProps={dragHandleProps} />
         <span className={[styles.cardIcon, styles.cardIconIncome].join(' ')}>
           <Icon name={icon} size={22} />
         </span>

@@ -17,6 +17,27 @@
   outline: none;
 }
 
+.pageTransition {
+  animation: pageFade 0.22s ease-out;
+}
+
+@keyframes pageFade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pageTransition {
+    animation: none;
+  }
+}
+
 .skip {
   position: absolute;
   top: -100px;

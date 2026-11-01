@@ -116,8 +116,7 @@ export function CategoriesPage() {
             budget={b}
             onEdit={() => open(b.category)}
             onToggleAlerts={() => void toggleCategoryAlerts(b.category.id)}
-            dragHandleProps={expenseDrag.getHandleProps(b.category.id)}
-            cardProps={expenseDrag.getCardProps(b.category.id)}
+            cardProps={{ ...expenseDrag.getHandleProps(b.category.id), ...expenseDrag.getCardProps(b.category.id) }}
             dragging={expenseDrag.draggingId === b.category.id}
           />
         ))}
@@ -132,8 +131,7 @@ export function CategoriesPage() {
             description={c.description}
             received={incomeByCategory.get(c.id) ?? 0}
             onEdit={() => open(c)}
-            dragHandleProps={incomeDrag.getHandleProps(c.id)}
-            cardProps={incomeDrag.getCardProps(c.id)}
+            cardProps={{ ...incomeDrag.getHandleProps(c.id), ...incomeDrag.getCardProps(c.id) }}
             dragging={incomeDrag.draggingId === c.id}
           />
         ))}
