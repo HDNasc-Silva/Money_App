@@ -36,6 +36,7 @@ const toValues = (category: Category | null): CategoryFormValues => ({
   kind: category?.kind ?? 'expense',
   group: category?.group ?? 'essential',
   monthlyLimit: category?.monthlyLimit ? centsToInput(category.monthlyLimit) : '',
+  alertsEnabled: category?.alertsEnabled ?? true,
 });
 
 export function CategoryFormSheet({ category, onClose }: CategoryFormSheetProps) {
@@ -119,6 +120,21 @@ export function CategoryFormSheet({ category, onClose }: CategoryFormSheetProps)
               <SelectField label="Grupo" value={values.group} onChange={(v) => update('group', v as CategoryGroup)} options={GROUP_OPTIONS} />
             </FormRow>
             <IconPicker label="Ícone de identificação" value={values.icon} onChange={(v) => update('icon', v)} error={errors.icon} />
+            {values.kind === 'expense' && (
+              <label className={styles.switchRow}>
+                <span>
+                  <strong>Alertas de orçamento</strong>
+                  <small>Avisa quando o teto mensal desta categoria estiver próximo ou ultrapassado.</small>
+                </span>
+                <input
+                  type="checkbox"
+                  role="switch"
+                  className={styles.switch}
+                  checked={values.alertsEnabled}
+                  onChange={(event) => update('alertsEnabled', event.target.checked)}
+                />
+              </label>
+            )}
             {formError && (
               <p role="alert" className={styles.formError}>
                 {formError}

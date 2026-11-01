@@ -109,9 +109,11 @@ export interface CategoryFormValues {
   kind: TransactionType;
   group: CategoryGroup;
   monthlyLimit: string;
+  /** Liga/desliga os alertas de limite próximo/ultrapassado desta categoria (ver DT-025). */
+  alertsEnabled: boolean;
 }
 
-export type CategoryDraft = Pick<Category, 'name' | 'description' | 'icon' | 'kind' | 'group' | 'monthlyLimit'>;
+export type CategoryDraft = Pick<Category, 'name' | 'description' | 'icon' | 'kind' | 'group' | 'monthlyLimit' | 'alertsEnabled'>;
 type CategoryField = keyof CategoryFormValues;
 
 export function validateCategory(
@@ -152,6 +154,7 @@ export function validateCategory(
       kind: values.kind,
       group: values.group,
       monthlyLimit,
+      alertsEnabled: values.alertsEnabled,
     },
   };
 }

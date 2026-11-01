@@ -15,10 +15,10 @@ export function tx(partial: Partial<Transaction> & Pick<Transaction, 'type' | 'a
 }
 
 export const categories: Category[] = [
-  { id: 'food', name: 'Alimentação', description: '', icon: 'restaurant', kind: 'expense', group: 'essential', monthlyLimit: 100_000, createdAt: '' },
-  { id: 'fun', name: 'Lazer', description: '', icon: 'sports_esports', kind: 'expense', group: 'lifestyle', monthlyLimit: 50_000, createdAt: '' },
-  { id: 'misc', name: 'Outros', description: '', icon: 'category', kind: 'expense', group: 'lifestyle', monthlyLimit: null, createdAt: '' },
-  { id: 'salary', name: 'Salário', description: '', icon: 'payments', kind: 'income', group: 'essential', monthlyLimit: null, createdAt: '' },
+  { id: 'food', name: 'Alimentação', description: '', icon: 'restaurant', kind: 'expense', group: 'essential', monthlyLimit: 100_000, alertsEnabled: true, order: 0, createdAt: '' },
+  { id: 'fun', name: 'Lazer', description: '', icon: 'sports_esports', kind: 'expense', group: 'lifestyle', monthlyLimit: 50_000, alertsEnabled: true, order: 1, createdAt: '' },
+  { id: 'misc', name: 'Outros', description: '', icon: 'category', kind: 'expense', group: 'lifestyle', monthlyLimit: null, alertsEnabled: true, order: 2, createdAt: '' },
+  { id: 'salary', name: 'Salário', description: '', icon: 'payments', kind: 'income', group: 'essential', monthlyLimit: null, alertsEnabled: true, order: 3, createdAt: '' },
 ];
 
 export function goal(partial: Partial<Goal> = {}): Goal {

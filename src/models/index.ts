@@ -63,6 +63,13 @@ export interface Category {
   group: CategoryGroup;
   /** Limite mensal; `null` = sem limite. Só se aplica a categorias de despesa. */
   monthlyLimit: Cents | null;
+  /**
+   * Liga/desliga os alertas de "limite próximo" e "limite ultrapassado" desta categoria
+   * (ver DT-025); padrão `true`. Não afeta os demais tipos de alerta (ex.: gastos em alta, metas).
+   */
+  alertsEnabled: boolean;
+  /** Posição na ordem definida pelo usuário (arrastar e soltar, DT-025); menor = primeiro. */
+  order: number;
   createdAt: string;
 }
 

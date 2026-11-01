@@ -1,3 +1,4 @@
+import type { HTMLAttributes } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge, type BadgeTone } from '@/components/common/Badge';
 import { Icon } from '@/components/common/Icon';
@@ -7,6 +8,18 @@ import type { BudgetStatus, CategoryBudget } from '@/domain/budgets';
 import { formatPercent } from '@/utils/format';
 import { GROUP_LABELS } from './CategoryForm';
 import styles from './Categories.module.css';
+
+/** Props do cabo de arrastar (Pointer Events) e do cartão em si, repassadas por `useDragReorder`. */
+type DragProps = Record<string, unknown> & HTMLAttributes<HTMLElement>;
+
+function DragHandle({ handleProps }: { handleProps?: DragProps }) {
+  if (!handleProps) return null;
+  return (
+    <button type="button" className={styles.dragHandle} aria-label="Arrastar para reordenar" {...handleProps}>
+      <Icon name="drag_indicator" size={20} />
+    </button>
+  );
+}
 
 const TONE: Record<BudgetStatus, ProgressTone> = { none: 'muted', ok: 'good', warning: 'warning', exceeded: 'danger' };
 const BADGE: Record<BudgetStatus, BadgeTone> = { none: 'neutral', ok: 'income', warning: 'neutral', exceeded: 'expense' };
@@ -23,16 +36,24 @@ function statusText(budget: CategoryBudget): { label: string; detail: string; cl
 interface CategoryCardProps {
   budget: CategoryBudget;
   onEdit(): void;
+  /** Liga/desliga os alertas de limite desta categoria (DT-025). */
+  onToggleAlerts(): void;
+  /** Alça de arrastar (Pointer Events) do `useDragReorder`, repassada pelo contêiner da lista. */
+  dragHandleProps?: DragProps;
+  /** Props do próprio cartão para o `useDragReorder` medir sua posição (`data-drag-id`). */
+  cardProps?: DragProps;
+  dragging?: boolean;
 }
 
-export function CategoryCard({ budget, onEdit }: CategoryCardProps) {
+export function CategoryCard({ budget, onEdit, onToggleAlerts, dragHandleProps, cardProps, dragging }: CategoryCardProps) {
   const { category, spent, limit, ratio, remaining, status } = budget;
   const text = statusText(budget);
   const exceededBy = remaining !== null && remaining < 0 ? -remaining : 0;
 
   return (
-    <article className={styles.card}>
+    <article className={[styles.card, dragging && styles.dragging].filter(Boolean).join(' ')} {...cardProps}>
       <div className={styles.cardTop}>
+        <DragHandle handleProps={dragHandleProps} />
         <span className={[styles.cardIcon, status === 'exceeded' && styles.cardIconDanger].filter(Boolean).join(' ')}>
           <Icon name={category.icon} size={22} />
         </span>
@@ -43,6 +64,15 @@ export function CategoryCard({ budget, onEdit }: CategoryCardProps) {
           </div>
           {category.description && <p>{category.description}</p>}
         </div>
+        <button
+          type="button"
+          className={[styles.bellButton, category.alertsEnabled && styles.bellActive].filter(Boolean).join(' ')}
+          onClick={onToggleAlerts}
+          aria-pressed={category.alertsEnabled}
+          aria-label={category.alertsEnabled ? `Desligar alertas de orçamento de ${category.name}` : `Ligar alertas de orçamento de ${category.name}`}
+        >
+          <Icon name={category.alertsEnabled ? 'notifications' : 'notifications_off'} size={18} filled={category.alertsEnabled} />
+        </button>
         {ratio !== null && (
           <Badge tone={BADGE[status]} money>
             {status === 'exceeded' ? <Money value={exceededBy} signed /> : formatPercent(ratio)}
@@ -102,12 +132,16 @@ interface IncomeCategoryCardProps {
   received: number;
   id: string;
   onEdit(): void;
+  dragHandleProps?: DragProps;
+  cardProps?: DragProps;
+  dragging?: boolean;
 }
 
-export function IncomeCategoryCard({ id, name, icon, description, received, onEdit }: IncomeCategoryCardProps) {
+export function IncomeCategoryCard({ id, name, icon, description, received, onEdit, dragHandleProps, cardProps, dragging }: IncomeCategoryCardProps) {
   return (
-    <article className={styles.card}>
+    <article className={[styles.card, dragging && styles.dragging].filter(Boolean).join(' ')} {...cardProps}>
       <div className={styles.cardTop}>
+        <DragHandle handleProps={dragHandleProps} />
         <span className={[styles.cardIcon, styles.cardIconIncome].join(' ')}>
           <Icon name={icon} size={22} />
         </span>

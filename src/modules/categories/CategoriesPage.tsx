@@ -9,13 +9,14 @@ import { Money } from '@/components/common/Money';
 import { MonthSwitcher } from '@/components/common/MonthSwitcher';
 import { ProgressBar } from '@/components/common/ProgressBar';
 import { SegmentedControl } from '@/components/common/SegmentedControl';
+import { useDragReorder } from '@/components/common/useDragReorder';
 import { Page } from '@/components/layout/Page';
-import { categoryBudgets, globalBudget } from '@/domain/budgets';
+import { categoryBudgets, globalBudget, type CategoryBudget } from '@/domain/budgets';
 import { monthPeriod } from '@/domain/periods';
 import { filterByPeriod } from '@/domain/summary';
 import type { Category } from '@/models';
 import { MonthSubscriptionsCard } from '@/modules/subscriptions/MonthSubscriptionsCard';
-import { useFinanceData } from '@/store/FinanceProvider';
+import { useFinanceActions, useFinanceData } from '@/store/FinanceProvider';
 import { useSelectedMonth } from '@/store/SelectedMonth';
 import { formatPercent } from '@/utils/format';
 import styles from './Categories.module.css';
@@ -24,8 +25,12 @@ import { CategoryFormSheet } from './CategoryForm';
 
 type Filter = 'all' | 'essential' | 'lifestyle' | 'income';
 
+const budgetId = (b: CategoryBudget) => b.category.id;
+const categoryId = (c: Category) => c.id;
+
 export function CategoriesPage() {
   const { transactions, categories } = useFinanceData();
+  const { reorderCategories, toggleCategoryAlerts } = useFinanceActions();
   const { month } = useSelectedMonth();
   const [filter, setFilter] = useState<Filter>('all');
   const [editing, setEditing] = useState<{ key: number; category: Category | null } | null>(null);
@@ -57,6 +62,11 @@ export function CategoriesPage() {
   const visibleBudgets = filter === 'income' ? [] : budgets.filter((b) => filter === 'all' || b.category.group === filter);
   const incomeCategories = filter === 'income' ? categories.filter((c) => c.kind === 'income') : [];
   const open = (category: Category | null) => setEditing({ key: Date.now(), category });
+
+  // Arrastar e soltar para reordenar (DT-025): cada lista visível (despesas filtradas ou receitas)
+  // tem seu próprio arraste; a nova ordem relativa é mesclada na ordem global das categorias.
+  const expenseDrag = useDragReorder(visibleBudgets, budgetId, (ids) => void reorderCategories(ids));
+  const incomeDrag = useDragReorder(incomeCategories, categoryId, (ids) => void reorderCategories(ids));
 
   return (
     <Page title="Categorias & Orçamentos" description="Defina tetos mensais e evite surpresas no fechamento." action={<MonthSwitcher />}>
@@ -99,11 +109,21 @@ export function CategoriesPage() {
         <SegmentedControl variant="pills" label="Filtrar categorias" options={filterOptions} value={filter} onChange={setFilter} />
       </div>
 
-      <div className={styles.cards}>
-        {visibleBudgets.map((b) => (
-          <CategoryCard key={b.category.id} budget={b} onEdit={() => open(b.category)} />
+      <div className={styles.cards} ref={expenseDrag.containerRef}>
+        {expenseDrag.orderedItems.map((b) => (
+          <CategoryCard
+            key={b.category.id}
+            budget={b}
+            onEdit={() => open(b.category)}
+            onToggleAlerts={() => void toggleCategoryAlerts(b.category.id)}
+            dragHandleProps={expenseDrag.getHandleProps(b.category.id)}
+            cardProps={expenseDrag.getCardProps(b.category.id)}
+            dragging={expenseDrag.draggingId === b.category.id}
+          />
         ))}
-        {incomeCategories.map((c) => (
+      </div>
+      <div className={styles.cards} ref={incomeDrag.containerRef}>
+        {incomeDrag.orderedItems.map((c) => (
           <IncomeCategoryCard
             key={c.id}
             id={c.id}
@@ -112,6 +132,9 @@ export function CategoriesPage() {
             description={c.description}
             received={incomeByCategory.get(c.id) ?? 0}
             onEdit={() => open(c)}
+            dragHandleProps={incomeDrag.getHandleProps(c.id)}
+            cardProps={incomeDrag.getCardProps(c.id)}
+            dragging={incomeDrag.draggingId === c.id}
           />
         ))}
       </div>

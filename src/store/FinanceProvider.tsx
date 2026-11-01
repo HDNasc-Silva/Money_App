@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, type ReactNode } from 'react';
 import { useToast } from '@/components/common/Toast';
+import { reorderCategories as reorderCategoriesList } from '@/domain/categories';
 import { skipMonth, syncSubscriptionCharges } from '@/domain/subscriptions';
 import {
   DEFAULT_SETTINGS,
@@ -53,6 +54,13 @@ export interface FinanceActions {
   deleteCategory(id: string): Promise<void>;
   /** Adiciona as categorias padrão que faltam (sem duplicar nomes); retorna as que foram criadas. */
   ensureDefaultCategories(): Promise<Category[]>;
+  /** Liga/desliga os alertas de limite (próximo/ultrapassado) de uma categoria (DT-025). */
+  toggleCategoryAlerts(id: string): Promise<void>;
+  /**
+   * Reordena as categorias por arrastar e soltar (DT-025): `movedIds` é a fatia arrastada (pode ser
+   * um filtro visível, ex. só despesas) já na nova ordem relativa entre si.
+   */
+  reorderCategories(movedIds: readonly string[]): Promise<void>;
   saveGoal(draft: GoalDraft, id?: string): Promise<Goal>;
   deleteGoal(id: string): Promise<void>;
   addContribution(goalId: string, amount: number, date: IsoDate): Promise<Goal>;
@@ -252,9 +260,11 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
         if (existing && existing.kind !== draft.kind && id && usedBySubscriptions(data(), id) > 0) {
           throw new DomainError('Não é possível mudar o tipo de uma categoria usada por assinaturas.');
         }
+        const nextOrder = () => data().categories.reduce((max, c) => Math.max(max, c.order), -1) + 1;
         const category: Category = {
           ...draft,
           id: existing?.id ?? createId(),
+          order: existing?.order ?? nextOrder(),
           createdAt: existing?.createdAt ?? now(),
         };
         dispatch({ type: 'category/saved', category });
@@ -293,6 +303,19 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
           for (const category of added) await repos.categories.upsert(category);
         });
         return added;
+      },
+
+      async toggleCategoryAlerts(id) {
+        const category = data().categories.find((c) => c.id === id);
+        if (!category) throw new DomainError('Categoria não encontrada.');
+        const updated: Category = { ...category, alertsEnabled: !category.alertsEnabled };
+        dispatch({ type: 'category/saved', category: updated });
+        await persist(() => repos.categories.upsert(updated));
+      },
+
+      async reorderCategories(movedIds) {
+        const reordered = reorderCategoriesList(data().categories, movedIds);
+        await replaceData({ ...data(), categories: reordered });
       },
 
       async saveGoal(draft, id) {

@@ -1,4 +1,4 @@
-import { DEFAULT_SETTINGS, USER_NAME_MAX, type FinanceData, type Settings, type Subscription } from '@/models';
+import { DEFAULT_SETTINGS, USER_NAME_MAX, type Category, type FinanceData, type Settings, type Subscription } from '@/models';
 import { MAX_AMOUNT } from '@/utils/money';
 import type { StorageAdapter } from './StorageAdapter';
 
@@ -89,6 +89,27 @@ function sanitizeSubscription(raw: Record<string, unknown>): Subscription {
   };
 }
 
+/**
+ * Normaliza uma categoria já validada estruturalmente: documentos salvos antes da v1.12.0 não têm
+ * `alertsEnabled` nem `order` (migração aditiva, DT-025). `alertsEnabled` ausente ou inválido vira
+ * `true` (alertas ligados por padrão); `order` ausente ou inválido usa a posição original no array,
+ * preservando a ordem de quem já tinha categorias salvas.
+ */
+function sanitizeCategory(raw: Record<string, unknown>, index: number): Category {
+  return {
+    id: raw.id as string,
+    name: raw.name as string,
+    description: typeof raw.description === 'string' ? raw.description : '',
+    icon: raw.icon as string,
+    kind: raw.kind as Category['kind'],
+    group: raw.group as Category['group'],
+    monthlyLimit: isIntegerCents(raw.monthlyLimit) ? (raw.monthlyLimit as number) : null,
+    alertsEnabled: typeof raw.alertsEnabled === 'boolean' ? raw.alertsEnabled : true,
+    order: typeof raw.order === 'number' && Number.isFinite(raw.order) ? raw.order : index,
+    createdAt: typeof raw.createdAt === 'string' ? raw.createdAt : '',
+  };
+}
+
 const pick = <T>(value: unknown, isValid: (v: unknown) => boolean, fallback: T): T => (isValid(value) ? (value as T) : fallback);
 const isBoolean = (v: unknown) => typeof v === 'boolean';
 const isMonthlyIncome = (v: unknown) => isIntegerCents(v) && (v as number) <= MAX_AMOUNT;
@@ -116,9 +137,12 @@ export function parseFinanceData(raw: string): FinanceData | null {
   try {
     const parsed: unknown = JSON.parse(raw);
     if (!isStoredDocument(parsed) || parsed.schemaVersion > SCHEMA_VERSION) return null;
+    const categories = (parsed.categories as unknown as Record<string, unknown>[])
+      .map((raw, index) => sanitizeCategory(raw, index))
+      .sort((a, b) => a.order - b.order);
     return {
       transactions: parsed.transactions,
-      categories: parsed.categories,
+      categories,
       goals: parsed.goals,
       // Migração da v1.6.0: documentos sem assinaturas recebem uma lista vazia.
       subscriptions: Array.isArray(parsed.subscriptions)

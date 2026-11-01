@@ -40,9 +40,11 @@ const DEFINITIONS: readonly DefaultCategoryDefinition[] = [
 
 /** Cria as categorias padrão com a data de criação informada. */
 export function buildDefaultCategories(createdAt: string): Category[] {
-  return DEFINITIONS.map(({ limit, ...definition }) => ({
+  return DEFINITIONS.map(({ limit, ...definition }, index) => ({
     ...definition,
     monthlyLimit: limit === null ? null : fromReais(limit),
+    alertsEnabled: true,
+    order: index,
     createdAt,
   }));
 }
@@ -61,8 +63,10 @@ export function missingDefaultCategories(
 ): Category[] {
   const names = new Set(existing.map((c) => nameKey(c.kind, c.name)));
   const ids = new Set(existing.map((c) => c.id));
+  const nextOrder = existing.reduce((max, c) => Math.max(max, c.order), -1) + 1;
   return buildDefaultCategories(createdAt)
     .filter((c) => !names.has(nameKey(c.kind, c.name)))
+    .map((c, index) => ({ ...c, order: nextOrder + index }))
     .map((c) => (ids.has(c.id) ? { ...c, id: newId() } : c));
 }
 

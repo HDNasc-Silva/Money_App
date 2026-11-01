@@ -39,6 +39,23 @@ describe('repositórios', () => {
     expect(adapter.read(DATA_KEY)).toBeNull();
   });
 
+  it('migra categorias salvas sem alertsEnabled/order (DT-025): liga alertas e preserva a ordem salva', () => {
+    const legacyCategory = { id: 'food', name: 'Alimentação', description: '', icon: 'restaurant', kind: 'expense', group: 'essential', monthlyLimit: 100_000, createdAt: '' };
+    const legacyDoc = JSON.stringify({
+      schemaVersion: 1,
+      transactions: [],
+      categories: [{ ...legacyCategory, id: 'misc', name: 'Outros' }, legacyCategory],
+      goals: [],
+      settings: {},
+    });
+    const data = parseFinanceData(legacyDoc);
+    expect(data).not.toBeNull();
+    // Sem `order` salvo, usa a posição em que já estava no documento antigo (Outros antes de Alimentação).
+    expect(data!.categories.map((c) => c.id)).toEqual(['misc', 'food']);
+    expect(data!.categories.every((c) => c.alertsEnabled === true)).toBe(true);
+    expect(data!.categories.map((c) => c.order)).toEqual([0, 1]);
+  });
+
   it('rejeita documentos com estrutura inválida ou versão futura', () => {
     const valid = serializeFinanceData({ ...EMPTY_DATA, categories });
     expect(parseFinanceData(valid)).not.toBeNull();

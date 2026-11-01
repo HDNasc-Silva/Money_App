@@ -7,6 +7,25 @@ Categorias: **Adicionado** · **Modificado** · **Corrigido** · **Removido** ·
 
 ---
 
+## [1.12.0] - 01/11/2026 — Sininho de alertas por categoria e reordenar categorias arrastando
+
+### Adicionado
+- **Sininho de alertas por categoria** (DT-025): cada categoria ganha `alertsEnabled` (padrão `true`). No cartão da categoria (`CategoryCard`, `src/modules/categories/CategoryCard.tsx`) um ícone de sino liga/desliga os alertas de "limite próximo" e "limite ultrapassado" dessa categoria (`toggleCategoryAlerts`, `src/store/FinanceProvider.tsx`), com feedback visual (sino tocando vs. cortado). No formulário de categoria (`CategoryFormSheet`), um `switch` "Alertas de orçamento" faz o mesmo, visível só para despesas. `buildAlerts` (`src/domain/alerts.ts`) passa a ignorar os dois alertas de orçamento das categorias com `alertsEnabled: false`; os demais alertas (gastos em alta, metas, lembretes de assinatura) não são afetados.
+- **Reordenar categorias arrastando** (DT-025): cada categoria ganha `order`, mantido sempre consistente com a posição no array `categories`. Em Categorias, cada cartão tem uma alça de arrastar (`drag_indicator`) que reordena a lista por **Pointer Events nativos** (`useDragReorder`, `src/components/common/useDragReorder.ts`), funcionando com mouse e toque, sem biblioteca nova. A nova ordem é persistida por `reorderCategories` (`FinanceProvider`), que mescla a fatia arrastada na ordem global (`src/domain/categories.ts`). A mesma ordem passa a ser usada em qualquer lugar que liste categorias: cartões de Categorias, Ajustes → Categorias (antes ordenava por nome) e o seletor de categoria do lançamento rápido (categorias nunca usadas, que antes ficavam na ordem de cadastro, agora seguem a ordem escolhida pelo usuário).
+
+### Modificado
+- `Category` (`src/models/index.ts`): novos campos `alertsEnabled: boolean` e `order: number`. Documentos salvos antes desta versão migram de forma aditiva em `FinanceDocument.parseFinanceData` (`src/services/storage/FinanceDocument.ts`): `alertsEnabled` ausente ou inválido vira `true`; `order` ausente ou inválido usa a posição em que a categoria já estava salva (ninguém perde a ordem que já tinha).
+- `src/modules/settings/CategoriesSettings.tsx`: a lista de categorias de Ajustes deixa de ordenar por nome (`localeCompare`) e passa a seguir a ordem salva (`Category.order`), igual às demais telas.
+
+### Técnico
+- `CACHE_VERSION` do service worker: `v1.12.0`. Versão do pacote: 1.11.0 → 1.12.0 (MINOR).
+- 238 testes automatizados (7 novos: `buildAlerts` ignorando categoria com `alertsEnabled: false`, `sortCategories`/`reorderCategories` em `tests/domain.test.ts`, migração de categorias legadas em `tests/persistence.test.ts`, sino e switch do formulário em `tests/categoryAlerts.test.tsx`); fixture `tests/helpers.ts` (`categories`) ganhou `alertsEnabled`/`order`; `tests/validations.test.ts` ajustado para o novo campo obrigatório de `CategoryFormValues`.
+
+### Documentação
+- `DECISOES_TECNICAS.md`: DT-025 (sininho de alertas por categoria e ordem persistida por arrastar e soltar, com Pointer Events nativos em vez de biblioteca nova). `ESCOPO_PROJETO.md`: acompanhamento v1.12.0.
+
+---
+
 ## [1.11.0] - 31/10/2026 — Alertas no topo do Início e categoria "Assinaturas" protegida
 
 ### Modificado

@@ -77,6 +77,8 @@ export function buildAlerts({ transactions, categories, goals, month, today, sub
   }
 
   for (const budget of categoryBudgets(transactions, categories, month)) {
+    // Categoria com alertas desligados (sininho, DT-025) não gera "limite próximo"/"limite ultrapassado".
+    if (!budget.category.alertsEnabled) continue;
     if (budget.status === 'exceeded' && budget.ratio !== null) {
       alerts.push({
         id: `budget-exceeded-${budget.category.id}`,

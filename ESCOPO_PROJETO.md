@@ -2,8 +2,8 @@
 
 > Documento oficial de referência. Representa o **estado atual real** do aplicativo e deve ser atualizado a cada alteração do sistema (ver `CHANGELOG.md` e `DECISOES_TECNICAS.md`).
 
-**Versão atual:** 1.9.0 (Lembretes de assinatura, saldo projetado e sugestão de lançamento fixo)
-**Última atualização:** 31/10/2026 (v1.11.0)
+**Versão atual:** 1.12.0 (Sininho de alertas por categoria e reordenar categorias arrastando)
+**Última atualização:** 01/11/2026 (v1.12.0)
 
 ---
 
@@ -133,7 +133,7 @@ Money_APP/
 |---|---|
 | **Visão Geral** (`modules/dashboard`) | Saldo disponível (descontados os aportes em metas), resumo do mês (receitas, despesas, poupança com variação vs mês anterior), atalho para novo lançamento, próximas cobranças, últimos lançamentos, metas em destaque, alertas compactos, gráfico semanal, gastos por categoria vs. limite, seletor de mês |
 | **Lançamentos** (`modules/transactions`) | Lançamento rápido (chips de categoria por uso, sugestões de descrição, "Salvar e adicionar outro"), CRUD de receitas/despesas, extrato agrupado por dia com total do dia, resumo do filtro, busca, filtros em chips (período, tipo, categoria), colunas no desktop, exportação CSV do filtro, duplicar, selo "Assinatura" nos lançamentos gerados |
-| **Categorias / Gastos** (`modules/categories`) | CRUD de categorias, limite mensal, gasto atual, % consumido, alertas de limite, teto global, filtro por grupo, bloco "Assinaturas do mês" |
+| **Categorias / Gastos** (`modules/categories`) | CRUD de categorias, limite mensal, gasto atual, % consumido, alertas de limite (com sininho por categoria para ligar/desligar, v1.12.0), teto global, filtro por grupo, bloco "Assinaturas do mês", reordenar por arrastar e soltar (v1.12.0) |
 | **Assinaturas** (`modules/subscriptions`) | CRUD de assinaturas mensais (nome, ícone, valor, dia de cobrança, categoria, primeiro/último mês, ativa/pausada, observação), sugestões rápidas, total mensal e estimativa anual, próxima cobrança, pausar/retomar, excluir mantendo ou não os lançamentos; componente do bloco "Assinaturas do mês" usado em Gastos |
 | **Metas** (`modules/goals`) | CRUD de metas, valor alvo/acumulado, prazo, progresso, aportes; lista primeiro e, depois, simulador de aporte mensal e cenários |
 | **Relatórios / Gráficos** (`modules/reports`) | Centrado nas metas: total guardado, aportes no período, aportes por mês por meta, evolução acumulada do total guardado, distribuição por meta, progresso e previsão de cada meta, estado vazio com atalho para Metas. Secundário: receitas × despesas por mês, distribuição por categoria, comparação com período anterior (inclui aportes), hábitos de gastos, exportação CSV/PDF |
@@ -180,6 +180,8 @@ Money_APP/
 - Ícone escolhido num catálogo único (`design-system/icons.ts`, 150 ícones desde a v1.6.0, compartilhado com Metas e Assinaturas) com busca em português.
 - Bloco **"Assinaturas do mês"** (v1.6.0): cobranças de assinaturas do mês selecionado — lançadas e previstas —, com data, selo "Lançada"/"Prevista", valor, total do mês e link "Gerenciar" para a aba Assinaturas (seção 10.6).
 - Também gerenciáveis em **Ajustes → Categorias** (lista compacta por Despesas/Receitas, criar, editar, excluir e "Restaurar categorias padrão"), com o mesmo formulário e as mesmas regras.
+- **Sininho de alertas por categoria** (v1.12.0, DT-025): ícone de sino no cartão (e `switch` "Alertas de orçamento" no formulário, só para despesas) liga/desliga os alertas de "limite próximo" e "limite ultrapassado" daquela categoria especificamente; os demais alertas (gastos em alta, metas, assinaturas) continuam valendo mesmo com o sino desligado.
+- **Reordenar categorias arrastando** (v1.12.0, DT-025): alça de arrastar em cada cartão reordena a lista com mouse ou toque (Pointer Events nativos, sem biblioteca nova); a ordem escolhida é salva por categoria e usada em toda tela que lista categorias (cartões de Categorias, Ajustes → Categorias e o seletor de categoria do lançamento).
 
 ### 10.4 Metas
 - Criar, editar, excluir metas: nome, ícone, descrição, valor alvo, valor já guardado (inicial), aporte mensal planejado, prazo opcional.
@@ -508,6 +510,12 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 - ✅ Alertas do mês no topo do Início (DT-024, ajuste de layout): `AlertsSummary` passa a ser a primeira seção visível no Início, antes do saldo e dos cards de resumo.
 - ✅ Categoria "Assinaturas" protegida contra exclusão (regra de negócio, DT-024): `deleteCategory` bloqueia a exclusão dessa categoria por identidade (nome), mesmo sem assinaturas vinculadas no momento, com mensagem explicativa.
 - ✅ 231 testes automatizados (suíte existente, sem testes novos dedicados a estas correções pontuais).
+
+### Concluído (v1.12.0 — testado automaticamente)
+- ✅ Sininho de alertas por categoria (regra nova, DT-025): `Category.alertsEnabled` (padrão `true`); ícone de sino no cartão (`CategoryCard`) e `switch` "Alertas de orçamento" no formulário (só para despesas) ligam/desligam os alertas de "limite próximo" e "limite ultrapassado" daquela categoria; os demais alertas não são afetados.
+- ✅ Reordenar categorias arrastando (regra nova, DT-025): `Category.order`, mantido consistente com a posição no array `categories`; arrastar e soltar com Pointer Events nativos (mouse e toque, sem biblioteca nova) em `useDragReorder`; a ordem escolhida vale em Categorias, Ajustes → Categorias (deixou de ordenar por nome) e no seletor de categoria do lançamento.
+- ✅ Migração aditiva: categorias salvas antes desta versão recebem `alertsEnabled: true` e `order` pela posição em que já estavam salvas.
+- ✅ 238 testes automatizados (7 novos: 1 em `tests/domain.test.ts` para o alerta suprimido por `alertsEnabled`, 3 em `tests/domain.test.ts` para `sortCategories`/`reorderCategories`, 1 em `tests/persistence.test.ts` para a migração, 2 em `tests/categoryAlerts.test.tsx` para o sino e o switch do formulário).
 
 ### Em desenvolvimento
 - Nenhum.

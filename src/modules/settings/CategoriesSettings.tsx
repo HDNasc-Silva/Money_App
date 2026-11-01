@@ -14,8 +14,6 @@ const SECTIONS: { kind: TransactionType; title: string }[] = [
   { kind: 'income', title: 'Receitas' },
 ];
 
-const byName = (a: Category, b: Category) => a.name.localeCompare(b.name, 'pt-BR');
-
 function CategoryRow({ category, onEdit }: { category: Category; onEdit(): void }) {
   return (
     <li>
@@ -55,8 +53,9 @@ export function CategoriesSettings() {
   const [editing, setEditing] = useState<{ key: number; category: Category | null } | null>(null);
   const [restoring, setRestoring] = useState(false);
 
+  // A ordem segue a definida pelo usuário em Categorias (arrastar e soltar, DT-025), não alfabética.
   const sections = useMemo(
-    () => SECTIONS.map((section) => ({ ...section, items: categories.filter((c) => c.kind === section.kind).sort(byName) })),
+    () => SECTIONS.map((section) => ({ ...section, items: categories.filter((c) => c.kind === section.kind) })),
     [categories],
   );
 

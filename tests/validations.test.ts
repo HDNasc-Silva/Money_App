@@ -53,7 +53,7 @@ describe('validateTransaction', () => {
 });
 
 describe('validateCategory', () => {
-  const base = { name: 'Pets', description: '', icon: 'pets', kind: 'expense' as const, group: 'lifestyle' as const, monthlyLimit: '300' };
+  const base = { name: 'Pets', description: '', icon: 'pets', kind: 'expense' as const, group: 'lifestyle' as const, monthlyLimit: '300', alertsEnabled: true };
 
   it('aceita categoria com limite', () => {
     const result = validateCategory(base, categories, null);

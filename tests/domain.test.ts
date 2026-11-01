@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildAlerts } from '@/domain/alerts';
 import { budgetStatus, categoryBudgets, globalBudget } from '@/domain/budgets';
+import { reorderCategories, sortCategories } from '@/domain/categories';
 import { goalForecast, goalProgress, goalsSummary, monthsToReach, requiredMonthly, simulationScenarios } from '@/domain/goals';
 import {
   defaultDateForMonth,
@@ -75,6 +76,27 @@ describe('budgets', () => {
     expect(global.limit).toBe(150_000);
     expect(global.spent).toBe(144_100);
     expect(global.available).toBe(5_900);
+  });
+});
+
+describe('categorias: ordem (DT-025)', () => {
+  it('sortCategories ordena pelo campo order, sem alterar o array original', () => {
+    const shuffled = [categories[2]!, categories[0]!, categories[3]!, categories[1]!];
+    expect(sortCategories(shuffled).map((c) => c.id)).toEqual(['food', 'fun', 'misc', 'salary']);
+    expect(shuffled.map((c) => c.id)).toEqual(['misc', 'food', 'salary', 'fun']); // não mutou
+  });
+
+  it('reorderCategories move a fatia arrastada preservando a posição das demais categorias', () => {
+    // Arraste só entre "fun" e "misc" (ambas de despesa, grupo lifestyle): troca a ordem relativa.
+    const result = reorderCategories(categories, ['misc', 'fun']);
+    expect(result.map((c) => c.id)).toEqual(['food', 'misc', 'fun', 'salary']);
+    expect(result.map((c) => c.order)).toEqual([0, 1, 2, 3]);
+  });
+
+  it('reorderCategories ignora um id inexistente, sem perder nem duplicar categorias', () => {
+    const result = reorderCategories(categories, ['fun', 'id-que-nao-existe', 'food']);
+    expect(result.map((c) => c.id)).toEqual(['fun', 'food', 'misc', 'salary']);
+    expect(new Set(result.map((c) => c.id)).size).toBe(4);
   });
 });
 
@@ -236,6 +258,27 @@ describe('alerts', () => {
     });
     const ids = alerts.map((a) => a.id);
     expect(ids).toContain('budget-exceeded-food');
+    expect(ids).toContain('budget-warning-fun');
+    expect(ids).toContain('spending-up');
+    expect(ids).toContain('goal-near-g1');
+  });
+
+  it('categoria com alertsEnabled=false não gera alerta de limite, mas os demais continuam (DT-025)', () => {
+    const list = [
+      tx({ type: 'expense', amount: 110_000, date: '2026-10-03', categoryId: 'food' }),
+      tx({ type: 'expense', amount: 42_000, date: '2026-10-04', categoryId: 'fun' }),
+      tx({ type: 'expense', amount: 50_000, date: '2026-09-03', categoryId: 'food' }),
+    ];
+    const silenced = categories.map((c) => (c.id === 'food' ? { ...c, alertsEnabled: false } : c));
+    const alerts = buildAlerts({
+      transactions: list,
+      categories: silenced,
+      goals: [goal({ initialAmount: 850_000 })],
+      month: '2026-10',
+      today: '2026-10-30',
+    });
+    const ids = alerts.map((a) => a.id);
+    expect(ids).not.toContain('budget-exceeded-food');
     expect(ids).toContain('budget-warning-fun');
     expect(ids).toContain('spending-up');
     expect(ids).toContain('goal-near-g1');
