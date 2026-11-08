@@ -95,6 +95,10 @@ describe('primeiro acesso', () => {
     expect(screen.queryByRole('heading', { name: 'Como prefere ser chamado?' })).not.toBeInTheDocument();
     expect(screen.queryByText(/dados de demonstração/)).not.toBeInTheDocument();
     expect(readStored(adapter).settings).toMatchObject({ userName: 'Maria', monthlyIncome: 500_000, onboardingCompleted: true });
+    // A renda informada já entra como receita do mês (dia 1º, categoria Salário — DT-028).
+    expect(readStored(adapter).transactions).toEqual([
+      expect.objectContaining({ type: 'income', description: 'Renda mensal', amount: 500_000, date: `${todayIso().slice(0, 7)}-01` }),
+    ]);
 
     // As categorias padrão do primeiro acesso permitem lançar sem configuração extra.
     await user.click(within(screen.getByRole('main')).getByRole('button', { name: /Novo Lançamento/ }));
@@ -103,7 +107,7 @@ describe('primeiro acesso', () => {
     await user.type(within(dialog).getByLabelText('Descrição'), 'Padaria');
     await user.click(within(dialog).getByRole('radio', { name: 'Alimentação' }));
     await user.click(within(dialog).getByRole('button', { name: /Adicionar lançamento/ }));
-    await waitFor(() => expect(readStored(adapter).transactions).toHaveLength(1));
+    await waitFor(() => expect(readStored(adapter).transactions).toHaveLength(2));
   });
 
   it('renda mensal é opcional', async () => {

@@ -62,7 +62,7 @@ export function OnboardingPage() {
             value={values.monthlyIncome}
             onChange={change('monthlyIncome')}
             error={errors.monthlyIncome}
-            hint="Fica no seu perfil e pode ser alterada em Ajustes."
+            hint="Entra como receita todo dia 1º; pode ser alterada em Ajustes."
           />
           <Button type="submit" icon="arrow_forward" fullWidth disabled={saving}>
             Começar

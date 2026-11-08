@@ -3,7 +3,7 @@ import { Button } from '@/components/common/Button';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { Sheet } from '@/components/common/Sheet';
 import { useToast } from '@/components/common/Toast';
-import { FormRow, FormStack, MoneyField, SelectField, TextField } from '@/components/forms/Fields';
+import { DateField, FormRow, FormStack, MoneyField, SelectField, TextField } from '@/components/forms/Fields';
 import { IconPicker } from '@/components/forms/IconPicker';
 import type { Category, Subscription } from '@/models';
 import { findSubscriptionsCategory, SUBSCRIPTIONS_CATEGORY_NAME } from '@/store/defaultCategories';
@@ -151,16 +151,16 @@ export function SubscriptionFormSheet({ subscription, onClose }: SubscriptionFor
               placeholder="Selecione"
             />
             <FormRow>
-              <TextField
+              <DateField
                 label="Primeira cobrança"
-                type="month"
+                kind="month"
                 value={values.startMonth}
                 onChange={(v) => update('startMonth', v)}
                 error={errors.startMonth}
               />
-              <TextField
+              <DateField
                 label="Última cobrança (opcional)"
-                type="month"
+                kind="month"
                 value={values.endMonth}
                 onChange={(v) => update('endMonth', v)}
                 error={errors.endMonth}

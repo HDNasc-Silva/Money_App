@@ -7,6 +7,28 @@ Categorias: **Adicionado** · **Modificado** · **Corrigido** · **Removido** ·
 
 ---
 
+## [1.14.0] - 07/11/2026 — Renda mensal automática e campos de data/mês padronizados
+
+### Adicionado
+- **Renda mensal vira receita automática no dia 1º** (DT-028): com `settings.monthlyIncome > 0` (onboarding ou Ajustes → Perfil), o app lança uma receita "Renda mensal" na categoria "Salário" no dia 1º de cada mês, a partir do mês em que a renda foi definida (`settings.incomeStartMonth`). Mesmo mecanismo idempotente de assinaturas/empréstimos (`withAutomaticCharges` ao abrir/importar, `syncMonthlyIncome` ao voltar ao app): id determinístico por mês (`income-AAAA-MM`) e vínculo `Transaction.incomeMonth`; excluir o lançamento de um mês registra o mês em `settings.incomeSkippedMonths` e ele não é gerado de novo; mudar o valor vale só para os meses ainda não lançados; zerar/apagar a renda para a geração (`incomeStartMonth = null`). Se a categoria "Salário" não existir, é recriada sob demanda. Não gera nada com dados de demonstração.
+- Novo módulo `src/domain/income.ts` (`scheduleIncome`, `syncMonthlyIncome`, `skipIncomeMonth`, `incomeTransaction`); `findSalaryCategory`/`salaryCategoryToCreate` em `store/defaultCategories.ts`; ação `syncMonthlyIncome` e ação do reducer `income/synced` (merge aditivo, DT-027).
+- Componente `DateField` (`kind="date" | "month"`) em `src/components/forms/Fields.tsx`.
+
+### Modificado
+- **Campos de data e mês padronizados na raiz** (`Fields.module.css`, classe `.dateInput`): mesma altura (3,25 rem), borda, raio, fundo e fonte dos demais campos; aparência nativa neutralizada (texto alinhado à esquerda no iOS, sem largura mínima intrínseca), números tabulares, ícone de calendário nativo discreto que segue o tema via `color-scheme` (claro/escuro). Usado em Lançamento (Data e "Primeira parcela"), Agiotagem ("Data do empréstimo", "Mês do pagamento"/"Primeira parcela"), Assinaturas (primeira/última cobrança) e Metas (prazo e data do aporte).
+- `FormRow`: colunas `repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr))` — dois campos lado a lado quando cabem, empilhados em telas estreitas (ex.: 320 px) em vez de estourar; rótulos em uma linha (com reticências) para manter os campos alinhados.
+- Textos de ajuda da renda mensal (onboarding e Ajustes) informam o lançamento automático todo dia 1º. "Apagar todos os dados" recomeça a renda no mês atual.
+
+### Técnico
+- `Settings` ganha `incomeStartMonth` e `incomeSkippedMonths` (migração aditiva em `sanitizeSettings`: documentos antigos com renda > 0 passam a gerar a partir do mês atual); `Transaction.incomeMonth` validado no storage.
+- `CACHE_VERSION` do service worker: `v1.14.0`. Versão do pacote: 1.13.1 → 1.14.0 (MINOR).
+- Novos testes: `tests/monthlyIncome.test.tsx` (9: agendamento, geração, idempotência, exclusão, valor novo, zerar, demonstração, storage, provider com reabertura/exclusão/recriação de "Salário") e `tests/dateField.test.tsx` (1). `tests/onboarding.test.tsx` ajustado (a renda informada gera a receita do mês). 268 testes automatizados.
+
+### Documentação
+- `DECISOES_TECNICAS.md`: DT-028. `ESCOPO_PROJETO.md`: regra 33 e RF-15 atualizadas, acompanhamento da v1.14.0.
+
+---
+
 ## [1.13.1] - 07/11/2026 — Correções na Agiotagem: "a receber este mês" e sincronização concorrente
 
 ### Corrigido

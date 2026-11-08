@@ -1,4 +1,4 @@
-import { EMPTY_DATA, type Category, type FinanceData, type Goal, type Loan, type Settings, type Subscription, type Transaction } from '@/models';
+import { EMPTY_DATA, type Category, type FinanceData, type Goal, type Loan, type MonthKey, type Settings, type Subscription, type Transaction } from '@/models';
 
 export type LoadNotice = 'corrupted' | 'not-persistent' | 'load-failed' | null;
 
@@ -33,6 +33,11 @@ export type FinanceAction =
   | { type: 'loan/removed'; id: string }
   /** Resultado da geração de pagamentos de empréstimos: só as parcelas CRIADAS nesta sincronização (DT-027). */
   | { type: 'loans/synced'; created: Transaction[] }
+  /**
+   * Resultado da geração da renda mensal (DT-028): só as receitas e a categoria "Salário" CRIADAS, mais
+   * o mês inicial do agendamento — somados sobre o estado atual (DT-027).
+   */
+  | { type: 'income/synced'; created: Transaction[]; categories: Category[]; incomeStartMonth: MonthKey | null }
   | { type: 'settings/saved'; settings: Settings }
   | { type: 'notice/dismissed' };
 
@@ -83,6 +88,16 @@ export function financeReducer(state: FinanceState, action: FinanceAction): Fina
       return { ...state, data: { ...data, loans: withoutId(data.loans, action.id) } };
     case 'loans/synced':
       return { ...state, data: { ...data, transactions: appendNew(data.transactions, action.created) } };
+    case 'income/synced':
+      return {
+        ...state,
+        data: {
+          ...data,
+          transactions: appendNew(data.transactions, action.created),
+          categories: appendNew(data.categories, action.categories),
+          settings: { ...data.settings, incomeStartMonth: action.incomeStartMonth },
+        },
+      };
     case 'settings/saved':
       return { ...state, data: { ...data, settings: action.settings } };
     case 'notice/dismissed':

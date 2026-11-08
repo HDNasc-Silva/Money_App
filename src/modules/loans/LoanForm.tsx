@@ -4,7 +4,7 @@ import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { SegmentedControl } from '@/components/common/SegmentedControl';
 import { Sheet } from '@/components/common/Sheet';
 import { useToast } from '@/components/common/Toast';
-import { FormRow, FormStack, MoneyField, SelectField, TextField } from '@/components/forms/Fields';
+import { DateField, FormRow, FormStack, MoneyField, SelectField, TextField } from '@/components/forms/Fields';
 import { INSTALLMENT_COUNT_MAX, INSTALLMENT_COUNT_MIN } from '@/domain/loans';
 import type { Loan } from '@/models';
 import { findLoansCategory, LOANS_CATEGORY_NAME } from '@/store/defaultCategories';
@@ -108,7 +108,7 @@ export function LoanFormSheet({ loan, onClose }: LoanFormSheetProps) {
                 onChange={(v) => update('amount', v)}
                 error={errors.amount}
               />
-              <TextField label="Data do empréstimo" type="date" value={values.loanDate} onChange={(v) => update('loanDate', v)} error={errors.loanDate} />
+              <DateField label="Data do empréstimo"value={values.loanDate} onChange={(v) => update('loanDate', v)} error={errors.loanDate} />
             </FormRow>
             <SelectField label="Categoria" value={values.categoryId} onChange={(v) => update('categoryId', v)} options={categoryOptions} error={errors.categoryId} placeholder="Selecione" />
             <SegmentedControl
@@ -118,9 +118,9 @@ export function LoanFormSheet({ loan, onClose }: LoanFormSheetProps) {
               onChange={(mode) => update('paymentMode', mode)}
             />
             <FormRow>
-              <TextField
+              <DateField
                 label={values.paymentMode === 'installments' ? 'Primeira parcela' : 'Mês do pagamento'}
-                type="month"
+                kind="month"
                 value={values.firstMonth}
                 onChange={(v) => update('firstMonth', v)}
                 error={errors.firstMonth}

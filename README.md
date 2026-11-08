@@ -18,7 +18,7 @@ Registrar receitas e despesas, controlar limites de orçamento por categoria, ac
 | Metas | Metas, aportes, progresso e simulador de economia |
 | Relatórios ("Gráficos") | Centrados nas metas: total guardado, aportes por mês, evolução do total guardado, distribuição por meta e progresso de cada meta; receitas × despesas como seção secundária; exportação CSV/PDF |
 | Boas-vindas | No primeiro acesso, pergunta como prefere ser chamado (e, opcionalmente, a renda mensal) |
-| Ajustes | Perfil (nome e renda mensal), Aparência (tema de cores com prévia, modo claro/escuro/automático, tamanho do texto, ocultar valores), gerenciamento de categorias (com catálogo de ícones pesquisável), instalar app, planilha (exportar/importar CSV com prévia), backup, dados de demonstração |
+| Ajustes | Perfil (nome e renda mensal — lançada automaticamente como receita todo dia 1º), Aparência (tema de cores com prévia, modo claro/escuro/automático, tamanho do texto, ocultar valores), gerenciamento de categorias (com catálogo de ícones pesquisável), instalar app, planilha (exportar/importar CSV com prévia), backup, dados de demonstração |
 
 ## Tecnologias
 

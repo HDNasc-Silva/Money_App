@@ -5,7 +5,7 @@ import { SegmentedControl } from '@/components/common/SegmentedControl';
 import { Sheet } from '@/components/common/Sheet';
 import { useToast } from '@/components/common/Toast';
 import { CategoryPicker } from '@/components/forms/CategoryPicker';
-import { FormRow, FormStack, MoneyField, TextField } from '@/components/forms/Fields';
+import { DateField, FormRow, FormStack, MoneyField, TextField } from '@/components/forms/Fields';
 import { INSTALLMENT_COUNT_MAX, INSTALLMENT_COUNT_MIN } from '@/domain/installments';
 import {
   categoriesByUsage,
@@ -285,7 +285,7 @@ export function TransactionFormSheet({ open, transaction, preset, onClose }: Tra
               </Button>
             </div>
           )}
-          <TextField label="Data" type="date" value={values.date} onChange={(v) => update('date', v)} error={errors.date} />
+          <DateField label="Data"value={values.date} onChange={(v) => update('date', v)} error={errors.date} />
           {!isEditing && values.type === 'expense' && (
             <label className={styles.toggle}>
               <input
@@ -302,9 +302,9 @@ export function TransactionFormSheet({ open, transaction, preset, onClose }: Tra
           {!isEditing && values.type === 'expense' && values.installmentEnabled && (
             <div className={styles.installmentFields}>
               <FormRow>
-                <TextField
+                <DateField
                   label="Primeira parcela"
-                  type="month"
+                  kind="month"
                   value={values.installmentFirstMonth}
                   onChange={(v) => update('installmentFirstMonth', v)}
                   error={errors.installmentFirstMonth}

@@ -3,7 +3,7 @@
 > Documento oficial de referência. Representa o **estado atual real** do aplicativo e deve ser atualizado a cada alteração do sistema (ver `CHANGELOG.md` e `DECISOES_TECNICAS.md`).
 
 **Versão atual:** 1.13.1 (Correções na Agiotagem: "a receber este mês" e sincronização concorrente)
-**Última atualização:** 07/11/2026 (v1.13.1)
+**Última atualização:** 07/11/2026 (v1.14.0)
 
 ---
 
@@ -261,7 +261,7 @@ Money_APP/
 30. **Boas-vindas (onboarding)**: aparece enquanto `settings.onboardingCompleted` for `false`; qualquer rota leva a ela e não há cabeçalho nem navegação. Nome obrigatório (espaços extras removidos, 1–40 caracteres); renda mensal opcional (máscara da regra 24; vazio = não informada). "Começar" salva o perfil, marca o onboarding como concluído e abre o Início com "Olá, <nome>". Depois de concluído, a rota de boas-vindas redireciona para o Início.
 31. **Migração (v1.4.0)**: documentos salvos por versões anteriores não têm `onboardingCompleted` e são tratados como onboarding concluído (quem já usava o app não é interrompido); `monthlyIncome` ausente vale 0. Campos de preferências inválidos voltam ao padrão. Importar um backup nunca reabre as boas-vindas.
 32. **Nome do usuário**: não há nome padrão. Sem nome (possível apagando-o em Ajustes), a saudação é apenas "Olá".
-33. **Renda mensal** (`settings.monthlyIncome`, centavos, 0 = não informada): editável no onboarding e em Ajustes → card "Perfil". É apenas referência no perfil e não entra em nenhum cálculo. (Até a v1.4.0 o card também tinha a meta de poupança em % e o valor dela em R$; removidos na v1.5.0.)
+33. **Renda mensal** (`settings.monthlyIncome`, centavos, 0 = não informada): editável no onboarding e em Ajustes → card "Perfil". Desde a v1.14.0 (DT-028), quando > 0 vira uma **receita automática "Renda mensal" no dia 1º de cada mês** (categoria "Salário", recriada sob demanda), a partir do mês em que foi definida (`settings.incomeStartMonth`); id determinístico por mês (`income-AAAA-MM`, vínculo `incomeMonth`), sem duplicar ao reabrir; excluir o lançamento de um mês o registra em `settings.incomeSkippedMonths` (não é regerado); mudar o valor vale para os meses ainda não lançados; zerar/apagar a renda para a geração; nada é gerado com dados de demonstração. (Até a v1.4.0 o card também tinha a meta de poupança em % e o valor dela em R$; removidos na v1.5.0.)
 34. **Instalação (PWA)**: o app é instalável (manifest + service worker, DT-015). Em Ajustes → "Instalar app": botão nativo quando o navegador oferece a instalação (Chrome/Edge/Android); no iPhone/iPad, instruções (Safari → Compartilhar → Adicionar à Tela de Início); nos demais, instrução pelo menu do navegador; já instalado, informa que está aberto como aplicativo.
 35. **Poupança = aportes em metas** (v1.5.0, DT-016): poupança de um período = Σ aportes de todas as metas com data no período (o valor inicial da meta não entra). No Início, o KPI "Poupança" mostra a do mês selecionado, com variação vs. mês anterior. O alerta "Ótima Notícia" aparece quando os aportes do mês superam os do mesmo intervalo de dias do mês anterior (e este teve aportes).
 36. **Saldo disponível** = Σ receitas − Σ despesas − Σ aportes em metas, todos com data até a data de referência (mês atual: hoje; mês passado/futuro: último dia do mês). O dinheiro aportado sai do saldo disponível, mas não aparece como despesa, no extrato, nos limites de categoria nem no CSV. Valores iniciais das metas não são descontados.
@@ -388,7 +388,7 @@ Escala tipográfica `--text-2xs` (11 px) a `--text-2xl` (24 px), espaçamentos `
 | RF-12 | Persistir todos os dados localmente entre sessões |
 | RF-13 | Carregar dados de demonstração (a pedido), apagar dados, exportar/importar backup JSON |
 | RF-14 | Tela de boas-vindas no primeiro acesso (nome obrigatório, renda opcional) |
-| RF-15 | Renda mensal no perfil (referência; a meta de poupança em % foi removida na v1.5.0) |
+| RF-15 | Renda mensal no perfil, lançada automaticamente como receita no dia 1º de cada mês (v1.14.0, DT-028; a meta de poupança em % foi removida na v1.5.0) |
 | RF-16 | Instalar o app no celular/computador (PWA) e abrir offline após o primeiro acesso |
 | RF-17 | Cadastrar, editar, pausar/retomar e excluir assinaturas mensais, com lançamento automático das cobranças vencidas |
 | RF-18 | Exibir as assinaturas do mês (lançadas e previstas) na aba Gastos e identificar os lançamentos gerados no Extrato |
@@ -546,6 +546,11 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 - ✅ Correção: sincronização automática de assinaturas/empréstimos (`visibilitychange`) deixou de poder sobrescrever, em memória, um lançamento recém-criado por outra sincronização ou ação concorrente — `subscriptions/synced`/`loans/synced` agora somam só os lançamentos criados (`created`) sobre o estado mais atual, em vez de substituir `transactions` inteiro (DT-027).
 - ✅ 258 testes automatizados (3 novos em `tests/financeReducerSync.test.ts`; 2 novos em `tests/installmentsAndLoans.test.ts`; `tests/loansDashboard.test.tsx` novo com 2 testes, incluindo o cenário exato reportado).
 
+### Concluído (v1.14.0 — testado automaticamente)
+- ✅ Renda mensal automática (regra 33, DT-028): receita "Renda mensal" no dia 1º de cada mês, idempotente, respeitando exclusões, valor novo só para meses não lançados, parada ao zerar; categoria "Salário" recriada sob demanda (domain/income.ts).
+- ✅ Campos de data/mês padronizados na raiz (DateField + .dateInput em components/forms), usados em Lançamento, Agiotagem, Assinaturas e Metas; FormRow empilha em telas estreitas.
+- ✅ 268 testes automatizados (9 novos em 	ests/monthlyIncome.test.tsx, 1 em 	ests/dateField.test.tsx).
+
 ### Em desenvolvimento
 - Nenhum.
 
@@ -580,11 +585,12 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 - Navegação v1.8.0 (DT-021): Gastos, Assinaturas e Gráficos passam a exigir 2 toques no mobile (Mais → destino) em vez de 1; não foi conferida visualmente no navegador real (320–430 px), só em jsdom.
 - Compra parcelada e Agiotagem (v1.13.0): validadas em jsdom e por build; a aparência real do ícone `theater_comedy` (Material Symbols) e o layout da aba Agiotagem/checkbox de parcelamento **não foram conferidos visualmente no navegador**. Editar o valor/categoria de uma parcela ou de um pagamento de empréstimo já lançado não propaga para as demais parcelas do mesmo grupo (decisão de UX, DT-026) — quem quiser corrigir todas precisa editar uma a uma. A categoria "Empréstimos" não entra nas categorias padrão do primeiro acesso nem na demonstração.
 - Sincronização automática concorrente (v1.13.1, DT-027): a correção garante que o estado em memória (o que a tela mostra) nunca perde um lançamento criado por uma sincronização concorrente. A gravação em disco (`repos.replaceAll`) de cada sincronização ainda grava o array calculado a partir da própria leitura daquela sincronização — num cenário de corrida real, o documento salvo pode ficar momentaneamente incompleto até a próxima abertura do app (a sincronização é idempotente e se autocorrige). Esse mesmo padrão de "substituir o array inteiro a partir de uma leitura antiga" ainda existe em ações baseadas em `replaceData` (`saveLoan`, `saveTransaction`, etc.); o risco ali é bem menor (ação síncrona, sem concorrência de fundo) e não foi alterado nesta correção.
+- Renda mensal automática (v1.14.0, DT-028): quem já lançava o salário à mão terá o valor em dobro no mês (excluir um deles; o mês não volta). Sempre no dia 1º (sem dia configurável); zerar e voltar a preencher recomeça no mês atual. Campos de data/mês (v1.14.0): validados em jsdom e por build; a aparência real do seletor nativo em iOS/Android e Firefox **não foi conferida visualmente** no navegador.
 
 ### Próximas etapas (sugestões)
 1. Conferir visualmente a v1.7.0 no navegador (5 temas × claro/escuro, 320–430 px e 1366 px) e medir os contrastes com uma ferramenta (axe/Lighthouse).
 2. Importação CSV: escolher o tipo padrão (despesa) para planilhas só com valores positivos e mapear categorias desconhecidas na prévia.
 3. Fontes e ícones locais (hoje do Google Fonts) para uso offline completo do PWA; aviso de "nova versão disponível".
-4. Lançamentos recorrentes genéricos para receitas fixas (ex.: salário) — as assinaturas (v1.6.0) cobrem despesas recorrentes e a compra parcelada/Agiotagem (v1.13.0) cobre os casos finitos; falta um caso de receita mensal recorrente e infinita.
+4. Lançamentos recorrentes genéricos (outras receitas fixas além da renda mensal, que desde a v1.14.0 é lançada no dia 1º; ex.: dia de pagamento configurável, aluguel recebido).
 5. Testes E2E com Playwright (incluindo verificação de layout sem scroll horizontal em 320 px).
 6. Backend e sincronização (trocar os repositórios por implementações HTTP).

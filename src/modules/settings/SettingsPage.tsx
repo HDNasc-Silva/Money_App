@@ -113,6 +113,7 @@ export function SettingsPage() {
                 value={profile.monthlyIncome}
                 onChange={changeProfile('monthlyIncome')}
                 error={profileErrors.monthlyIncome}
+                hint="Lançada como receita todo dia 1º."
               />
             </FormRow>
             <Button type="submit" icon="check">

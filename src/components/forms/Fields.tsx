@@ -44,13 +44,13 @@ interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'on
   hint?: string;
 }
 
-export function TextField({ label, value, onChange, error, hint, ...rest }: TextFieldProps) {
+export function TextField({ label, value, onChange, error, hint, className, ...rest }: TextFieldProps) {
   const id = useId();
   return (
     <FieldShell id={id} label={label} error={error} hint={hint}>
       <input
         id={id}
-        className={styles.input}
+        className={[styles.input, className].filter(Boolean).join(' ')}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         aria-invalid={Boolean(error)}
@@ -59,6 +59,20 @@ export function TextField({ label, value, onChange, error, hint, ...rest }: Text
       />
     </FieldShell>
   );
+}
+
+interface DateFieldProps extends Omit<TextFieldProps, 'type'> {
+  /** `date` = dia (AAAA-MM-DD); `month` = mês (AAAA-MM). */
+  kind?: 'date' | 'month';
+}
+
+/**
+ * Campo de data ou de mês com o mesmo visual dos demais campos (altura, borda, raio, fundo e fonte),
+ * valor alinhado à esquerda (o iOS centraliza por padrão), ícone de calendário nativo seguindo o tema
+ * via `color-scheme` e sem largura mínima intrínseca (não estoura lado a lado em `FormRow`).
+ */
+export function DateField({ kind = 'date', className, ...rest }: DateFieldProps) {
+  return <TextField type={kind} className={[styles.dateInput, className].filter(Boolean).join(' ')} {...rest} />;
 }
 
 /**

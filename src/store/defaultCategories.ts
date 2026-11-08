@@ -20,6 +20,9 @@ export const SUBSCRIPTIONS_CATEGORY_NAME = 'Assinaturas';
  */
 export const LOANS_CATEGORY_NAME = 'Empréstimos';
 
+/** Categoria padrão das receitas de renda mensal automática (v1.14.0, DT-028); recriada sob demanda. */
+export const SALARY_CATEGORY_NAME = 'Salário';
+
 interface DefaultCategoryDefinition {
   id: string;
   name: string;
@@ -40,7 +43,7 @@ const DEFINITIONS: readonly DefaultCategoryDefinition[] = [
   { id: 'cat-education', name: 'Educação', description: 'Livros, cursos e workshops', icon: 'school', kind: 'expense', group: 'lifestyle', limit: 200 },
   { id: SUBSCRIPTIONS_CATEGORY_ID, name: SUBSCRIPTIONS_CATEGORY_NAME, description: 'Streaming, música, nuvem e apps mensais', icon: 'subscriptions', kind: 'expense', group: 'lifestyle', limit: 250 },
   { id: 'cat-other', name: 'Outros', description: 'Reservas pontuais e pequenas demandas', icon: 'category', kind: 'expense', group: 'lifestyle', limit: 300 },
-  { id: 'cat-salary', name: 'Salário', description: 'Receita principal', icon: 'account_balance_wallet', kind: 'income', group: 'essential', limit: null },
+  { id: 'cat-salary', name: SALARY_CATEGORY_NAME, description: 'Receita principal', icon: 'account_balance_wallet', kind: 'income', group: 'essential', limit: null },
   { id: 'cat-freelance', name: 'Freelance', description: 'Trabalhos extras', icon: 'payments', kind: 'income', group: 'lifestyle', limit: null },
   { id: 'cat-yield', name: 'Rendimentos', description: 'Juros e investimentos', icon: 'savings', kind: 'income', group: 'lifestyle', limit: null },
 ];
@@ -90,6 +93,17 @@ export function subscriptionsCategoryToCreate(
   newId: () => string,
 ): Category | null {
   return missingDefaultCategories(existing, createdAt, newId).find((c) => c.name === SUBSCRIPTIONS_CATEGORY_NAME) ?? null;
+}
+
+/** Categoria de receita chamada "Salário" (sem acento e sem diferenciar maiúsculas), se existir. */
+export function findSalaryCategory(categories: readonly Category[]): Category | undefined {
+  const key = nameKey('income', SALARY_CATEGORY_NAME);
+  return categories.find((c) => nameKey(c.kind, c.name) === key);
+}
+
+/** A categoria padrão "Salário" pronta para ser criada (sob demanda, quando o usuário a excluiu). */
+export function salaryCategoryToCreate(existing: readonly Category[], createdAt: string, newId: () => string): Category | null {
+  return missingDefaultCategories(existing, createdAt, newId).find((c) => c.name === SALARY_CATEGORY_NAME) ?? null;
 }
 
 /** Categoria de receita chamada "Empréstimos" (sem acento e sem diferenciar maiúsculas), se existir. */

@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, type ReactNode } from 'react';
 import { useToast } from '@/components/common/Toast';
 import { reorderCategories as reorderCategoriesList } from '@/domain/categories';
+import { hasPendingIncome, skipIncomeMonth, syncMonthlyIncome } from '@/domain/income';
 import { buildInstallmentTransactions, type InstallmentPlanInput } from '@/domain/installments';
 import { skipLoanMonth, syncLoanPayments } from '@/domain/loans';
 import { skipMonth, syncSubscriptionCharges } from '@/domain/subscriptions';
@@ -34,9 +35,11 @@ import {
 import {
   buildDefaultCategories,
   findLoansCategory,
+  findSalaryCategory,
   findSubscriptionsCategory,
   loansCategoryToCreate,
   missingDefaultCategories,
+  salaryCategoryToCreate,
   subscriptionsCategoryToCreate,
 } from './defaultCategories';
 import { buildDemoData } from './demoData';
@@ -97,6 +100,9 @@ export interface FinanceActions {
   deleteLoan(id: string, options?: { keepTransactions?: boolean }): Promise<void>;
   /** Gera os pagamentos de empréstimos que venceram desde a última sincronização (idempotente). */
   syncLoans(): Promise<void>;
+  /** Lança a renda mensal dos meses que chegaram desde a última sincronização (idempotente, DT-028). */
+  syncMonthlyIncome(): Promise<void>;
+  /** Salva as preferências; definir/alterar/zerar a renda mensal reagenda a receita automática (DT-028). */
   updateSettings(changes: Partial<Settings>): Promise<void>;
   /** Salva o perfil informado na tela de boas-vindas e libera o acesso ao app. */
   completeOnboarding(profile: ProfileDraft): Promise<void>;
@@ -139,11 +145,55 @@ function withLoanPayments(data: FinanceData): { data: FinanceData; created: Tran
   return { data: { ...data, transactions: result.transactions }, created: result.created, changed: true };
 }
 
-/** Aplica assinaturas e empréstimos em sequência (usado ao carregar e ao editar/voltar ao app). */
+interface IncomeApplication {
+  data: FinanceData;
+  /** Receitas de renda criadas. */
+  created: Transaction[];
+  /** Categoria "Salário" recriada sob demanda (quando o usuário a excluiu). */
+  createdCategories: Category[];
+  changed: boolean;
+}
+
+/**
+ * Aplica a renda mensal automática (DT-028): agenda o mês inicial e lança a receita do dia 1º dos
+ * meses que chegaram, na categoria "Salário" (criada só se for preciso lançar algo e ela não existir).
+ */
+function withMonthlyIncome(data: FinanceData): IncomeApplication {
+  const today = todayIso();
+  const timestamp = new Date().toISOString();
+  let categories = data.categories;
+  let categoryId = findSalaryCategory(categories)?.id;
+  const createdCategories: Category[] = [];
+  if (!categoryId && hasPendingIncome(data.settings, data.transactions, today)) {
+    const category = salaryCategoryToCreate(categories, timestamp, createId);
+    if (category) {
+      createdCategories.push(category);
+      categories = [...categories, category];
+      categoryId = category.id;
+    }
+  }
+  const result = syncMonthlyIncome(data.settings, data.transactions, categoryId ?? '', today, timestamp);
+  const created = categoryId ? result.created : [];
+  if (result.settings === data.settings && created.length === 0) return { data, created: [], createdCategories: [], changed: false };
+  return {
+    data: {
+      ...data,
+      settings: result.settings,
+      categories: created.length > 0 ? categories : data.categories,
+      transactions: created.length > 0 ? [...data.transactions, ...created] : data.transactions,
+    },
+    created,
+    createdCategories: created.length > 0 ? createdCategories : [],
+    changed: true,
+  };
+}
+
+/** Aplica assinaturas, empréstimos e renda mensal em sequência (usado ao carregar e ao importar). */
 function withAutomaticCharges(data: FinanceData): { data: FinanceData; changed: boolean } {
   const subs = withSubscriptionCharges(data);
   const loans = withLoanPayments(subs.data);
-  return { data: loans.data, changed: subs.changed || loans.changed };
+  const income = withMonthlyIncome(loans.data);
+  return { data: income.data, changed: subs.changed || loans.changed || income.changed };
 }
 
 const usedBySubscriptions = (data: FinanceData, categoryId: string) =>
@@ -220,7 +270,14 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
     };
 
     const updateSettings = async (changes: Partial<Settings>) => {
-      const settings: Settings = { ...data().settings, ...changes };
+      const current = data();
+      // Definir, alterar ou zerar a renda mensal reagenda a receita automática (DT-028).
+      const synced = withMonthlyIncome({ ...current, settings: { ...current.settings, ...changes } });
+      if (synced.created.length > 0) {
+        await replaceData(synced.data);
+        return;
+      }
+      const { settings } = synced.data;
       dispatch({ type: 'settings/saved', settings });
       await persist(() => repos.settings.save(settings));
     };
@@ -235,6 +292,8 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
           ...(existing?.subscriptionId
             ? { subscriptionId: existing.subscriptionId, subscriptionMonth: existing.subscriptionMonth }
             : {}),
+          // Idem para a renda mensal automática (DT-028): excluir depois ainda impede a regeração do mês.
+          ...(existing?.incomeMonth ? { incomeMonth: existing.incomeMonth } : {}),
           id: existing?.id ?? createId(),
           createdAt: existing?.createdAt ?? timestamp,
           updatedAt: timestamp,
@@ -278,6 +337,7 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
         delete copy.installmentTotal;
         delete copy.loanId;
         delete copy.loanMonth;
+        delete copy.incomeMonth;
         dispatch({ type: 'transaction/saved', transaction: copy });
         await persist(() => repos.transactions.upsert(copy));
         return copy;
@@ -307,6 +367,14 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
           if (updated !== loan) {
             dispatch({ type: 'loan/saved', loan: updated });
             await persist(() => repos.loans.upsert(updated));
+          }
+        }
+        // Excluir a receita de renda mensal gerada: o mês não é lançado de novo (DT-028).
+        if (transaction?.incomeMonth) {
+          const settings = skipIncomeMonth(data().settings, transaction.incomeMonth);
+          if (settings !== data().settings) {
+            dispatch({ type: 'settings/saved', settings });
+            await persist(() => repos.settings.save(settings));
           }
         }
       },
@@ -510,6 +578,20 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
         await persist(() => repos.replaceAll(synced.data));
       },
 
+      async syncMonthlyIncome() {
+        const synced = withMonthlyIncome(data());
+        if (!synced.changed) return;
+        const { incomeStartMonth } = synced.data.settings;
+        // Merge aditivo (DT-027): só o que foi criado + o mês inicial; a persistência também é por item,
+        // para não sobrescrever o que outra sincronização concorrente acabou de gravar.
+        dispatch({ type: 'income/synced', created: synced.created, categories: synced.createdCategories, incomeStartMonth });
+        await persist(async () => {
+          for (const category of synced.createdCategories) await repos.categories.upsert(category);
+          for (const transaction of synced.created) await repos.transactions.upsert(transaction);
+          await repos.settings.save({ ...data().settings, incomeStartMonth });
+        });
+      },
+
       updateSettings,
 
       async completeOnboarding(profile) {
@@ -528,11 +610,13 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
        */
       async clearAllData() {
         const { userName, monthlyIncome } = data().settings;
-        await replaceData({
+        // A renda mensal recomeça no mês atual (DT-028).
+        const cleared = withMonthlyIncome({
           ...EMPTY_DATA,
           categories: buildDefaultCategories(now()),
           settings: { ...DEFAULT_SETTINGS, userName, monthlyIncome },
         });
+        await replaceData(cleared.data);
       },
 
       async importBackup(json) {
@@ -557,6 +641,7 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
       if (document.visibilityState === 'visible') {
         void actions.syncSubscriptions();
         void actions.syncLoans();
+        void actions.syncMonthlyIncome();
       }
     };
     document.addEventListener('visibilitychange', onVisible);

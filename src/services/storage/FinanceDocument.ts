@@ -53,7 +53,8 @@ const hasValidSubscriptionLink = (t: Record<string, unknown>) =>
   isOptional(t.installmentIndex, (v) => Number.isInteger(v) && (v as number) >= 1) &&
   isOptional(t.installmentTotal, (v) => Number.isInteger(v) && (v as number) >= 1) &&
   isOptional(t.loanId, (v) => typeof v === 'string') &&
-  isOptional(t.loanMonth, isMonthKey);
+  isOptional(t.loanMonth, isMonthKey) &&
+  isOptional(t.incomeMonth, isMonthKey);
 
 const isValidSubscription = (s: Record<string, unknown>) =>
   isIntegerCents(s.amount) &&
@@ -158,12 +159,17 @@ const isMonthlyIncome = (v: unknown) => isIntegerCents(v) && (v as number) <= MA
  * app e o onboarding é considerado concluído (padrão `true`); `monthlyIncome` ausente vira 0.
  * Migração da v1.5.0: o antigo `savingsTarget` (meta de poupança em %) é descartado — como o objeto
  * é montado campo a campo, campos desconhecidos nunca chegam ao estado (DT-016).
+ * Migração da v1.14.0 (DT-028): sem `incomeStartMonth`, fica `null` e o provider agenda a renda a
+ * partir do mês atual (se houver renda); `incomeSkippedMonths` ausente vira lista vazia.
  */
 function sanitizeSettings(raw: Record<string, unknown>): Settings {
   const d = DEFAULT_SETTINGS;
+  const skipped = Array.isArray(raw.incomeSkippedMonths) ? raw.incomeSkippedMonths.filter(isMonthKey) : [];
   return {
     userName: pick(raw.userName, (v) => typeof v === 'string', d.userName).trim().slice(0, USER_NAME_MAX),
     monthlyIncome: pick(raw.monthlyIncome, isMonthlyIncome, d.monthlyIncome),
+    incomeStartMonth: isMonthKey(raw.incomeStartMonth) ? raw.incomeStartMonth : null,
+    incomeSkippedMonths: [...new Set(skipped)].sort(),
     hideBalances: pick(raw.hideBalances, isBoolean, d.hideBalances),
     isDemoData: pick(raw.isDemoData, isBoolean, d.isDemoData),
     onboardingCompleted: pick(raw.onboardingCompleted, isBoolean, d.onboardingCompleted),

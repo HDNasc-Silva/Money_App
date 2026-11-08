@@ -34,6 +34,8 @@ export interface Transaction {
   loanId?: string;
   /** Mês de referência da parcela do empréstimo; chave de idempotência junto com `loanId`. */
   loanMonth?: MonthKey;
+  /** Mês de referência da renda mensal gerada automaticamente (DT-028); chave de idempotência. */
+  incomeMonth?: MonthKey;
   createdAt: string;
   updatedAt: string;
 }
@@ -137,8 +139,15 @@ export interface Goal {
 
 export interface Settings {
   userName: string;
-  /** Renda mensal informada pelo usuário (apenas referência no perfil); 0 = não informada. */
+  /**
+   * Renda mensal informada pelo usuário; 0 = não informada. Quando > 0, vira uma receita automática
+   * no dia 1º de cada mês (DT-028).
+   */
   monthlyIncome: Cents;
+  /** Primeiro mês em que a renda é lançada; `null` = renda não informada (nada é gerado). */
+  incomeStartMonth: MonthKey | null;
+  /** Meses cuja renda não deve ser lançada (o usuário excluiu o lançamento gerado). */
+  incomeSkippedMonths: MonthKey[];
   hideBalances: boolean;
   isDemoData: boolean;
   /** `false` só num primeiro acesso, até o usuário concluir a tela de boas-vindas (ver DT-014). */
@@ -171,6 +180,8 @@ export const USER_NAME_MAX = 40;
 export const DEFAULT_SETTINGS: Settings = {
   userName: '',
   monthlyIncome: 0,
+  incomeStartMonth: null,
+  incomeSkippedMonths: [],
   hideBalances: false,
   isDemoData: false,
   onboardingCompleted: true,
