@@ -45,7 +45,11 @@ export function LoanFormSheet({ loan, onClose }: LoanFormSheetProps) {
   const { saveLoan, deleteLoan } = useFinanceActions();
   const { showToast } = useToast();
   const today = todayIso();
-  const [values, setValues] = useState(() => toValues(loan, today));
+  const [values, setValues] = useState(() => {
+    const initial = toValues(loan, today);
+    const existingLoans = findLoansCategory(categories);
+    return !loan && existingLoans ? { ...initial, categoryId: existingLoans.id } : initial;
+  });
   const [errors, setErrors] = useState<FieldErrors<Field>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
