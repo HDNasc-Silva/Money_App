@@ -113,10 +113,25 @@ describe('empréstimos (Agiotagem, DT-026)', () => {
   it('loansDueInMonth soma as parcelas esperadas no mês, e sortLoans ordena pendentes antes de liquidados', () => {
     const settled = loan({ id: 'a', firstMonth: '2026-09', installmentTotal: 1, amount: 5_000 });
     const pending = loan({ id: 'b', firstMonth: '2026-11', installmentTotal: 1, amount: 7_000 });
-    expect(loansDueInMonth([settled, pending], '2026-11')).toBe(7_000);
+    expect(loansDueInMonth([settled, pending], '2026-11', [])).toBe(7_000);
     const synced = syncLoanPayments([settled], [], TODAY, 'ts');
     const order = sortLoans([settled, pending], synced.transactions);
     expect(order.map((l) => l.id)).toEqual(['b', 'a']);
+  });
+
+  it('loansDueInMonth NÃO conta parcelas do mês que já foram lançadas (bug real, DT-026)', () => {
+    // Dois empréstimos de pagamento único com vencimento em novembro/2026, ambos já lançados (hoje = 07/11).
+    const loanX = loan({ id: 'loan-x', borrower: 'X', amount: 100, loanDate: '2026-11-07', firstMonth: '2026-11', installmentTotal: 1 });
+    const loanY = loan({ id: 'loan-y', borrower: 'Y', amount: 10_000, loanDate: '2026-11-01', firstMonth: '2026-11', installmentTotal: 1 });
+    const synced = syncLoanPayments([loanX, loanY], [], TODAY, 'ts');
+    expect(synced.created).toHaveLength(2);
+    // Já foram lançados (aparecem no Extrato) — "a receber este mês" deve ser zero, não 10_100.
+    expect(loansDueInMonth([loanX, loanY], '2026-11', synced.transactions)).toBe(0);
+  });
+
+  it('loansDueInMonth soma só a parte pendente quando o mês ainda não foi lançado', () => {
+    const pending = loan({ id: 'p', firstMonth: '2026-11', installmentTotal: 1, amount: 3_000 });
+    expect(loansDueInMonth([pending], '2026-11', [])).toBe(3_000);
   });
 });
 

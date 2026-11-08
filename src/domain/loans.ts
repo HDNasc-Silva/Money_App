@@ -154,9 +154,19 @@ export function loanStatus(loan: Loan, transactions: readonly Transaction[]): Lo
   return 'partial';
 }
 
-/** Soma das parcelas esperadas (lançadas ou previstas) no mês informado — "a receber este mês". */
-export function loansDueInMonth(loans: readonly Loan[], month: MonthKey): Cents {
-  return loans.filter((loan) => isLoanDueInMonth(loan, month)).reduce((sum, loan) => sum + loan.amount, 0);
+/**
+ * Soma das parcelas AINDA PENDENTES (não lançadas) no mês informado — "a receber este mês".
+ * Reaproveita `loanInstallments`, que já sabe diferenciar parcela lançada (existe `Transaction` com o
+ * `loanId` e o mês) de parcela ainda pendente; evita contar de novo o que já virou receita no Extrato.
+ */
+export function loansDueInMonth(loans: readonly Loan[], month: MonthKey, transactions: readonly Transaction[]): Cents {
+  let total = 0;
+  for (const loan of loans) {
+    if (!isLoanDueInMonth(loan, month)) continue;
+    const installment = loanInstallments(loan, transactions).find((i) => i.month === month);
+    if (installment && installment.status === 'pending') total += installment.amount;
+  }
+  return total;
 }
 
 /** Ordem da lista: pendentes/parciais primeiro, depois liquidados; dentro do grupo, pelo mais recente. */

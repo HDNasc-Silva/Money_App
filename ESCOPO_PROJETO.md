@@ -2,8 +2,8 @@
 
 > Documento oficial de referência. Representa o **estado atual real** do aplicativo e deve ser atualizado a cada alteração do sistema (ver `CHANGELOG.md` e `DECISOES_TECNICAS.md`).
 
-**Versão atual:** 1.13.0 (Compra parcelada e aba "Agiotagem")
-**Última atualização:** 07/11/2026 (v1.13.0)
+**Versão atual:** 1.13.1 (Correções na Agiotagem: "a receber este mês" e sincronização concorrente)
+**Última atualização:** 07/11/2026 (v1.13.1)
 
 ---
 
@@ -541,6 +541,11 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 - ✅ Indicador "Empréstimo a receber" no Início quando há parcelas esperadas no mês selecionado.
 - ✅ 251 testes automatizados (13 novos em `tests/installmentsAndLoans.test.ts`; `tests/navigation.test.tsx` ajustado para o novo destino).
 
+### Concluído (v1.13.1 — testado automaticamente)
+- ✅ Correção: "Empréstimo a receber este mês" não soma mais parcela que já virou lançamento (ou está em `skippedMonths`) — `loansDueInMonth` agora recebe `transactions` e reaproveita `loanInstallments` para só contar o que está realmente pendente (DT-026).
+- ✅ Correção: sincronização automática de assinaturas/empréstimos (`visibilitychange`) deixou de poder sobrescrever, em memória, um lançamento recém-criado por outra sincronização ou ação concorrente — `subscriptions/synced`/`loans/synced` agora somam só os lançamentos criados (`created`) sobre o estado mais atual, em vez de substituir `transactions` inteiro (DT-027).
+- ✅ 258 testes automatizados (3 novos em `tests/financeReducerSync.test.ts`; 2 novos em `tests/installmentsAndLoans.test.ts`; `tests/loansDashboard.test.tsx` novo com 2 testes, incluindo o cenário exato reportado).
+
 ### Em desenvolvimento
 - Nenhum.
 
@@ -574,6 +579,7 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 - As preferências de aparência não fazem parte do backup JSON (são do dispositivo).
 - Navegação v1.8.0 (DT-021): Gastos, Assinaturas e Gráficos passam a exigir 2 toques no mobile (Mais → destino) em vez de 1; não foi conferida visualmente no navegador real (320–430 px), só em jsdom.
 - Compra parcelada e Agiotagem (v1.13.0): validadas em jsdom e por build; a aparência real do ícone `theater_comedy` (Material Symbols) e o layout da aba Agiotagem/checkbox de parcelamento **não foram conferidos visualmente no navegador**. Editar o valor/categoria de uma parcela ou de um pagamento de empréstimo já lançado não propaga para as demais parcelas do mesmo grupo (decisão de UX, DT-026) — quem quiser corrigir todas precisa editar uma a uma. A categoria "Empréstimos" não entra nas categorias padrão do primeiro acesso nem na demonstração.
+- Sincronização automática concorrente (v1.13.1, DT-027): a correção garante que o estado em memória (o que a tela mostra) nunca perde um lançamento criado por uma sincronização concorrente. A gravação em disco (`repos.replaceAll`) de cada sincronização ainda grava o array calculado a partir da própria leitura daquela sincronização — num cenário de corrida real, o documento salvo pode ficar momentaneamente incompleto até a próxima abertura do app (a sincronização é idempotente e se autocorrige). Esse mesmo padrão de "substituir o array inteiro a partir de uma leitura antiga" ainda existe em ações baseadas em `replaceData` (`saveLoan`, `saveTransaction`, etc.); o risco ali é bem menor (ação síncrona, sem concorrência de fundo) e não foi alterado nesta correção.
 
 ### Próximas etapas (sugestões)
 1. Conferir visualmente a v1.7.0 no navegador (5 temas × claro/escuro, 320–430 px e 1366 px) e medir os contrastes com uma ferramenta (axe/Lighthouse).

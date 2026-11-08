@@ -22,12 +22,17 @@ export type FinanceAction =
   | { type: 'goal/removed'; id: string }
   | { type: 'subscription/saved'; subscription: Subscription }
   | { type: 'subscription/removed'; id: string }
-  /** Resultado da geração de cobranças (lançamentos criados e meses ignorados registrados). */
-  | { type: 'subscriptions/synced'; transactions: Transaction[]; subscriptions: Subscription[] }
+  /**
+   * Resultado da geração de cobranças: só os lançamentos CRIADOS nesta sincronização (não o array
+   * inteiro recalculado) — assim o merge soma sobre o estado mais atual, em vez de substituí-lo por
+   * uma leitura que pode estar desatualizada (ex.: duas sincronizações automáticas concorrentes,
+   * uma de assinaturas e outra de empréstimos, DT-027).
+   */
+  | { type: 'subscriptions/synced'; created: Transaction[]; subscriptions: Subscription[] }
   | { type: 'loan/saved'; loan: Loan }
   | { type: 'loan/removed'; id: string }
-  /** Resultado da geração de pagamentos de empréstimos (parcelas lançadas). */
-  | { type: 'loans/synced'; transactions: Transaction[] }
+  /** Resultado da geração de pagamentos de empréstimos: só as parcelas CRIADAS nesta sincronização (DT-027). */
+  | { type: 'loans/synced'; created: Transaction[] }
   | { type: 'settings/saved'; settings: Settings }
   | { type: 'notice/dismissed' };
 
@@ -36,6 +41,14 @@ function upsert<T extends { id: string }>(items: readonly T[], item: T): T[] {
 }
 
 const withoutId = <T extends { id: string }>(items: readonly T[], id: string): T[] => items.filter((i) => i.id !== id);
+
+/** Insere os itens criados que ainda não existem (por id) — idempotente, soma sobre o estado atual. */
+function appendNew<T extends { id: string }>(items: readonly T[], created: readonly T[]): T[] {
+  if (created.length === 0) return [...items];
+  const ids = new Set(items.map((i) => i.id));
+  const additions = created.filter((i) => !ids.has(i.id));
+  return additions.length === 0 ? [...items] : [...items, ...additions];
+}
 
 export function financeReducer(state: FinanceState, action: FinanceAction): FinanceState {
   const { data } = state;
@@ -63,13 +76,13 @@ export function financeReducer(state: FinanceState, action: FinanceAction): Fina
     case 'subscription/removed':
       return { ...state, data: { ...data, subscriptions: withoutId(data.subscriptions, action.id) } };
     case 'subscriptions/synced':
-      return { ...state, data: { ...data, transactions: action.transactions, subscriptions: action.subscriptions } };
+      return { ...state, data: { ...data, transactions: appendNew(data.transactions, action.created), subscriptions: action.subscriptions } };
     case 'loan/saved':
       return { ...state, data: { ...data, loans: upsert(data.loans, action.loan) } };
     case 'loan/removed':
       return { ...state, data: { ...data, loans: withoutId(data.loans, action.id) } };
     case 'loans/synced':
-      return { ...state, data: { ...data, transactions: action.transactions } };
+      return { ...state, data: { ...data, transactions: appendNew(data.transactions, action.created) } };
     case 'settings/saved':
       return { ...state, data: { ...data, settings: action.settings } };
     case 'notice/dismissed':

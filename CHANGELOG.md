@@ -7,6 +7,21 @@ Categorias: **Adicionado** · **Modificado** · **Corrigido** · **Removido** ·
 
 ---
 
+## [1.13.1] - 07/11/2026 — Correções na Agiotagem: "a receber este mês" e sincronização concorrente
+
+### Corrigido
+- **"Empréstimo a receber" contava parcelas já lançadas** (DT-026): `loansDueInMonth` somava `loan.amount` de todo empréstimo com vencimento no mês, mesmo quando a parcela daquele mês **já tinha virado um lançamento real** (ou estava em `skippedMonths`). Resultado: o card "Empréstimo a receber" no Início continuava mostrando o valor cheio mesmo depois do pagamento aparecer no Extrato. Agora `loansDueInMonth(loans, month, transactions)` reaproveita `loanInstallments` (que já sabe diferenciar parcela lançada de pendente) e só soma a parcela do mês quando o status é `'pending'`.
+- **Sincronização concorrente de assinaturas e empréstimos podia perder um lançamento recém-criado** (DT-027): `syncSubscriptions()` e `syncLoans()` são disparados em paralelo (sem aguardar um ao outro) ao voltar para o app (`visibilitychange`). Cada um calculava o array de lançamentos inteiro a partir de uma leitura própria do estado (`data()`); se as duas sincronizações — ou uma delas e qualquer outra ação que salve um lançamento no mesmo instante — processassem a partir de leituras diferentes, a que despachasse por último **substituía por completo** `transactions`, descartando silenciosamente o que a outra tinha acabado de adicionar (ex.: a parcela de um empréstimo). As ações `subscriptions/synced` e `loans/synced` agora despacham só os lançamentos **criados** nessa sincronização (`created`), e o reducer (`financeReducer`) os **soma** sobre o estado mais atual no momento em que a ação é processada, em vez de substituir o array inteiro. Idempotente (por id), sem duplicar.
+
+### Técnico
+- `CACHE_VERSION` do service worker: `v1.13.1`. Versão do pacote: 1.13.0 → 1.13.1 (PATCH).
+- Novos testes: `tests/financeReducerSync.test.ts` (3, merge aditivo e idempotente de `subscriptions/synced`/`loans/synced`, incluindo o cenário de sincronizações concorrentes a partir do mesmo snapshot); `tests/loansDashboard.test.tsx` (2, cenário real reportado: despesa manual + dois empréstimos de pagamento único já lançados no mês — saldo soma os três, e "Empréstimo a receber" não aparece); 2 novos casos em `tests/installmentsAndLoans.test.ts` para `loansDueInMonth` com parcelas já lançadas. 258 testes automatizados.
+
+### Documentação
+- `DECISOES_TECNICAS.md`: DT-027 (sincronização automática aditiva, por `created`, em vez de substituição do array inteiro). `ESCOPO_PROJETO.md`: seção de problemas conhecidos atualizada.
+
+---
+
 ## [1.13.0] - 07/11/2026 — Compra parcelada e aba "Agiotagem" (empréstimos a terceiros)
 
 ### Adicionado

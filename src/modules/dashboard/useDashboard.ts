@@ -54,7 +54,7 @@ export function useDashboard() {
       upcomingTotal: summarizeCharges(upcomingCharges).forecast,
       hasSubscriptions: subscriptions.length > 0,
       // "Empréstimos a receber este mês" (Agiotagem, DT-026): parcelas esperadas no mês selecionado.
-      loansReceivableThisMonth: loansDueInMonth(loans, month),
+      loansReceivableThisMonth: loansDueInMonth(loans, month, transactions),
       recent: latestTransactions(transactions, period, RECENT_LIMIT),
       goals: highlightedGoals(goals, HIGHLIGHTED_GOALS_LIMIT),
       weeks: weeklyBreakdown(transactions, month),

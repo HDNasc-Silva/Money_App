@@ -126,17 +126,17 @@ function defaultRepositories(): { repositories: Repositories; persistent: boolea
 }
 
 /** Aplica a geração de cobranças de assinaturas a um conjunto de dados (DT-017). */
-function withSubscriptionCharges(data: FinanceData): { data: FinanceData; changed: boolean } {
+function withSubscriptionCharges(data: FinanceData): { data: FinanceData; created: Transaction[]; changed: boolean } {
   const result = syncSubscriptionCharges(data.subscriptions, data.transactions, todayIso(), new Date().toISOString());
-  if (!result.changed) return { data, changed: false };
-  return { data: { ...data, transactions: result.transactions, subscriptions: result.subscriptions }, changed: true };
+  if (!result.changed) return { data, created: [], changed: false };
+  return { data: { ...data, transactions: result.transactions, subscriptions: result.subscriptions }, created: result.created, changed: true };
 }
 
 /** Aplica a geração dos pagamentos de empréstimos a um conjunto de dados (DT-026). */
-function withLoanPayments(data: FinanceData): { data: FinanceData; changed: boolean } {
+function withLoanPayments(data: FinanceData): { data: FinanceData; created: Transaction[]; changed: boolean } {
   const result = syncLoanPayments(data.loans, data.transactions, todayIso(), new Date().toISOString());
-  if (!result.changed) return { data, changed: false };
-  return { data: { ...data, transactions: result.transactions }, changed: true };
+  if (!result.changed) return { data, created: [], changed: false };
+  return { data: { ...data, transactions: result.transactions }, created: result.created, changed: true };
 }
 
 /** Aplica assinaturas e empréstimos em sequência (usado ao carregar e ao editar/voltar ao app). */
@@ -459,7 +459,10 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
       async syncSubscriptions() {
         const synced = withSubscriptionCharges(data());
         if (!synced.changed) return;
-        dispatch({ type: 'subscriptions/synced', transactions: synced.data.transactions, subscriptions: synced.data.subscriptions });
+        // Dispara só o que foi criado (não o array inteiro recalculado): o merge soma sobre o estado mais
+        // atual no momento em que a ação é processada, mesmo que outra sincronização (ex.: empréstimos)
+        // tenha corrido ao mesmo tempo a partir de uma leitura mais antiga (DT-027).
+        dispatch({ type: 'subscriptions/synced', created: synced.created, subscriptions: synced.data.subscriptions });
         await persist(() => repos.replaceAll(synced.data));
       },
 
@@ -502,7 +505,8 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
       async syncLoans() {
         const synced = withLoanPayments(data());
         if (!synced.changed) return;
-        dispatch({ type: 'loans/synced', transactions: synced.data.transactions });
+        // Idem syncSubscriptions: dispara só as parcelas criadas, somadas sobre o estado mais atual (DT-027).
+        dispatch({ type: 'loans/synced', created: synced.created });
         await persist(() => repos.replaceAll(synced.data));
       },
 
