@@ -26,6 +26,18 @@ export function TransactionItem({ transaction, category, onOpenActions }: Transa
               Assinatura
             </span>
           )}
+          {transaction.installmentGroupId && (
+            <span className={styles.itemTag} title="Parcela de uma compra parcelada">
+              <Icon name="calendar_month" size={12} />
+              Parcela {transaction.installmentIndex}/{transaction.installmentTotal}
+            </span>
+          )}
+          {transaction.loanId && (
+            <span className={styles.itemTag} title="Pagamento de empréstimo (Agiotagem)">
+              <Icon name="theater_comedy" size={12} />
+              Empréstimo
+            </span>
+          )}
           {category?.name ?? 'Sem categoria'}
           {transaction.note && <span className={styles.itemNote}> · {transaction.note}</span>}
         </span>

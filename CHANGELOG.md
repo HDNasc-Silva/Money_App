@@ -7,6 +7,27 @@ Categorias: **Adicionado** · **Modificado** · **Corrigido** · **Removido** ·
 
 ---
 
+## [1.13.0] - 07/11/2026 — Compra parcelada e aba "Agiotagem" (empréstimos a terceiros)
+
+### Adicionado
+- **Compra parcelada no lançamento** (DT-026): no formulário de novo lançamento (`TransactionForm`, só para despesas), um checkbox "Compra parcelada?" revela "Primeira parcela" (mês/ano) e "Quantidade de parcelas" (2 a 60). O valor digitado é o de **cada parcela**: `saveInstallmentPurchase` (`FinanceProvider`) gera, de uma vez, um lançamento por mês a partir da primeira parcela (mesmo dia do mês), com a descrição sufixada `"(i/N)"` (ex.: "Notebook (3/12)") e vinculados pelo mesmo `installmentGroupId` (`domain/installments.ts`). Cada parcela é um lançamento independente no Extrato: editar ou excluir uma não afeta as demais. Um selo "Parcela i/N" identifica a parcela na lista (`TransactionItem`).
+- **Aba "Agiotagem"** (DT-026): novo destino na navegação (dentro do hub "Mais" no mobile, ícone `theater_comedy`) para registrar empréstimos informais a terceiros. Cadastro: para quem (nome livre), valor, data do empréstimo e quando é esperado o pagamento — único mês ou parcelado (mesma UX de "primeira parcela + quantidade de parcelas" do lançamento parcelado). Registrar **não** debita o saldo; quando o mês do pagamento (ou de cada parcela) chega, uma receita é lançada automaticamente (`domain/loans.ts`, `syncLoanPayments`, mesmo padrão idempotente das Assinaturas, DT-017, mas finito). A categoria de receita "Empréstimos" é criada sob demanda ao salvar o primeiro empréstimo. Lista de empréstimos com status por parcela (a receber / recebido) em `LoansPage`/`LoanItem`/`LoanForm` (`src/modules/loans/`).
+- **Indicador "Empréstimo a receber" no Início**: quando há parcelas de empréstimo esperadas no mês selecionado, um cartão discreto perto do saldo mostra o total (`LoanReceivableCard`, `useDashboard`).
+
+### Modificado
+- `Transaction` (`src/models/index.ts`): novos campos opcionais `installmentGroupId`, `installmentIndex`, `installmentTotal` (compra parcelada) e `loanId`, `loanMonth` (Agiotagem). `FinanceData` ganha `loans: Loan[]`.
+- `FinanceProvider`: novas ações `saveInstallmentPurchase`, `saveLoan`, `deleteLoan`, `syncLoans`; `deleteTransaction` passa a registrar o mês como ignorado também para parcelas de empréstimo excluídas (mesma lógica já existente para assinaturas); a sincronização ao abrir o app e ao voltar a ele agora cobre assinaturas **e** empréstimos (`withAutomaticCharges`).
+- `FinanceDocument` (`services/storage`): migração aditiva — documentos salvos antes desta versão não têm `loans` (lista vazia); vínculos opcionais de parcela/empréstimo no lançamento são validados estruturalmente.
+
+### Técnico
+- `CACHE_VERSION` do service worker: `v1.13.0`. Versão do pacote: 1.12.2 → 1.13.0 (MINOR).
+- 251 testes automatizados (13 novos em `tests/installmentsAndLoans.test.ts`: `buildInstallmentTransactions`, `validateInstallmentPlan`, geração/idempotência/status dos pagamentos de empréstimo, `validateLoan`); `tests/navigation.test.tsx` ajustado para o novo destino "Agiotagem" na navegação lateral e no hub "Mais"; demais fixtures de `FinanceData` nos testes existentes ganharam `loans: []`.
+
+### Documentação
+- `DECISOES_TECNICAS.md`: DT-026 (compra parcelada e Agiotagem como duas entidades finitas, reaproveitando o padrão de materialização idempotente das Assinaturas). `ESCOPO_PROJETO.md`: novos módulos, regras de negócio e acompanhamento v1.13.0.
+
+---
+
 ## [1.12.2] - 01/11/2026 — Transição de página; reordenar categorias volta à alça
 
 ### Modificado

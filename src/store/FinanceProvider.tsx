@@ -1,6 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, type ReactNode } from 'react';
 import { useToast } from '@/components/common/Toast';
 import { reorderCategories as reorderCategoriesList } from '@/domain/categories';
+import { buildInstallmentTransactions, type InstallmentPlanInput } from '@/domain/installments';
+import { skipLoanMonth, syncLoanPayments } from '@/domain/loans';
 import { skipMonth, syncSubscriptionCharges } from '@/domain/subscriptions';
 import {
   DEFAULT_SETTINGS,
@@ -9,6 +11,7 @@ import {
   type FinanceData,
   type Goal,
   type IsoDate,
+  type Loan,
   type Settings,
   type Subscription,
   type Transaction,
@@ -19,16 +22,20 @@ import { createDefaultAdapter } from '@/services/storage/StorageAdapter';
 import { todayIso } from '@/utils/dates';
 import { createId } from '@/utils/id';
 import {
+  CREATE_LOANS_CATEGORY,
   CREATE_SUBSCRIPTIONS_CATEGORY,
   type CategoryDraft,
   type GoalDraft,
+  type LoanDraft,
   type ProfileDraft,
   type SubscriptionDraft,
   type TransactionDraft,
 } from '@/validations';
 import {
   buildDefaultCategories,
+  findLoansCategory,
   findSubscriptionsCategory,
+  loansCategoryToCreate,
   missingDefaultCategories,
   subscriptionsCategoryToCreate,
 } from './defaultCategories';
@@ -46,6 +53,12 @@ export class DomainError extends Error {
 
 export interface FinanceActions {
   saveTransaction(draft: TransactionDraft, id?: string): Promise<Transaction>;
+  /**
+   * Cria uma compra parcelada (DT-026): `plan.amount` é o valor de CADA parcela. Gera `plan.count`
+   * lançamentos independentes (um por mês a partir de `plan.firstMonth`), vinculados pelo mesmo
+   * grupo; editar ou excluir uma não afeta as demais.
+   */
+  saveInstallmentPurchase(plan: InstallmentPlanInput): Promise<Transaction[]>;
   /** Adiciona vários lançamentos já validados de uma vez (importação de planilha CSV); retorna quantos entraram. */
   importTransactions(drafts: readonly TransactionDraft[]): Promise<number>;
   duplicateTransaction(id: string): Promise<Transaction>;
@@ -75,6 +88,15 @@ export interface FinanceActions {
   deleteSubscription(id: string, options?: { keepTransactions?: boolean }): Promise<void>;
   /** Gera as cobranças de assinaturas que venceram desde a última sincronização (idempotente). */
   syncSubscriptions(): Promise<void>;
+  /**
+   * Cria ou edita um empréstimo a terceiros (Agiotagem, DT-026) e lança os pagamentos cujo mês já
+   * chegou. `draft.categoryId === CREATE_LOANS_CATEGORY` cria (ou reutiliza) a categoria "Empréstimos".
+   */
+  saveLoan(draft: LoanDraft, id?: string): Promise<Loan>;
+  /** Exclui o empréstimo; por padrão os lançamentos já gerados são mantidos. */
+  deleteLoan(id: string, options?: { keepTransactions?: boolean }): Promise<void>;
+  /** Gera os pagamentos de empréstimos que venceram desde a última sincronização (idempotente). */
+  syncLoans(): Promise<void>;
   updateSettings(changes: Partial<Settings>): Promise<void>;
   /** Salva o perfil informado na tela de boas-vindas e libera o acesso ao app. */
   completeOnboarding(profile: ProfileDraft): Promise<void>;
@@ -110,6 +132,20 @@ function withSubscriptionCharges(data: FinanceData): { data: FinanceData; change
   return { data: { ...data, transactions: result.transactions, subscriptions: result.subscriptions }, changed: true };
 }
 
+/** Aplica a geração dos pagamentos de empréstimos a um conjunto de dados (DT-026). */
+function withLoanPayments(data: FinanceData): { data: FinanceData; changed: boolean } {
+  const result = syncLoanPayments(data.loans, data.transactions, todayIso(), new Date().toISOString());
+  if (!result.changed) return { data, changed: false };
+  return { data: { ...data, transactions: result.transactions }, changed: true };
+}
+
+/** Aplica assinaturas e empréstimos em sequência (usado ao carregar e ao editar/voltar ao app). */
+function withAutomaticCharges(data: FinanceData): { data: FinanceData; changed: boolean } {
+  const subs = withSubscriptionCharges(data);
+  const loans = withLoanPayments(subs.data);
+  return { data: loans.data, changed: subs.changed || loans.changed };
+}
+
 const usedBySubscriptions = (data: FinanceData, categoryId: string) =>
   data.subscriptions.filter((s) => s.categoryId === categoryId).length;
 
@@ -134,8 +170,8 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
         const result = await repos.load();
         if (cancelled) return;
         if (result.status === 'ok') {
-          // Ao abrir o app, lança as cobranças de assinaturas que venceram desde o último acesso.
-          const synced = withSubscriptionCharges(result.data);
+          // Ao abrir o app, lança as cobranças de assinaturas e os pagamentos de empréstimos vencidos.
+          const synced = withAutomaticCharges(result.data);
           if (synced.changed) {
             try {
               await repos.replaceAll(synced.data);
@@ -208,6 +244,14 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
         return transaction;
       },
 
+      async saveInstallmentPurchase(plan) {
+        const timestamp = now();
+        const installments = buildInstallmentTransactions(plan, createId(), timestamp, createId);
+        const current = data();
+        await replaceData({ ...current, transactions: [...current.transactions, ...installments] });
+        return installments;
+      },
+
       async importTransactions(drafts) {
         if (drafts.length === 0) return 0;
         const timestamp = now();
@@ -225,10 +269,15 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
         const original = data().transactions.find((t) => t.id === id);
         if (!original) throw new DomainError('Lançamento não encontrado.');
         const timestamp = now();
-        // A cópia é um lançamento manual: não carrega o vínculo com a assinatura.
+        // A cópia é um lançamento manual: não carrega vínculo com assinatura, parcela ou empréstimo.
         const copy: Transaction = { ...original, id: createId(), date: todayIso(), createdAt: timestamp, updatedAt: timestamp };
         delete copy.subscriptionId;
         delete copy.subscriptionMonth;
+        delete copy.installmentGroupId;
+        delete copy.installmentIndex;
+        delete copy.installmentTotal;
+        delete copy.loanId;
+        delete copy.loanMonth;
         dispatch({ type: 'transaction/saved', transaction: copy });
         await persist(() => repos.transactions.upsert(copy));
         return copy;
@@ -239,6 +288,7 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
         const subscription = transaction?.subscriptionId
           ? data().subscriptions.find((s) => s.id === transaction.subscriptionId)
           : undefined;
+        const loan = transaction?.loanId ? data().loans.find((l) => l.id === transaction.loanId) : undefined;
         dispatch({ type: 'transaction/removed', id });
         await persist(() => repos.transactions.remove(id));
         // Excluir uma cobrança gerada: o mês não é lançado de novo pela sincronização.
@@ -248,6 +298,15 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
           if (updated !== subscription) {
             dispatch({ type: 'subscription/saved', subscription: updated });
             await persist(() => repos.subscriptions.upsert(updated));
+          }
+        }
+        // Excluir a receita de uma parcela de empréstimo: o mês não é lançado de novo.
+        if (transaction && loan) {
+          const month = transaction.loanMonth ?? transaction.date.slice(0, 7);
+          const updated = skipLoanMonth(loan, month);
+          if (updated !== loan) {
+            dispatch({ type: 'loan/saved', loan: updated });
+            await persist(() => repos.loans.upsert(updated));
           }
         }
       },
@@ -404,6 +463,49 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
         await persist(() => repos.replaceAll(synced.data));
       },
 
+      async saveLoan(draft, id) {
+        const current = data();
+        const existing = id ? current.loans.find((l) => l.id === id) : undefined;
+        const timestamp = now();
+        let categories = current.categories;
+        let categoryId = draft.categoryId;
+        if (categoryId === CREATE_LOANS_CATEGORY) {
+          const category = findLoansCategory(categories) ?? loansCategoryToCreate(categories, timestamp, createId);
+          if (!categories.some((c) => c.id === category.id)) categories = [...categories, category];
+          categoryId = category.id;
+        }
+        const loan: Loan = {
+          ...draft,
+          categoryId,
+          id: existing?.id ?? createId(),
+          skippedMonths: existing?.skippedMonths ?? [],
+          createdAt: existing?.createdAt ?? timestamp,
+          updatedAt: timestamp,
+        };
+        if (!loan.notes) delete loan.notes;
+        const loans = existing ? current.loans.map((l) => (l.id === loan.id ? loan : l)) : [...current.loans, loan];
+        // Lançamentos já gerados não mudam: valor e categoria novos valem para os meses ainda não lançados.
+        await replaceData(withLoanPayments({ ...current, categories, loans }).data);
+        return loan;
+      },
+
+      async deleteLoan(id, options) {
+        const keepTransactions = options?.keepTransactions ?? true;
+        const current = data();
+        await replaceData({
+          ...current,
+          loans: current.loans.filter((l) => l.id !== id),
+          transactions: keepTransactions ? current.transactions : current.transactions.filter((t) => t.loanId !== id),
+        });
+      },
+
+      async syncLoans() {
+        const synced = withLoanPayments(data());
+        if (!synced.changed) return;
+        dispatch({ type: 'loans/synced', transactions: synced.data.transactions });
+        await persist(() => repos.replaceAll(synced.data));
+      },
+
       updateSettings,
 
       async completeOnboarding(profile) {
@@ -434,7 +536,7 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
         if (!imported) throw new DomainError('Arquivo de backup inválido ou de uma versão incompatível.');
         // A importação acontece em Ajustes, depois do onboarding: nunca volta para a tela de boas-vindas.
         const next = { ...imported, settings: { ...imported.settings, isDemoData: false, onboardingCompleted: true } };
-        await replaceData(withSubscriptionCharges(next).data);
+        await replaceData(withAutomaticCharges(next).data);
       },
 
       dismissNotice() {
@@ -448,7 +550,10 @@ export function FinanceProvider({ children, repositories, persistent = true }: F
   useEffect(() => {
     if (!ready) return;
     const onVisible = () => {
-      if (document.visibilityState === 'visible') void actions.syncSubscriptions();
+      if (document.visibilityState === 'visible') {
+        void actions.syncSubscriptions();
+        void actions.syncLoans();
+      }
     };
     document.addEventListener('visibilitychange', onVisible);
     return () => document.removeEventListener('visibilitychange', onVisible);

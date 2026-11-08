@@ -22,6 +22,7 @@ function setup(path = '/') {
     categories,
     goals: [],
     subscriptions: [],
+    loans: [],
     settings: { ...DEFAULT_SETTINGS, userName: 'Ana' },
   };
   const adapter = new MemoryStorageAdapter();

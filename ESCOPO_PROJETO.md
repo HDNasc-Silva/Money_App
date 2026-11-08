@@ -2,8 +2,8 @@
 
 > Documento oficial de referência. Representa o **estado atual real** do aplicativo e deve ser atualizado a cada alteração do sistema (ver `CHANGELOG.md` e `DECISOES_TECNICAS.md`).
 
-**Versão atual:** 1.12.0 (Sininho de alertas por categoria e reordenar categorias arrastando)
-**Última atualização:** 01/11/2026 (v1.12.0)
+**Versão atual:** 1.13.0 (Compra parcelada e aba "Agiotagem")
+**Última atualização:** 07/11/2026 (v1.13.0)
 
 ---
 
@@ -25,7 +25,7 @@ Falta de visão consolidada das finanças pessoais: gastos acima do planejado s�
 
 ## 4. Descrição geral
 
-SPA executada no navegador, sem backend nesta fase. Os dados ficam no `localStorage` por meio de uma camada de repositórios preparada para troca futura por uma API. Seis módulos principais (Visão Geral, Lançamentos, Categorias/Gastos, Assinaturas, Metas, Relatórios) compartilham um único estado financeiro; qualquer alteração é refletida imediatamente em todos eles.
+SPA executada no navegador, sem backend nesta fase. Os dados ficam no `localStorage` por meio de uma camada de repositórios preparada para troca futura por uma API. Sete módulos principais (Visão Geral, Lançamentos, Categorias/Gastos, Assinaturas, Agiotagem, Metas, Relatórios) compartilham um único estado financeiro; qualquer alteração é refletida imediatamente em todos eles.
 
 ## 5. Auditoria da pasta `App_Financas_Layout`
 
@@ -111,7 +111,7 @@ Money_APP/
 │   │   ├── charts/           # BarChart (agrupado/empilhado), DonutChart, LineChart
 │   │   └── forms/            # campos reutilizáveis (MoneyField, Field, Select)
 │   ├── modules/
-│   │   ├── dashboard/  transactions/  categories/  subscriptions/  goals/  reports/  settings/  onboarding/
+│   │   ├── dashboard/  transactions/  categories/  subscriptions/  loans/  goals/  reports/  settings/  onboarding/
 │   ├── domain/               # regras de negócio puras
 │   ├── services/             # storage, repositórios, exportação, importação de planilha (CSV), pwa (service worker, instalação)
 │   ├── store/                # estado global financeiro, dados iniciais e de demonstração
@@ -131,15 +131,16 @@ Money_APP/
 
 | Módulo | Responsabilidade |
 |---|---|
-| **Visão Geral** (`modules/dashboard`) | Saldo disponível (descontados os aportes em metas), resumo do mês (receitas, despesas, poupança com variação vs mês anterior), atalho para novo lançamento, próximas cobranças, últimos lançamentos, metas em destaque, alertas compactos, gráfico semanal, gastos por categoria vs. limite, seletor de mês |
-| **Lançamentos** (`modules/transactions`) | Lançamento rápido (chips de categoria por uso, sugestões de descrição, "Salvar e adicionar outro"), CRUD de receitas/despesas, extrato agrupado por dia com total do dia, resumo do filtro, busca, filtros em chips (período, tipo, categoria), colunas no desktop, exportação CSV do filtro, duplicar, selo "Assinatura" nos lançamentos gerados |
+| **Visão Geral** (`modules/dashboard`) | Saldo disponível (descontados os aportes em metas), resumo do mês (receitas, despesas, poupança com variação vs mês anterior), indicador de "empréstimo a receber este mês" (v1.13.0), atalho para novo lançamento, próximas cobranças, últimos lançamentos, metas em destaque, alertas compactos, gráfico semanal, gastos por categoria vs. limite, seletor de mês |
+| **Lançamentos** (`modules/transactions`) | Lançamento rápido (chips de categoria por uso, sugestões de descrição, "Salvar e adicionar outro"), CRUD de receitas/despesas, **compra parcelada** (v1.13.0, DT-026: gera um lançamento por mês, valor por parcela), extrato agrupado por dia com total do dia, resumo do filtro, busca, filtros em chips (período, tipo, categoria), colunas no desktop, exportação CSV do filtro, duplicar, selos "Assinatura" / "Parcela i/N" / "Empréstimo" nos lançamentos gerados automaticamente |
 | **Categorias / Gastos** (`modules/categories`) | CRUD de categorias, limite mensal, gasto atual, % consumido, alertas de limite (com sininho por categoria para ligar/desligar, v1.12.0), teto global, filtro por grupo, bloco "Assinaturas do mês", reordenar por arrastar e soltar (v1.12.0) |
 | **Assinaturas** (`modules/subscriptions`) | CRUD de assinaturas mensais (nome, ícone, valor, dia de cobrança, categoria, primeiro/último mês, ativa/pausada, observação), sugestões rápidas, total mensal e estimativa anual, próxima cobrança, pausar/retomar, excluir mantendo ou não os lançamentos; componente do bloco "Assinaturas do mês" usado em Gastos |
+| **Agiotagem** (`modules/loans`, v1.13.0, DT-026) | CRUD de empréstimos a terceiros (para quem, valor por parcela/único, data do empréstimo, categoria de receita, pagamento único ou parcelado em N meses); registrar não debita o saldo; cada parcela esperada vira uma receita automaticamente quando o mês chega; lista com status por parcela (a receber/recebido), total a receber, excluir mantendo ou não os lançamentos |
 | **Metas** (`modules/goals`) | CRUD de metas, valor alvo/acumulado, prazo, progresso, aportes; lista primeiro e, depois, simulador de aporte mensal e cenários |
 | **Relatórios / Gráficos** (`modules/reports`) | Centrado nas metas: total guardado, aportes no período, aportes por mês por meta, evolução acumulada do total guardado, distribuição por meta, progresso e previsão de cada meta, estado vazio com atalho para Metas. Secundário: receitas × despesas por mês, distribuição por categoria, comparação com período anterior (inclui aportes), hábitos de gastos, exportação CSV/PDF |
 | **Boas-vindas** (`modules/onboarding`) | Tela do primeiro acesso ("Como prefere ser chamado?": nome obrigatório e renda mensal opcional) e `OnboardingGate`, que mostra o carregamento e redireciona entre boas-vindas e app conforme `settings.onboardingCompleted` |
 | **Ajustes** (`modules/settings`) | Perfil (nome e renda mensal), Aparência (tema de cores com prévia, modo claro/escuro/automático, tamanho do texto, ocultar valores), gerenciamento de categorias (lista, criar, editar, excluir, restaurar padrão), instalar app (PWA), planilha (exportar CSV e importar CSV com prévia), carregar dados de demonstração, apagar dados (recriando as categorias padrão), exportar/importar backup JSON |
-| **Mais** (`modules/more`, v1.8.0, DT-021) | Hub da navegação (`/mais`), acessível só pela barra inferior do mobile: agrupa Gastos/Categorias e Assinaturas ("Dinheiro saindo"), Gráficos/Relatórios ("Acompanhar") e Ajustes ("Conta"), cada um com ícone, nome e descrição curta |
+| **Mais** (`modules/more`, v1.8.0, DT-021) | Hub da navegação (`/mais`), acessível só pela barra inferior do mobile: agrupa Gastos/Categorias, Assinaturas e Agiotagem ("Dinheiro saindo"), Gráficos/Relatórios ("Acompanhar") e Ajustes ("Conta"), cada um com ícone, nome e descrição curta |
 | Design System (`design-system`, `theme`) | Tokens dos modos claro/escuro, paletas (`palettes.css`), escala tipográfica; modo, paleta e tamanho do texto com persistência (DT-019) |
 | Persistência (`services`) | Leitura/gravação segura e versionada dos dados; importação de planilha CSV (`services/import`, DT-020) |
 
@@ -166,6 +167,7 @@ Money_APP/
 - **Sugestão de fixo/recorrente** (v1.9.0, regra 59): ao criar uma despesa, se valor (±10%) e descrição (sem acento/maiúsculas) forem parecidos com uma despesa da mesma categoria no mês anterior, aparece "Marcar como fixo", que cria uma assinatura com os dados do lançamento (os meses seguintes passam a ser gerados automaticamente, como em Assinaturas). Só em lançamentos novos (não na edição); ignora lançamentos já vinculados a uma assinatura.
 - Extrato agrupado por dia com a contagem de itens e o total do dia; **resumo do filtro** com entradas, saídas e saldo do que está filtrado (regra 55).
 - **Seletor de mês** (v1.10.0, regra 60, DT-023): o mesmo `MonthSwitcher` da Visão Geral/Categorias/Relatórios aparece como ação do cabeçalho; os filtros "Mês selecionado" e "Mês anterior ao selecionado" seguem o mês navegado (compartilhado entre as telas), em vez do dia real do sistema.
+- **Compra parcelada** (v1.13.0, regra 61, DT-026): no formulário, um checkbox "Compra parcelada?" (só para despesas, só em lançamentos novos) revela "Primeira parcela" (mês/ano) e "Quantidade de parcelas" (2 a 60). O valor digitado é o de cada parcela; ao salvar, são criados N lançamentos (um por mês, mesmo dia da primeira parcela, mesma categoria/descrição/observação), com a descrição sufixada "(i/N)" e vinculados pelo mesmo grupo. Cada parcela aparece e se edita/exclui no Extrato como um lançamento comum, independente das demais.
 - Busca por descrição/categoria/observação; filtros em **chips**: período (mês selecionado, 7 dias, mês anterior ao selecionado, todos), tipo e categoria (ao escolher um tipo, só aparecem as categorias desse tipo); "Limpar filtros"; estado vazio com "limpar filtros" ou, sem filtros, o convite "Seu extrato começa aqui" com "Novo lançamento".
 - Desktop (≥ 1024 px): linhas em colunas Descrição | Categoria | Valor, com cabeçalho, como numa planilha.
 - "Exportar CSV" exporta exatamente os lançamentos filtrados.
@@ -215,6 +217,15 @@ Money_APP/
 - **Ajustes → Aparência**: 5 temas de cores com prévia (Esmeralda, Oceano, Ametista, Pôr do sol, Grafite), modo Claro / Escuro / Automático, tamanho do texto Normal / Grande, "Ocultar valores".
 - O botão sol/lua do cabeçalho continua alternando claro/escuro, mantendo a paleta.
 - **Ajustes → Seus dados → Planilha (CSV)**: "Exportar para planilha" (todos os lançamentos, do mais recente ao mais antigo) e "Importar de planilha" (instruções, escolha do arquivo, prévia com contadores, linhas inválidas com motivo, "Importar N lançamentos"). Backup completo (JSON) em grupo próprio.
+
+### 10.8 Agiotagem (v1.13.0, DT-026)
+- Aba própria (`/agiotagem`), acessível pela navegação lateral e pelo hub "Mais" no mobile (grupo "Dinheiro saindo").
+- Cadastro: para quem (nome livre), valor (de cada parcela, ou único), categoria de receita (sugestão "Empréstimos", criada ao salvar o primeiro se ainda não existir), data do empréstimo e quando é esperado o pagamento — único mês ou parcelado (mesma UX de "primeira parcela + quantidade de parcelas" da seção 10.2, regra 61).
+- Registrar um empréstimo **não** debita o saldo nem gera lançamento algum no momento do registro.
+- Quando o mês do pagamento (ou de cada parcela) chega, uma receita é lançada automaticamente, do mesmo jeito que as cobranças de assinatura (regras 39–47), mas com total de parcelas sempre finito.
+- Lista de empréstimos com status (a receber / parcialmente recebido / recebido) e, quando parcelado, uma pílula por parcela indicando se já foi recebida; total "a receber" no topo.
+- Excluir com confirmação; opção de excluir também os lançamentos já gerados (padrão: manter).
+- Estado vazio com "Registrar empréstimo".
 
 ## 11. Regras de negócio
 
@@ -279,6 +290,8 @@ Money_APP/
 58. **Lembrete de assinatura chegando** (v1.9.0, DT-022): para cada cobrança prevista (ativa, ainda não lançada, não ignorada) com data entre hoje e os próximos 3 dias (inclusive), um alerta "`<nome>` desconta hoje/amanhã/em N dias (`<valor>`)", com link para Assinaturas. Entra em `buildAlerts` antes dos demais alertas (regra 51).
 59. **Sugestão de fixo/recorrente no lançamento rápido** (v1.9.0, DT-022): ao criar uma despesa, se existir uma despesa da mesma categoria no mês anterior com a mesma descrição (sem acento/maiúsculas) e valor dentro de ±10%, mostra "Marcar como fixo". Confirmar cria uma assinatura (nome = descrição, valor, categoria, dia de cobrança = dia da data informada, primeiro mês = mês da data informada); os meses seguintes são gerados automaticamente (regras 39–47). Não sugere na edição nem quando o lançamento comparado já é gerado por uma assinatura.
 60. **Seletor de mês no Extrato** (v1.10.0, DT-023): o Extrato ganha o mesmo `MonthSwitcher` da Visão Geral/Categorias/Relatórios; os filtros "Mês selecionado" e "Mês anterior ao selecionado" passam a usar o mês navegado nesse seletor compartilhado (`useSelectedMonth`), em vez do mês do calendário real.
+61. **Compra parcelada** (v1.13.0, DT-026): o valor digitado no lançamento é o valor de CADA parcela (não o total); ao marcar "Compra parcelada?" com primeira parcela e quantidade (2–60), são criados N lançamentos de despesa, um por mês a partir da primeira parcela, no mesmo dia do mês, mesma categoria/descrição/observação, com a descrição sufixada "(i/N)". Editar ou excluir uma parcela afeta só ela; não há exclusão em lote do grupo.
+62. **Agiotagem — empréstimos a terceiros** (v1.13.0, DT-026): registrar um empréstimo não altera o saldo nem gera lançamento. O valor informado é o de cada parcela (ou o valor único, se não parcelado). Quando o mês do pagamento esperado chega (≤ hoje), uma receita é lançada automaticamente na categoria escolhida (mesma mecânica idempotente das cobranças de assinatura, regras 39 e 41, mas com quantidade de parcelas sempre finita, nunca uma assinatura). Excluir o lançamento gerado marca o mês como ignorado, como na regra 42.
 
 ## 12. Fluxos de navegação
 
@@ -291,11 +304,13 @@ Ajustes → Planilha (CSV) → "Exportar para planilha" (download) · "Importar 
 Novo lançamento → valor → chip de categoria → descrição (sugestões) → "Adicionar lançamento" ou "Salvar e adicionar outro" (repete)
 Início → "Últimos lançamentos" → tocar → edição · "Ver extrato" → Lançamentos · "Próximas cobranças" → Assinaturas · "Suas metas" → Metas
 Ajustes → "Instalar app" → diálogo do navegador (ou instruções no iPhone)
-Navegação lateral (desktop, ≥ 1024 px): Visão Geral ⇄ Lançamentos (Extrato) ⇄ Categorias (Gastos) ⇄ Assinaturas ⇄ Metas ⇄ Relatórios (Gráficos) ⇄ Ajustes, todos visíveis ao mesmo tempo
-Navegação inferior (mobile, v1.8.0, DT-021): Visão Geral ⇄ Lançamentos (Extrato) ⇄ Metas ⇄ Mais (hub) → Gastos (Categorias) / Assinaturas / Relatórios (Gráficos) / Ajustes
-Abrir app / voltar para ele → cobranças de assinaturas vencidas são lançadas como despesas
+Navegação lateral (desktop, ≥ 1024 px): Visão Geral ⇄ Lançamentos (Extrato) ⇄ Categorias (Gastos) ⇄ Assinaturas ⇄ Metas ⇄ Relatórios (Gráficos) ⇄ Agiotagem ⇄ Ajustes, todos visíveis ao mesmo tempo
+Navegação inferior (mobile, v1.8.0, DT-021): Visão Geral ⇄ Lançamentos (Extrato) ⇄ Metas ⇄ Mais (hub) → Gastos (Categorias) / Assinaturas / Agiotagem / Relatórios (Gráficos) / Ajustes
+Abrir app / voltar para ele → cobranças de assinaturas vencidas são lançadas como despesas e parcelas de empréstimos vencidas são lançadas como receitas
 Assinaturas → "Adicionar assinatura" / "Nova assinatura" → formulário (sugestões rápidas) → salvar → cobranças até hoje lançadas · Pausar/Retomar · Editar → Excluir (manter ou não os lançamentos)
 Gastos → bloco "Assinaturas do mês" → "Gerenciar" → Assinaturas
+Novo lançamento → "Compra parcelada?" → Primeira parcela + quantidade → salvar → N parcelas criadas no Extrato
+Agiotagem → "Registrar empréstimo" / "Novo empréstimo" → formulário (único ou parcelado) → salvar → parcelas vencidas já lançadas como receita · Editar → Excluir (manter ou não os lançamentos)
 Cabeçalho: alternar tema · notificações (lista de alertas) · Ajustes
 Visão Geral → "Novo Lançamento" → formulário (sheet, data sugerida no mês selecionado) → salvar → todos os módulos recalculam
 Visão Geral → "Editar tetos" → Categorias
@@ -342,9 +357,10 @@ Escala tipográfica `--text-2xs` (11 px) a `--text-2xl` (24 px), espaçamentos `
 ## 15. Armazenamento e persistência
 
 - `StorageAdapter` (get/set/remove de JSON) com implementações `LocalStorageAdapter` (produção) e `MemoryStorageAdapter` (testes/fallback quando o storage estiver indisponível).
-- Chave única versionada `money-app:data:v1` com `{ schemaVersion, transactions, categories, goals, subscriptions, settings }`.
-- Repositórios assíncronos (transações, categorias, metas, assinaturas e preferências) — a UI nunca acessa o storage diretamente.
+- Chave única versionada `money-app:data:v1` com `{ schemaVersion, transactions, categories, goals, subscriptions, loans, settings }`.
+- Repositórios assíncronos (transações, categorias, metas, assinaturas, empréstimos e preferências) — a UI nunca acessa o storage diretamente.
 - Assinaturas (v1.6.0): documentos e backups sem `subscriptions` carregam com lista vazia; cada assinatura é validada (valor em centavos, dia 1–31, mês `AAAA-MM`) e saneada (`active`, `endMonth`, `skippedMonths`, `notes`); lançamentos com `subscriptionId`/`subscriptionMonth` inválidos tornam o documento inválido. O backup JSON inclui as assinaturas.
+- Empréstimos (v1.13.0, DT-026): documentos e backups sem `loans` carregam com lista vazia; cada empréstimo é validado (valor em centavos, `installmentTotal` ≥ 1, mês `AAAA-MM`) e saneado (`skippedMonths`, `notes`); lançamentos com `installmentGroupId`/`installmentIndex`/`installmentTotal`/`loanId`/`loanMonth` inválidos tornam o documento inválido. O backup JSON inclui os empréstimos.
 - Erros de leitura (JSON corrompido) → dados preservados em chave de backup e app inicia vazio com aviso; erros de gravação (cota) → toast de erro, estado não é perdido em memória.
 - Nenhum dado sensível (senhas, documentos) é armazenado.
 - Preferências (`settings`) são saneadas campo a campo na leitura (`sanitizeSettings` em `FinanceDocument.ts`): ausentes ou inválidos recebem o padrão (migração da v1.4.0, regra 31); campos que não existem mais, como o antigo `savingsTarget`, são descartados (regra 38). O `schemaVersion` continua 1.
@@ -380,6 +396,8 @@ Escala tipográfica `--text-2xs` (11 px) a `--text-2xl` (24 px), espaçamentos `
 | RF-20 | Lançamento rápido: categorias por uso em chips, sugestões de descrição com categoria, "Salvar e adicionar outro" |
 | RF-21 | Início com próximas cobranças, últimos lançamentos, metas em destaque e alertas compactos |
 | RF-22 | Exportar lançamentos para CSV (Ajustes e Extrato filtrado) e importar CSV de planilha com prévia |
+| RF-23 | Marcar um lançamento como compra parcelada (primeira parcela + quantidade), gerando um lançamento por mês com o valor de cada parcela |
+| RF-24 | Cadastrar, editar e excluir empréstimos a terceiros (Agiotagem), com pagamento único ou parcelado, sem afetar o saldo no registro e com a receita lançada automaticamente no mês esperado |
 
 ## 18. Requisitos não funcionais
 
@@ -517,6 +535,12 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 - ✅ Migração aditiva: categorias salvas antes desta versão recebem `alertsEnabled: true` e `order` pela posição em que já estavam salvas.
 - ✅ 238 testes automatizados (7 novos: 1 em `tests/domain.test.ts` para o alerta suprimido por `alertsEnabled`, 3 em `tests/domain.test.ts` para `sortCategories`/`reorderCategories`, 1 em `tests/persistence.test.ts` para a migração, 2 em `tests/categoryAlerts.test.tsx` para o sino e o switch do formulário).
 
+### Concluído (v1.13.0 — testado automaticamente)
+- ✅ Compra parcelada no lançamento (regra 61, DT-026): checkbox "Compra parcelada?" (despesas, lançamentos novos) com "Primeira parcela" e "Quantidade de parcelas" (2–60); `saveInstallmentPurchase` gera um lançamento por mês com o valor de cada parcela, descrição sufixada "(i/N)", editável/excluível parcela a parcela.
+- ✅ Aba Agiotagem (regra 62, DT-026): CRUD de empréstimos a terceiros (`modules/loans`), pagamento único ou parcelado; registrar não debita o saldo; `syncLoanPayments` lança a receita automaticamente quando o mês do pagamento chega; categoria "Empréstimos" criada sob demanda; navegação lateral e hub "Mais" (mobile) com o novo destino, ícone `theater_comedy`.
+- ✅ Indicador "Empréstimo a receber" no Início quando há parcelas esperadas no mês selecionado.
+- ✅ 251 testes automatizados (13 novos em `tests/installmentsAndLoans.test.ts`; `tests/navigation.test.tsx` ajustado para o novo destino).
+
 ### Em desenvolvimento
 - Nenhum.
 
@@ -549,11 +573,12 @@ Legenda: ✅ Concluído · 🔄 Em desenvolvimento · ⏳ Pendente · ⛔ Bloque
 - Importação CSV: sem mapeamento manual de colunas/categorias; planilhas só com valores positivos e sem coluna Tipo viram receitas; arquivos em ANSI (Excel antigo) podem trazer acentos trocados.
 - As preferências de aparência não fazem parte do backup JSON (são do dispositivo).
 - Navegação v1.8.0 (DT-021): Gastos, Assinaturas e Gráficos passam a exigir 2 toques no mobile (Mais → destino) em vez de 1; não foi conferida visualmente no navegador real (320–430 px), só em jsdom.
+- Compra parcelada e Agiotagem (v1.13.0): validadas em jsdom e por build; a aparência real do ícone `theater_comedy` (Material Symbols) e o layout da aba Agiotagem/checkbox de parcelamento **não foram conferidos visualmente no navegador**. Editar o valor/categoria de uma parcela ou de um pagamento de empréstimo já lançado não propaga para as demais parcelas do mesmo grupo (decisão de UX, DT-026) — quem quiser corrigir todas precisa editar uma a uma. A categoria "Empréstimos" não entra nas categorias padrão do primeiro acesso nem na demonstração.
 
 ### Próximas etapas (sugestões)
 1. Conferir visualmente a v1.7.0 no navegador (5 temas × claro/escuro, 320–430 px e 1366 px) e medir os contrastes com uma ferramenta (axe/Lighthouse).
 2. Importação CSV: escolher o tipo padrão (despesa) para planilhas só com valores positivos e mapear categorias desconhecidas na prévia.
 3. Fontes e ícones locais (hoje do Google Fonts) para uso offline completo do PWA; aviso de "nova versão disponível".
-4. Lançamentos recorrentes genéricos (receitas fixas, contas) e parcelados — as assinaturas (v1.6.0) já cobrem despesas mensais recorrentes; avaliar generalizar `domain/subscriptions`.
+4. Lançamentos recorrentes genéricos para receitas fixas (ex.: salário) — as assinaturas (v1.6.0) cobrem despesas recorrentes e a compra parcelada/Agiotagem (v1.13.0) cobre os casos finitos; falta um caso de receita mensal recorrente e infinita.
 5. Testes E2E com Playwright (incluindo verificação de layout sem scroll horizontal em 320 px).
 6. Backend e sincronização (trocar os repositórios por implementações HTTP).

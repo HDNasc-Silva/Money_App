@@ -16,6 +16,7 @@ import { BalanceCard } from './BalanceCard';
 import { CategorySpendingCard } from './CategorySpendingCard';
 import styles from './Dashboard.module.css';
 import { GoalsHighlightCard } from './GoalsHighlightCard';
+import { LoanReceivableCard } from './LoanReceivableCard';
 import { MetricCards } from './MetricCards';
 import { ProjectedBalanceCard } from './ProjectedBalanceCard';
 import { RecentTransactionsCard } from './RecentTransactionsCard';
@@ -60,6 +61,7 @@ export function DashboardPage() {
             projected={isFuture}
             projectedSubscriptions={dashboard.projectedSubscriptions}
           />
+          <LoanReceivableCard amount={dashboard.loansReceivableThisMonth} />
           <MetricCards
             summary={summary}
             incomeChange={dashboard.incomeChange}

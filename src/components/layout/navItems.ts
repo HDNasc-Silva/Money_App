@@ -15,6 +15,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { to: '/assinaturas', label: 'Assinaturas', shortLabel: 'Assinaturas', icon: 'subscriptions', title: 'Assinaturas' },
   { to: '/metas', label: 'Metas', shortLabel: 'Metas', icon: 'flag', title: 'Metas' },
   { to: '/relatorios', label: 'Relatórios', shortLabel: 'Gráficos', icon: 'analytics', title: 'Relatórios' },
+  { to: '/agiotagem', label: 'Agiotagem', shortLabel: 'Agiotagem', icon: 'theater_comedy', title: 'Agiotagem' },
 ];
 
 export const SETTINGS_ITEM: NavItem = {
@@ -60,6 +61,7 @@ export const MORE_NAV_GROUPS: readonly MoreNavGroup[] = [
     entries: [
       { item: NAV_ITEMS[2]!, description: 'Limites por categoria e gasto do mês' },
       { item: NAV_ITEMS[3]!, description: 'Cobranças recorrentes e próximos vencimentos' },
+      { item: NAV_ITEMS[6]!, description: 'Empréstimos a terceiros e pagamentos esperados' },
     ],
   },
   {

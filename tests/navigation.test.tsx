@@ -16,6 +16,7 @@ function setup(path = '/') {
     categories,
     goals: [],
     subscriptions: [],
+    loans: [],
     settings: { ...DEFAULT_SETTINGS },
   };
   const adapter = new MemoryStorageAdapter();
@@ -82,13 +83,14 @@ describe('navegação (DT-021)', () => {
     expect(within(main).getByRole('link', { name: /Categorias/ })).toBeInTheDocument();
     expect(within(main).getByRole('link', { name: /Assinaturas/ })).toBeInTheDocument();
     expect(within(main).getByRole('link', { name: /Relatórios/ })).toBeInTheDocument();
+    expect(within(main).getByRole('link', { name: /Agiotagem/ })).toBeInTheDocument();
     expect(within(main).getByRole('link', { name: /Ajustes/ })).toBeInTheDocument();
 
     await user.click(within(main).getByRole('link', { name: /Assinaturas/ }));
     await screen.findByRole('heading', { name: 'Assinaturas' });
   });
 
-  it('a navegação lateral continua com todos os 6 destinos e Ajustes', async () => {
+  it('a navegação lateral continua com todos os destinos e Ajustes', async () => {
     setup();
     const nav = sideNavOf(await waitForNavs());
     const links = within(nav).getAllByRole('link');
@@ -99,6 +101,7 @@ describe('navegação (DT-021)', () => {
       'subscriptionsAssinaturas',
       'flagMetas',
       'analyticsRelatórios',
+      'theater_comedyAgiotagem',
       'tuneAjustes',
     ]);
   });

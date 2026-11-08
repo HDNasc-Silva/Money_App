@@ -13,6 +13,13 @@ import { fromReais } from '@/utils/money';
 export const SUBSCRIPTIONS_CATEGORY_ID = 'cat-subscriptions';
 export const SUBSCRIPTIONS_CATEGORY_NAME = 'Assinaturas';
 
+/**
+ * Categoria de receita sugerida para os pagamentos de empréstimos (Agiotagem, v1.13.0, DT-026).
+ * Diferente de "Assinaturas", não faz parte das categorias padrão criadas desde o início: só é
+ * criada quando o primeiro empréstimo é salvo (evita surpreender quem já usa o app).
+ */
+export const LOANS_CATEGORY_NAME = 'Empréstimos';
+
 interface DefaultCategoryDefinition {
   id: string;
   name: string;
@@ -83,4 +90,29 @@ export function subscriptionsCategoryToCreate(
   newId: () => string,
 ): Category | null {
   return missingDefaultCategories(existing, createdAt, newId).find((c) => c.name === SUBSCRIPTIONS_CATEGORY_NAME) ?? null;
+}
+
+/** Categoria de receita chamada "Empréstimos" (sem acento e sem diferenciar maiúsculas), se existir. */
+export function findLoansCategory(categories: readonly Category[]): Category | undefined {
+  const key = nameKey('income', LOANS_CATEGORY_NAME);
+  return categories.find((c) => nameKey(c.kind, c.name) === key);
+}
+
+/** A categoria "Empréstimos" pronta para ser criada (sob demanda, ao salvar o primeiro empréstimo). */
+export function loansCategoryToCreate(existing: readonly Category[], createdAt: string, newId: () => string): Category {
+  const nextOrder = existing.reduce((max, c) => Math.max(max, c.order), -1) + 1;
+  const ids = new Set(existing.map((c) => c.id));
+  const id = ids.has('cat-loans') ? newId() : 'cat-loans';
+  return {
+    id,
+    name: LOANS_CATEGORY_NAME,
+    description: 'Parcelas e pagamentos únicos recebidos de empréstimos a terceiros',
+    icon: 'theater_comedy',
+    kind: 'income',
+    group: 'lifestyle',
+    monthlyLimit: null,
+    alertsEnabled: true,
+    order: nextOrder,
+    createdAt,
+  };
 }

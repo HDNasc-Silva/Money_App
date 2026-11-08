@@ -21,6 +21,19 @@ export interface Transaction {
   subscriptionId?: string;
   /** Mês de referência da cobrança gerada; chave de idempotência junto com `subscriptionId`. */
   subscriptionMonth?: MonthKey;
+  /**
+   * Compra parcelada (DT-026): identifica o grupo de parcelas geradas juntas. Cada parcela é um
+   * `Transaction` independente — editar ou excluir uma não afeta as demais.
+   */
+  installmentGroupId?: string;
+  /** Posição da parcela (1-based) dentro do grupo. */
+  installmentIndex?: number;
+  /** Quantidade total de parcelas do grupo. */
+  installmentTotal?: number;
+  /** Empréstimo (Agiotagem, DT-026) que gerou esta receita automaticamente. Ausente em lançamentos manuais. */
+  loanId?: string;
+  /** Mês de referência da parcela do empréstimo; chave de idempotência junto com `loanId`. */
+  loanMonth?: MonthKey;
   createdAt: string;
   updatedAt: string;
 }
@@ -46,6 +59,34 @@ export interface Subscription {
   /** Último mês cobrado (assinatura cancelada); `null` = sem fim. */
   endMonth: MonthKey | null;
   /** Meses que não devem ser lançados: lançamento excluído pelo usuário ou cobrança durante a pausa. */
+  skippedMonths: MonthKey[];
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Empréstimo informal a terceiros ("Agiotagem", DT-026): registro de que um valor foi
+ * emprestado e de quando ele deve voltar — em um único mês ou parcelado em N meses. Não debita
+ * o saldo ao ser criado (o dinheiro já tinha saído do bolso antes do app existir); cada parcela
+ * gera uma receita real quando o mês do pagamento chega (mesmo padrão de materialização das
+ * assinaturas, DT-017, mas finito).
+ */
+export interface Loan {
+  id: string;
+  /** Nome livre de quem pegou o dinheiro. */
+  borrower: string;
+  /** Valor de CADA parcela (ou o valor único, quando `installmentTotal` é 1). */
+  amount: Cents;
+  /** Categoria de receita dos lançamentos gerados quando as parcelas são recebidas. */
+  categoryId: string;
+  /** Data em que o dinheiro foi emprestado (apenas registro; não gera lançamento). */
+  loanDate: IsoDate;
+  /** Primeiro mês em que o pagamento é esperado. */
+  firstMonth: MonthKey;
+  /** Quantidade de parcelas esperadas; `1` = pagamento único. */
+  installmentTotal: number;
+  /** Meses que não devem ser lançados (o usuário excluiu o lançamento gerado). */
   skippedMonths: MonthKey[];
   notes?: string;
   createdAt: string;
@@ -109,6 +150,8 @@ export interface FinanceData {
   categories: Category[];
   goals: Goal[];
   subscriptions: Subscription[];
+  /** Empréstimos a terceiros ("Agiotagem", DT-026). */
+  loans: Loan[];
   settings: Settings;
 }
 
@@ -138,5 +181,6 @@ export const EMPTY_DATA: FinanceData = {
   categories: [],
   goals: [],
   subscriptions: [],
+  loans: [],
   settings: DEFAULT_SETTINGS,
 };

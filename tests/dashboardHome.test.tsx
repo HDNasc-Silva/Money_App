@@ -48,6 +48,7 @@ function renderHome(data: Partial<FinanceData>) {
       categories,
       goals: [],
       subscriptions: [],
+      loans: [],
       settings: { ...DEFAULT_SETTINGS, userName: 'Ana' },
       ...data,
     }),

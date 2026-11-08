@@ -3,6 +3,7 @@ import { AppShell } from '@/components/layout/AppShell';
 import { CategoriesPage } from '@/modules/categories/CategoriesPage';
 import { DashboardPage } from '@/modules/dashboard/DashboardPage';
 import { GoalsPage } from '@/modules/goals/GoalsPage';
+import { LoansPage } from '@/modules/loans/LoansPage';
 import { MorePage } from '@/modules/more/MorePage';
 import { ONBOARDING_PATH, OnboardingGate } from '@/modules/onboarding/OnboardingGate';
 import { OnboardingPage } from '@/modules/onboarding/OnboardingPage';
@@ -24,6 +25,7 @@ export function AppRoutes() {
           <Route path="assinaturas" element={<SubscriptionsPage />} />
           <Route path="metas" element={<GoalsPage />} />
           <Route path="relatorios" element={<ReportsPage />} />
+          <Route path="agiotagem" element={<LoansPage />} />
           <Route path="ajustes" element={<SettingsPage />} />
           <Route path="mais" element={<MorePage />} />
           <Route path="*" element={<Navigate to="/" replace />} />

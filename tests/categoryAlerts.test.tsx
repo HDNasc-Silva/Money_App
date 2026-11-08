@@ -12,7 +12,7 @@ import { buildDefaultCategories } from '@/store/defaultCategories';
 
 function renderCategories(categories: Category[]) {
   const adapter = new MemoryStorageAdapter();
-  const data: FinanceData = { transactions: [], categories, goals: [], subscriptions: [], settings: { ...DEFAULT_SETTINGS, userName: 'Ana' } };
+  const data: FinanceData = { transactions: [], categories, goals: [], subscriptions: [], loans: [], settings: { ...DEFAULT_SETTINGS, userName: 'Ana' } };
   adapter.write(DATA_KEY, serializeFinanceData(data));
   const user = userEvent.setup();
   render(

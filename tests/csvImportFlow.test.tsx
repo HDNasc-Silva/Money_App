@@ -16,6 +16,7 @@ function setup() {
     categories,
     goals: [],
     subscriptions: [],
+    loans: [],
     settings: { ...DEFAULT_SETTINGS, userName: 'Ana' },
   };
   const adapter = new MemoryStorageAdapter();

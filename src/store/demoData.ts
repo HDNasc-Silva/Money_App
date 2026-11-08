@@ -178,6 +178,7 @@ export function buildDemoData(today: IsoDate): FinanceData {
     transactions: withSubscriptions.transactions,
     categories: DEMO_CATEGORIES,
     subscriptions: withSubscriptions.subscriptions,
+    loans: [],
     goals: [
       goal('goal-emergency', 'Reserva de Emergência', 'Segurança Financeira', 'shield', 10000, 4500, 500, `${year + 1}-06-30`, contributions('emergency', 500, [5, 4, 3, 2, 1, 0])),
       goal('goal-trip', 'Viagem de Férias', 'Lazer & Descanso', 'flight_takeoff', 6000, 2000, 400, `${year + 1}-07-31`, contributions('trip', 400, [4, 3, 2, 1])),

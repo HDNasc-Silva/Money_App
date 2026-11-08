@@ -5,12 +5,15 @@ import {
   type Cents,
   type Goal,
   type IsoDate,
+  type Loan,
   type MonthKey,
   type Settings,
   type Subscription,
   type Transaction,
   type TransactionType,
 } from '@/models';
+import { INSTALLMENT_COUNT_MAX, INSTALLMENT_COUNT_MIN } from '@/domain/installments';
+import { INSTALLMENT_COUNT_MAX as LOAN_INSTALLMENT_MAX, INSTALLMENT_COUNT_MIN as LOAN_INSTALLMENT_MIN } from '@/domain/loans';
 import { maxPlanningDate, maxPlanningMonth } from '@/domain/periods';
 import { BILLING_DAY_MAX, BILLING_DAY_MIN, SUBSCRIPTION_BACKFILL_MONTHS } from '@/domain/subscriptions';
 import { addMonths, formatDateBr, formatMonthLabel, isValidIso, monthKeyOf } from '@/utils/dates';
@@ -26,6 +29,8 @@ export type ValidationResult<T, K extends string> =
 const DESCRIPTION_MAX = 80;
 const NAME_MAX = 40;
 const NOTE_MAX = 200;
+
+const isMonthInput = (value: string) => /^\d{4}-(0[1-9]|1[0-2])$/.test(value);
 
 function validateAmount(raw: string, { allowZero = false } = {}): { value?: Cents; error?: string } {
   const value = parseMoney(raw);
@@ -52,10 +57,49 @@ export interface TransactionFormValues {
   date: string;
   categoryId: string;
   note: string;
+  /** Compra parcelada (DT-026): o valor acima é o de CADA parcela, não o total. */
+  installmentEnabled: boolean;
+  /** Mês da primeira parcela (seletor mês/ano). */
+  installmentFirstMonth: string;
+  /** Quantidade de parcelas (texto, validado por `validateInstallmentPlan`). */
+  installmentCount: string;
 }
 
 export type TransactionDraft = Pick<Transaction, 'type' | 'description' | 'amount' | 'date' | 'categoryId' | 'note'>;
 type TransactionField = keyof TransactionFormValues;
+
+export interface InstallmentPlanDraft {
+  firstMonth: MonthKey;
+  count: number;
+}
+
+type InstallmentPlanField = 'installmentFirstMonth' | 'installmentCount';
+
+/**
+ * Plano de parcelamento (compra parcelada, DT-026, ou pagamento parcelado de um empréstimo):
+ * primeira parcela até o mês limite de planejamento; quantidade entre `min` e `max` parcelas.
+ */
+export function validateInstallmentPlan(
+  firstMonth: string,
+  countRaw: string,
+  today: IsoDate,
+  bounds: { min: number; max: number } = { min: INSTALLMENT_COUNT_MIN, max: INSTALLMENT_COUNT_MAX },
+): ValidationResult<InstallmentPlanDraft, InstallmentPlanField> {
+  const errors: FieldErrors<InstallmentPlanField> = {};
+
+  if (!isMonthInput(firstMonth)) errors.installmentFirstMonth = 'Informe um mês válido.';
+  else if (firstMonth > maxPlanningMonth(today)) {
+    errors.installmentFirstMonth = `O mês da primeira parcela deve ser até ${formatMonthLabel(maxPlanningMonth(today))}.`;
+  }
+
+  const count = Number(countRaw);
+  if (!/^\d+$/.test(countRaw.trim()) || count < bounds.min || count > bounds.max) {
+    errors.installmentCount = `Informe um número de parcelas entre ${bounds.min} e ${bounds.max}.`;
+  }
+
+  if (Object.keys(errors).length > 0) return { ok: false, errors };
+  return { ok: true, value: { firstMonth, count } };
+}
 
 /**
  * Datas futuras são aceitas (planejamento), até o fim do mês limite
@@ -292,8 +336,6 @@ export type SubscriptionDraft = Pick<
 >;
 type SubscriptionField = keyof SubscriptionFormValues;
 
-const isMonthInput = (value: string) => /^\d{4}-(0[1-9]|1[0-2])$/.test(value);
-
 /**
  * Primeiro mês: no máximo `SUBSCRIPTION_BACKFILL_MONTHS` meses atrás (as cobranças desses meses são
  * lançadas ao salvar) e no máximo o mês limite de planejamento. Último mês opcional, ≥ primeiro mês.
@@ -378,4 +420,76 @@ export function validateContribution(
   if (!isValidIso(values.date)) errors.date = 'Informe uma data válida.';
   if (Object.keys(errors).length > 0) return { ok: false, errors };
   return { ok: true, value: { amount: amount.value as Cents, date: values.date } };
+}
+
+/* ---------- Empréstimo (Agiotagem) ---------- */
+
+/** Valor especial do campo de categoria: "criar a categoria padrão Empréstimos ao salvar". */
+export const CREATE_LOANS_CATEGORY = '__create-loans-category__';
+
+export type LoanPaymentMode = 'single' | 'installments';
+
+export interface LoanFormValues {
+  borrower: string;
+  amount: string;
+  categoryId: string;
+  loanDate: string;
+  paymentMode: LoanPaymentMode;
+  /** Mês do pagamento único, ou da primeira parcela quando `paymentMode === 'installments'`. */
+  firstMonth: string;
+  /** Quantidade de parcelas; ignorado quando `paymentMode === 'single'` (vira 1). */
+  installmentCount: string;
+  notes: string;
+}
+
+export type LoanDraft = Pick<Loan, 'borrower' | 'amount' | 'categoryId' | 'loanDate' | 'firstMonth' | 'installmentTotal' | 'notes'>;
+type LoanField = keyof LoanFormValues;
+
+/**
+ * Empréstimo a terceiros (DT-026): nome de quem pegou o dinheiro, valor (de CADA parcela, quando
+ * parcelado), data do empréstimo, categoria de receita e quando é esperado o pagamento — um único
+ * mês ou parcelado (reaproveita os mesmos limites de `validateInstallmentPlan`).
+ */
+export function validateLoan(values: LoanFormValues, categories: readonly Category[], today: IsoDate): ValidationResult<LoanDraft, LoanField> {
+  const errors: FieldErrors<LoanField> = {};
+
+  const borrower = validateText(values.borrower, 'Nome', NAME_MAX);
+  if (borrower.error) errors.borrower = borrower.error;
+
+  const amount = validateAmount(values.amount);
+  if (amount.error) errors.amount = amount.error;
+
+  if (!isValidIso(values.loanDate)) errors.loanDate = 'Informe uma data válida.';
+
+  if (values.categoryId !== CREATE_LOANS_CATEGORY) {
+    const category = categories.find((c) => c.id === values.categoryId);
+    if (!category) errors.categoryId = 'Selecione uma categoria.';
+    else if (category.kind !== 'income') errors.categoryId = 'Escolha uma categoria de receita.';
+  }
+
+  const installmentBounds =
+    values.paymentMode === 'single' ? { min: 1, max: 1 } : { min: LOAN_INSTALLMENT_MIN + 1, max: LOAN_INSTALLMENT_MAX };
+  const countInput = values.paymentMode === 'single' ? '1' : values.installmentCount;
+  const plan = validateInstallmentPlan(values.firstMonth, countInput, today, installmentBounds);
+  if (!plan.ok) {
+    if (plan.errors.installmentFirstMonth) errors.firstMonth = plan.errors.installmentFirstMonth;
+    if (plan.errors.installmentCount) errors.installmentCount = plan.errors.installmentCount;
+  }
+
+  const notes = validateText(values.notes, 'Observação', NOTE_MAX, false);
+  if (notes.error) errors.notes = notes.error;
+
+  if (Object.keys(errors).length > 0) return { ok: false, errors };
+  return {
+    ok: true,
+    value: {
+      borrower: borrower.value,
+      amount: amount.value as Cents,
+      categoryId: values.categoryId,
+      loanDate: values.loanDate,
+      firstMonth: plan.ok ? plan.value.firstMonth : values.firstMonth,
+      installmentTotal: plan.ok ? plan.value.count : 1,
+      notes: notes.value || undefined,
+    },
+  };
 }

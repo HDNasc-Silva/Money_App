@@ -1,4 +1,4 @@
-import { DEFAULT_SETTINGS, USER_NAME_MAX, type Category, type FinanceData, type Settings, type Subscription } from '@/models';
+import { DEFAULT_SETTINGS, USER_NAME_MAX, type Category, type FinanceData, type Loan, type Settings, type Subscription } from '@/models';
 import { MAX_AMOUNT } from '@/utils/money';
 import type { StorageAdapter } from './StorageAdapter';
 
@@ -6,10 +6,14 @@ export const DATA_KEY = 'money-app:data:v1';
 export const CORRUPTED_BACKUP_KEY = 'money-app:data:corrupted';
 export const SCHEMA_VERSION = 1;
 
-/** Documentos anteriores à v1.6.0 não têm `subscriptions` (migração: lista vazia). */
-interface StoredDocument extends Omit<FinanceData, 'subscriptions'> {
+/**
+ * Documentos anteriores à v1.6.0 não têm `subscriptions` e documentos anteriores à v1.13.0 não têm
+ * `loans` (migração: lista vazia em ambos — ver DT-026).
+ */
+interface StoredDocument extends Omit<FinanceData, 'subscriptions' | 'loans'> {
   schemaVersion: number;
   subscriptions?: unknown;
+  loans?: unknown;
 }
 
 export type LoadResult =
@@ -32,6 +36,7 @@ const CATEGORY_SHAPE: Shape = { id: 'string', name: 'string', icon: 'string', ki
 const GOAL_SHAPE: Shape = { id: 'string', name: 'string', icon: 'string', targetAmount: 'number', initialAmount: 'number', monthlyContribution: 'number', contributions: 'object' };
 
 const SUBSCRIPTION_SHAPE: Shape = { id: 'string', name: 'string', icon: 'string', amount: 'number', billingDay: 'number', categoryId: 'string', startMonth: 'string' };
+const LOAN_SHAPE: Shape = { id: 'string', borrower: 'string', amount: 'number', categoryId: 'string', loanDate: 'string', firstMonth: 'string', installmentTotal: 'number' };
 
 const MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/;
 const isMonthKey = (value: unknown): value is string => typeof value === 'string' && MONTH_PATTERN.test(value);
@@ -40,9 +45,15 @@ const isOptional = (value: unknown, check: (v: unknown) => boolean) => value ===
 const allMatch = (value: unknown, shape: Shape, check: (item: Record<string, unknown>) => boolean = () => true) =>
   Array.isArray(value) && value.every((item) => matches(item, shape) && check(item as Record<string, unknown>));
 
-/** Vínculo opcional com uma assinatura (v1.6.0): se presente, precisa ser coerente. */
+/** Vínculo opcional com uma assinatura (v1.6.0) e/ou com uma parcela ou empréstimo (v1.13.0, DT-026). */
 const hasValidSubscriptionLink = (t: Record<string, unknown>) =>
-  isOptional(t.subscriptionId, (v) => typeof v === 'string') && isOptional(t.subscriptionMonth, isMonthKey);
+  isOptional(t.subscriptionId, (v) => typeof v === 'string') &&
+  isOptional(t.subscriptionMonth, isMonthKey) &&
+  isOptional(t.installmentGroupId, (v) => typeof v === 'string') &&
+  isOptional(t.installmentIndex, (v) => Number.isInteger(v) && (v as number) >= 1) &&
+  isOptional(t.installmentTotal, (v) => Number.isInteger(v) && (v as number) >= 1) &&
+  isOptional(t.loanId, (v) => typeof v === 'string') &&
+  isOptional(t.loanMonth, isMonthKey);
 
 const isValidSubscription = (s: Record<string, unknown>) =>
   isIntegerCents(s.amount) &&
@@ -52,6 +63,13 @@ const isValidSubscription = (s: Record<string, unknown>) =>
   (s.billingDay as number) <= 31 &&
   isMonthKey(s.startMonth);
 
+const isValidLoan = (l: Record<string, unknown>) =>
+  isIntegerCents(l.amount) &&
+  (l.amount as number) <= MAX_AMOUNT &&
+  Number.isInteger(l.installmentTotal) &&
+  (l.installmentTotal as number) >= 1 &&
+  isMonthKey(l.firstMonth);
+
 /** Validação estrutural de dados vindos do storage ou de um backup importado (não confiáveis). */
 function isStoredDocument(value: unknown): value is StoredDocument {
   if (!isRecord(value) || typeof value.schemaVersion !== 'number' || !isRecord(value.settings)) return false;
@@ -59,7 +77,8 @@ function isStoredDocument(value: unknown): value is StoredDocument {
     allMatch(value.transactions, TRANSACTION_SHAPE, (t) => isIntegerCents(t.amount) && hasValidSubscriptionLink(t)) &&
     allMatch(value.categories, CATEGORY_SHAPE) &&
     allMatch(value.goals, GOAL_SHAPE, (g) => isIntegerCents(g.targetAmount) && Array.isArray(g.contributions)) &&
-    (value.subscriptions === undefined || allMatch(value.subscriptions, SUBSCRIPTION_SHAPE, isValidSubscription))
+    (value.subscriptions === undefined || allMatch(value.subscriptions, SUBSCRIPTION_SHAPE, isValidSubscription)) &&
+    (value.loans === undefined || allMatch(value.loans, LOAN_SHAPE, isValidLoan))
   );
 }
 
@@ -82,6 +101,25 @@ function sanitizeSubscription(raw: Record<string, unknown>): Subscription {
     active: typeof raw.active === 'boolean' ? raw.active : true,
     startMonth,
     endMonth,
+    skippedMonths: [...new Set(skipped)].sort(),
+    ...(typeof raw.notes === 'string' && raw.notes ? { notes: raw.notes } : {}),
+    createdAt,
+    updatedAt: typeof raw.updatedAt === 'string' ? raw.updatedAt : createdAt,
+  };
+}
+
+/** Normaliza um empréstimo já validado estruturalmente (DT-026): campos opcionais recebem o padrão. */
+function sanitizeLoan(raw: Record<string, unknown>): Loan {
+  const skipped = Array.isArray(raw.skippedMonths) ? raw.skippedMonths.filter(isMonthKey) : [];
+  const createdAt = typeof raw.createdAt === 'string' ? raw.createdAt : '';
+  return {
+    id: raw.id as string,
+    borrower: raw.borrower as string,
+    amount: raw.amount as number,
+    categoryId: raw.categoryId as string,
+    loanDate: typeof raw.loanDate === 'string' ? raw.loanDate : (raw.firstMonth as string) + '-01',
+    firstMonth: raw.firstMonth as string,
+    installmentTotal: raw.installmentTotal as number,
     skippedMonths: [...new Set(skipped)].sort(),
     ...(typeof raw.notes === 'string' && raw.notes ? { notes: raw.notes } : {}),
     createdAt,
@@ -148,6 +186,8 @@ export function parseFinanceData(raw: string): FinanceData | null {
       subscriptions: Array.isArray(parsed.subscriptions)
         ? (parsed.subscriptions as Record<string, unknown>[]).map(sanitizeSubscription)
         : [],
+      // Migração da v1.13.0 (DT-026): documentos sem empréstimos recebem uma lista vazia.
+      loans: Array.isArray(parsed.loans) ? (parsed.loans as Record<string, unknown>[]).map(sanitizeLoan) : [],
       settings: sanitizeSettings(parsed.settings as unknown as Record<string, unknown>),
     };
   } catch {
@@ -186,7 +226,10 @@ export class FinanceDocument {
   get(): FinanceData {
     if (!this.cache) {
       const result = this.load();
-      this.cache = result.status === 'ok' ? result.data : { transactions: [], categories: [], goals: [], subscriptions: [], settings: DEFAULT_SETTINGS };
+      this.cache =
+      result.status === 'ok'
+        ? result.data
+        : { transactions: [], categories: [], goals: [], subscriptions: [], loans: [], settings: DEFAULT_SETTINGS };
     }
     return this.cache;
   }

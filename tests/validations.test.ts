@@ -11,6 +11,9 @@ const validTransaction = {
   date: '2026-10-30',
   categoryId: 'food',
   note: '',
+  installmentEnabled: false,
+  installmentFirstMonth: '',
+  installmentCount: '',
 };
 
 describe('validateTransaction', () => {

@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { buildAlerts } from '@/domain/alerts';
 import { categoryBudgets } from '@/domain/budgets';
 import { contributionsInPeriod, contributionsUntil, highlightedGoals } from '@/domain/goals';
+import { loansDueInMonth } from '@/domain/loans';
 import { isFutureMonth, monthPeriod } from '@/domain/periods';
 import { periodIndicators, weeklyBreakdown } from '@/domain/reports';
 import { monthSubscriptionCharges, projectedSubscriptionExpenses, summarizeCharges } from '@/domain/subscriptions';
@@ -18,7 +19,7 @@ export const HIGHLIGHTED_GOALS_LIMIT = 3;
 
 /** Dados derivados da Visão Geral para o mês selecionado (sem estado próprio). */
 export function useDashboard() {
-  const { transactions, categories, goals, subscriptions } = useFinanceData();
+  const { transactions, categories, goals, subscriptions, loans } = useFinanceData();
   const { month } = useSelectedMonth();
   const today = todayIso();
 
@@ -52,6 +53,8 @@ export function useDashboard() {
       upcomingCharges,
       upcomingTotal: summarizeCharges(upcomingCharges).forecast,
       hasSubscriptions: subscriptions.length > 0,
+      // "Empréstimos a receber este mês" (Agiotagem, DT-026): parcelas esperadas no mês selecionado.
+      loansReceivableThisMonth: loansDueInMonth(loans, month),
       recent: latestTransactions(transactions, period, RECENT_LIMIT),
       goals: highlightedGoals(goals, HIGHLIGHTED_GOALS_LIMIT),
       weeks: weeklyBreakdown(transactions, month),
@@ -64,5 +67,5 @@ export function useDashboard() {
       projectedMonthEndBalance:
         summary.income - summary.expense - projectedSubscriptionExpenses(subscriptions, transactions, today, lastDayOfMonth(month)),
     };
-  }, [transactions, categories, goals, subscriptions, month, today]);
+  }, [transactions, categories, goals, subscriptions, loans, month, today]);
 }

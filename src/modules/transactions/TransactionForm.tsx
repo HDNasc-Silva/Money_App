@@ -5,7 +5,8 @@ import { SegmentedControl } from '@/components/common/SegmentedControl';
 import { Sheet } from '@/components/common/Sheet';
 import { useToast } from '@/components/common/Toast';
 import { CategoryPicker } from '@/components/forms/CategoryPicker';
-import { FormStack, MoneyField, TextField } from '@/components/forms/Fields';
+import { FormRow, FormStack, MoneyField, TextField } from '@/components/forms/Fields';
+import { INSTALLMENT_COUNT_MAX, INSTALLMENT_COUNT_MIN } from '@/domain/installments';
 import {
   categoriesByUsage,
   descriptionSuggestions,
@@ -17,7 +18,7 @@ import type { IsoDate, Transaction, TransactionType } from '@/models';
 import { useFinanceActions, useFinanceData } from '@/store/FinanceProvider';
 import { monthKeyOf, todayIso } from '@/utils/dates';
 import { centsToInput, parseMoney } from '@/utils/money';
-import { validateTransaction, type FieldErrors, type TransactionFormValues } from '@/validations';
+import { validateInstallmentPlan, validateTransaction, type FieldErrors, type TransactionFormValues } from '@/validations';
 import { MissingCategoriesNotice } from './MissingCategoriesNotice';
 import styles from './TransactionForm.module.css';
 
@@ -49,6 +50,9 @@ function initialValues(transaction: Transaction | null, preset: TransactionPrese
       date: transaction.date,
       categoryId: transaction.categoryId,
       note: transaction.note ?? '',
+      installmentEnabled: false,
+      installmentFirstMonth: '',
+      installmentCount: '',
     };
   }
   return {
@@ -58,6 +62,9 @@ function initialValues(transaction: Transaction | null, preset: TransactionPrese
     date: preset.date ?? todayIso(),
     categoryId: preset.categoryId ?? '',
     note: '',
+    installmentEnabled: false,
+    installmentFirstMonth: '',
+    installmentCount: '',
   };
 }
 
@@ -68,7 +75,7 @@ function initialValues(transaction: Transaction | null, preset: TransactionPrese
  */
 export function TransactionFormSheet({ open, transaction, preset, onClose }: TransactionFormSheetProps) {
   const { categories, transactions } = useFinanceData();
-  const { saveTransaction, ensureDefaultCategories, saveSubscription } = useFinanceActions();
+  const { saveTransaction, saveInstallmentPurchase, ensureDefaultCategories, saveSubscription } = useFinanceActions();
   const { showToast } = useToast();
   const [values, setValues] = useState(() => initialValues(transaction, preset));
   const [errors, setErrors] = useState<FieldErrors<keyof TransactionFormValues>>({});
@@ -132,7 +139,13 @@ export function TransactionFormSheet({ open, transaction, preset, onClose }: Tra
   const changeType = (type: TransactionType) => {
     setValues((current) => {
       const category = categories.find((c) => c.id === current.categoryId);
-      return { ...current, type, categoryId: category?.kind === type ? current.categoryId : '' };
+      return {
+        ...current,
+        type,
+        categoryId: category?.kind === type ? current.categoryId : '',
+        // Compra parcelada só faz sentido para despesas.
+        installmentEnabled: type === 'expense' ? current.installmentEnabled : false,
+      };
     });
   };
 
@@ -169,6 +182,20 @@ export function TransactionFormSheet({ open, transaction, preset, onClose }: Tra
     const result = validateTransaction(values, categories, todayIso());
     if (!result.ok) {
       setErrors(result.errors);
+      return;
+    }
+    // Compra parcelada (DT-026): o valor validado acima é o de CADA parcela; gera um lançamento por mês.
+    if (!isEditing && values.installmentEnabled) {
+      const plan = validateInstallmentPlan(values.installmentFirstMonth, values.installmentCount, todayIso());
+      if (!plan.ok) {
+        setErrors((current) => ({ ...current, ...plan.errors }));
+        return;
+      }
+      setSaving(true);
+      await saveInstallmentPurchase({ ...result.value, firstMonth: plan.value.firstMonth, count: plan.value.count });
+      setSaving(false);
+      showToast({ message: `${plan.value.count} parcelas adicionadas.` });
+      onClose();
       return;
     }
     setSaving(true);
@@ -259,6 +286,42 @@ export function TransactionFormSheet({ open, transaction, preset, onClose }: Tra
             </div>
           )}
           <TextField label="Data" type="date" value={values.date} onChange={(v) => update('date', v)} error={errors.date} />
+          {!isEditing && values.type === 'expense' && (
+            <label className={styles.toggle}>
+              <input
+                type="checkbox"
+                checked={values.installmentEnabled}
+                onChange={(event) => update('installmentEnabled', event.target.checked)}
+              />
+              <span>
+                <strong>Compra parcelada?</strong>
+                <small>O valor acima é o de cada parcela; criamos um lançamento por mês.</small>
+              </span>
+            </label>
+          )}
+          {!isEditing && values.type === 'expense' && values.installmentEnabled && (
+            <div className={styles.installmentFields}>
+              <FormRow>
+                <TextField
+                  label="Primeira parcela"
+                  type="month"
+                  value={values.installmentFirstMonth}
+                  onChange={(v) => update('installmentFirstMonth', v)}
+                  error={errors.installmentFirstMonth}
+                />
+                <TextField
+                  label="Quantidade de parcelas"
+                  type="number"
+                  inputMode="numeric"
+                  min={INSTALLMENT_COUNT_MIN}
+                  max={INSTALLMENT_COUNT_MAX}
+                  value={values.installmentCount}
+                  onChange={(v) => update('installmentCount', v)}
+                  error={errors.installmentCount}
+                />
+              </FormRow>
+            </div>
+          )}
           <TextField
             label="Observação (opcional)"
             value={values.note}
@@ -268,9 +331,9 @@ export function TransactionFormSheet({ open, transaction, preset, onClose }: Tra
           />
           <div className={styles.actions}>
             <Button type="submit" icon="check" fullWidth disabled={saving}>
-              {isEditing ? 'Salvar alterações' : 'Adicionar lançamento'}
+              {isEditing ? 'Salvar alterações' : values.installmentEnabled ? 'Adicionar parcelas' : 'Adicionar lançamento'}
             </Button>
-            {!isEditing && (
+            {!isEditing && !values.installmentEnabled && (
               <Button variant="secondary" icon="playlist_add" fullWidth disabled={saving} onClick={() => void save(true)}>
                 Salvar e adicionar outro
               </Button>
